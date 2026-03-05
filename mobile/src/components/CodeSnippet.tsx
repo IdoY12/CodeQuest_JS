@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
   },
   code: {
     color: "#d1d5db",
-    fontFamily: "JetBrainsMono_400Regular",
+    fontFamily: "monospace",
     fontSize: fontSize.sm,
     lineHeight: 22,
   },
@@ -62,7 +62,7 @@ const styles = StyleSheet.create({
   outputValue: {
     color: colors.success,
     fontSize: fontSize.base,
-    fontFamily: "JetBrainsMono_400Regular",
+    fontFamily: "monospace",
   },
 });
 

@@ -1,8 +1,16 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-const ACCESS_SECRET = process.env.JWT_ACCESS_SECRET ?? "dev-access-secret";
-const REFRESH_SECRET = process.env.JWT_REFRESH_SECRET ?? "dev-refresh-secret";
+function requireSecret(name: "JWT_ACCESS_SECRET" | "JWT_REFRESH_SECRET"): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`${name} must be configured`);
+  }
+  return value;
+}
+
+const ACCESS_SECRET = requireSecret("JWT_ACCESS_SECRET");
+const REFRESH_SECRET = requireSecret("JWT_REFRESH_SECRET");
 
 export interface AuthTokenPayload {
   userId: string;
@@ -26,9 +34,17 @@ export function signRefreshToken(payload: AuthTokenPayload): string {
 }
 
 export function verifyAccessToken(token: string): AuthTokenPayload {
-  return jwt.verify(token, ACCESS_SECRET) as AuthTokenPayload;
+  const payload = jwt.verify(token, ACCESS_SECRET);
+  if (typeof payload !== "object" || payload === null) {
+    throw new Error("Invalid access token payload");
+  }
+  return payload as AuthTokenPayload;
 }
 
 export function verifyRefreshToken(token: string): AuthTokenPayload {
-  return jwt.verify(token, REFRESH_SECRET) as AuthTokenPayload;
+  const payload = jwt.verify(token, REFRESH_SECRET);
+  if (typeof payload !== "object" || payload === null) {
+    throw new Error("Invalid refresh token payload");
+  }
+  return payload as AuthTokenPayload;
 }

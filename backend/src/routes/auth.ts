@@ -11,6 +11,11 @@ import {
 
 export const authRouter = Router();
 
+function mapExperienceToPath(experience: string | null | undefined): "BEGINNER" | "ADVANCED" {
+  if (!experience) return "BEGINNER";
+  return experience === "BEGINNER" || experience === "BASICS" ? "BEGINNER" : "ADVANCED";
+}
+
 const registerSchema = z.object({
   email: z.email(),
   username: z.string().min(2),
@@ -47,6 +52,8 @@ authRouter.post("/register", async (req, res) => {
         create: {
           pathId: path.id,
           onboardingCompleted: false,
+          notificationsEnabled: true,
+          dailyCommitmentMinutes: 15,
         },
       },
       duelRating: {
@@ -66,6 +73,10 @@ authRouter.post("/register", async (req, res) => {
       avatarId: user.avatarId,
       onboardingCompleted: false,
       pathKey: "BEGINNER",
+      goal: null,
+      experienceLevel: null,
+      dailyCommitmentMinutes: 15,
+      notificationsEnabled: true,
     },
     accessToken,
     refreshToken,
@@ -86,10 +97,32 @@ authRouter.post("/login", async (req, res) => {
   if (!valid) {
     return res.status(401).json({ error: "Invalid credentials" });
   }
-  const progress = await prisma.userProgress.findUnique({
+  let progress = await prisma.userProgress.findUnique({
     where: { userId: user.id },
     include: { path: true },
   });
+  if (!progress) {
+    const defaultPath = await prisma.learningPath.findUnique({ where: { key: "BEGINNER" } });
+    if (!defaultPath) {
+      return res.status(400).json({ error: "Path not found" });
+    }
+    progress = await prisma.userProgress.create({
+      data: {
+        userId: user.id,
+        pathId: defaultPath.id,
+        onboardingCompleted: false,
+        dailyCommitmentMinutes: 15,
+        notificationsEnabled: true,
+      },
+      include: { path: true },
+    });
+  }
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { lastActiveAt: new Date() },
+  });
+
+  const pathKey = mapExperienceToPath(progress.experienceLevel) ?? progress.path?.key ?? "BEGINNER";
   const accessToken = signAccessToken({ userId: user.id, email: user.email });
   const refreshToken = signRefreshToken({ userId: user.id, email: user.email });
   return res.json({
@@ -99,7 +132,11 @@ authRouter.post("/login", async (req, res) => {
       username: user.username,
       avatarId: user.avatarId,
       onboardingCompleted: progress?.onboardingCompleted ?? false,
-      pathKey: progress?.path?.key ?? "BEGINNER",
+      pathKey,
+      goal: progress.goal,
+      experienceLevel: progress.experienceLevel,
+      dailyCommitmentMinutes: progress.dailyCommitmentMinutes ?? 15,
+      notificationsEnabled: progress.notificationsEnabled ?? true,
     },
     accessToken,
     refreshToken,

@@ -4,7 +4,7 @@ import { createJSONStorage, persist, StateStorage } from "zustand/middleware";
 
 type Goal = "JOB" | "WORK" | "FUN" | "PROJECT";
 type Experience = "BEGINNER" | "BASICS" | "INTERMEDIATE" | "ADVANCED";
-type Commitment = "5" | "15" | "30";
+type Commitment = "10" | "15" | "30";
 
 interface AppState {
   isAuthenticated: boolean;
@@ -17,6 +17,7 @@ interface AppState {
   goal?: Goal;
   experience?: Experience;
   commitment?: Commitment;
+  notificationsEnabled: boolean;
   path: "BEGINNER" | "ADVANCED";
   level: number;
   xpTotal: number;
@@ -28,7 +29,13 @@ interface AppState {
   lessonExerciseIndex: number;
   lessonAccuracy: number;
   setOnboarding: (goal: Goal, experience: Experience, commitment: Commitment) => void;
-  completeOnboarding: (path: "BEGINNER" | "ADVANCED") => void;
+  completeOnboarding: (payload: {
+    path: "BEGINNER" | "ADVANCED";
+    goal: Goal;
+    experience: Experience;
+    commitment: Commitment;
+    notificationsEnabled: boolean;
+  }) => void;
   signIn: (payload: {
     userId: string;
     email: string;
@@ -37,14 +44,26 @@ interface AppState {
     refreshToken: string;
     onboardingCompleted: boolean;
     pathKey: "BEGINNER" | "ADVANCED";
+    goal?: Goal | null;
+    experienceLevel?: Experience | null;
+    dailyCommitmentMinutes?: number | null;
+    notificationsEnabled?: boolean | null;
   }) => void;
   signOut: () => void;
   addXp: (amount: number) => void;
   setCurrentLesson: (lessonId: string) => void;
   setExerciseIndex: (index: number) => void;
   setLessonAccuracy: (accuracy: number) => void;
-  toggleSounds: () => void;
-  toggleHaptics: () => void;
+  updatePreferences: (payload: {
+    goal: Goal;
+    experience: Experience;
+    commitment: Commitment;
+    notificationsEnabled: boolean;
+    path: "BEGINNER" | "ADVANCED";
+  }) => void;
+  toggleSounds: (value?: boolean) => void;
+  toggleHaptics: (value?: boolean) => void;
+  setNotificationsEnabled: (value: boolean) => void;
 }
 
 const memoryStorage = new Map<string, string>();
@@ -89,6 +108,7 @@ export const useAppStore = create<AppState>()(
       goal: undefined,
       experience: undefined,
       commitment: "15",
+      notificationsEnabled: true,
       path: "BEGINNER",
       level: 1,
       xpTotal: 0,
@@ -106,7 +126,15 @@ export const useAppStore = create<AppState>()(
           commitment,
           path: experience === "ADVANCED" ? "ADVANCED" : "BEGINNER",
         }),
-      completeOnboarding: (path) => set({ hasCompletedOnboarding: true, path }),
+      completeOnboarding: ({ path, goal, experience, commitment, notificationsEnabled }) =>
+        set({
+          hasCompletedOnboarding: true,
+          path,
+          goal,
+          experience,
+          commitment,
+          notificationsEnabled,
+        }),
       signIn: ({
         userId,
         email,
@@ -115,6 +143,10 @@ export const useAppStore = create<AppState>()(
         refreshToken,
         onboardingCompleted,
         pathKey,
+        goal,
+        experienceLevel,
+        dailyCommitmentMinutes,
+        notificationsEnabled,
       }) =>
         set({
           isAuthenticated: true,
@@ -125,6 +157,13 @@ export const useAppStore = create<AppState>()(
           refreshToken,
           hasCompletedOnboarding: onboardingCompleted,
           path: pathKey,
+          goal: goal ?? undefined,
+          experience: experienceLevel ?? undefined,
+          commitment:
+            dailyCommitmentMinutes === 10 || dailyCommitmentMinutes === 15 || dailyCommitmentMinutes === 30
+              ? (String(dailyCommitmentMinutes) as Commitment)
+              : get().commitment,
+          notificationsEnabled: notificationsEnabled ?? true,
         }),
       signOut: () =>
         set({
@@ -138,6 +177,7 @@ export const useAppStore = create<AppState>()(
           goal: undefined,
           experience: undefined,
           commitment: "15",
+          notificationsEnabled: true,
           path: "BEGINNER",
           lessonExerciseIndex: 0,
         }),
@@ -149,8 +189,11 @@ export const useAppStore = create<AppState>()(
       setCurrentLesson: (lessonId) => set({ currentLessonId: lessonId, lessonExerciseIndex: 0 }),
       setExerciseIndex: (index) => set({ lessonExerciseIndex: index }),
       setLessonAccuracy: (accuracy) => set({ lessonAccuracy: accuracy }),
-      toggleSounds: () => set({ soundsEnabled: !get().soundsEnabled }),
-      toggleHaptics: () => set({ hapticsEnabled: !get().hapticsEnabled }),
+      updatePreferences: ({ goal, experience, commitment, notificationsEnabled, path }) =>
+        set({ goal, experience, commitment, notificationsEnabled, path }),
+      toggleSounds: (value) => set({ soundsEnabled: typeof value === "boolean" ? value : !get().soundsEnabled }),
+      toggleHaptics: (value) => set({ hapticsEnabled: typeof value === "boolean" ? value : !get().hapticsEnabled }),
+      setNotificationsEnabled: (value) => set({ notificationsEnabled: value }),
     }),
     {
       name: "codequest-app-store",

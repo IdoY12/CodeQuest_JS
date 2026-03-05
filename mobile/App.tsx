@@ -1,22 +1,34 @@
 import React from "react";
 import { StatusBar } from "expo-status-bar";
-import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { AppState, AppStateStatus, Platform, StyleSheet, Text, View } from "react-native";
+import * as Notifications from "expo-notifications";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
-import { useFonts, Inter_400Regular, Inter_800ExtraBold } from "@expo-google-fonts/inter";
-import { JetBrainsMono_400Regular } from "@expo-google-fonts/jetbrains-mono";
 import { RootNavigator } from "./src/navigation/RootNavigator";
 import { colors } from "./src/theme/theme";
+import { useAppStore } from "./src/stores/useAppStore";
+import { apiRequest } from "./src/services/api";
 
 const queryClient = new QueryClient();
 
 export default function App() {
-  const [fontsLoaded] = useFonts({
-    Inter_400Regular,
-    Inter_800ExtraBold,
-    JetBrainsMono_400Regular,
-  });
   const [isConnected, setIsConnected] = React.useState(true);
+  const isAuthenticated = useAppStore((s) => s.isAuthenticated);
+  const accessToken = useAppStore((s) => s.accessToken);
+  const notificationsEnabled = useAppStore((s) => s.notificationsEnabled);
+  const appStateRef = React.useRef<AppStateStatus>(AppState.currentState);
+
+  React.useEffect(() => {
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+        shouldShowBanner: true,
+        shouldShowList: true,
+      }),
+    });
+  }, []);
 
   React.useEffect(() => {
     const unsubscribe = NetInfo.addEventListener((state) => {
@@ -25,13 +37,81 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
-  if (!fontsLoaded) {
-    return (
-      <View style={styles.loader}>
-        <ActivityIndicator color={colors.accent} />
-      </View>
-    );
-  }
+  React.useEffect(() => {
+    const prepareNotifications = async () => {
+      if (Platform.OS === "android") {
+        await Notifications.setNotificationChannelAsync("practice-reminders", {
+          name: "Practice reminders",
+          importance: Notifications.AndroidImportance.DEFAULT,
+        });
+      }
+      const permission = await Notifications.getPermissionsAsync();
+      if (permission.status !== "granted") {
+        await Notifications.requestPermissionsAsync();
+      }
+    };
+    void prepareNotifications();
+  }, []);
+
+  const checkDailyGoalAndNotify = React.useCallback(async () => {
+    if (!isAuthenticated || !accessToken || !notificationsEnabled) return;
+    const now = new Date();
+    const dateKey = now.toLocaleDateString("en-CA");
+    try {
+      const status = await apiRequest<{
+        goalMinutes: number;
+        practicedMinutes: number;
+        remainingMinutes: number;
+        canSendIncomplete: boolean;
+        canSendComplete: boolean;
+      }>(`/user/daily-goal-status/${dateKey}`, { token: accessToken });
+
+      if (status.canSendComplete) {
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: "Daily goal crushed!",
+            body: `You practiced ${status.practicedMinutes} minutes today. See you tomorrow!`,
+          },
+          trigger: null,
+        });
+        await apiRequest(`/user/daily-goal-status/${dateKey}/mark-notified`, {
+          method: "POST",
+          token: accessToken,
+          body: JSON.stringify({ type: "COMPLETE" }),
+        });
+        return;
+      }
+
+      const hour = now.getHours();
+      if (hour >= 20 && status.canSendIncomplete && status.remainingMinutes > 0) {
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: "Keep your streak alive",
+            body: `You're ${status.remainingMinutes} minutes away from your daily goal - jump back in and finish strong!`,
+          },
+          trigger: null,
+        });
+        await apiRequest(`/user/daily-goal-status/${dateKey}/mark-notified`, {
+          method: "POST",
+          token: accessToken,
+          body: JSON.stringify({ type: "INCOMPLETE" }),
+        });
+      }
+    } catch {
+      // Fail quietly; this should never block the app shell.
+    }
+  }, [accessToken, isAuthenticated, notificationsEnabled]);
+
+  React.useEffect(() => {
+    void checkDailyGoalAndNotify();
+    const subscription = AppState.addEventListener("change", (nextState) => {
+      if (appStateRef.current !== "active" && nextState === "active") {
+        void checkDailyGoalAndNotify();
+      }
+      appStateRef.current = nextState;
+    });
+    return () => subscription.remove();
+  }, [checkDailyGoalAndNotify]);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -50,7 +130,6 @@ export default function App() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  loader: { flex: 1, backgroundColor: colors.background, justifyContent: "center", alignItems: "center" },
   offlineBanner: {
     position: "absolute",
     top: 52,

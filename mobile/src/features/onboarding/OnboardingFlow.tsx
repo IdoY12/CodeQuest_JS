@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import Animated, { SlideInRight } from "react-native-reanimated";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors, fontSize, radius, spacing } from "../../theme/theme";
 import { useAppStore } from "../../stores/useAppStore";
 import { apiRequest } from "../../services/api";
@@ -21,7 +21,7 @@ const levels = [
 ] as const;
 
 const commitments = [
-  { key: "5", title: "5 min", subtitle: "Quick daily habit" },
+  { key: "10", title: "10 min", subtitle: "Quick daily habit" },
   { key: "15", title: "15 min", subtitle: "Steady progress" },
   { key: "30", title: "30 min", subtitle: "Fast track" },
 ] as const;
@@ -63,17 +63,23 @@ export function OnboardingFlow() {
       });
       setOnboarding(goal, level, commitment);
       if (response.onboardingCompleted) {
-        completeOnboarding(response.pathKey);
+        completeOnboarding({
+          path: response.pathKey,
+          goal,
+          experience: level,
+          commitment,
+          notificationsEnabled: true,
+        });
       }
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : "Failed to save onboarding");
+      setError(submitError instanceof Error ? submitError.message : "We could not save your setup. Please try again.");
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       {step === 1 && (
         <StepFrame title="What brings you to CodeQuest?" onContinue={() => setStep(2)} enabled={!!goal}>
           {goals.map((option) => (
@@ -154,13 +160,18 @@ function StepFrame({
   continueLabel?: string;
   children: React.ReactNode;
 }) {
+  const insets = useSafeAreaInsets();
   return (
-    <Animated.View entering={SlideInRight.duration(300)} style={styles.step}>
-      <Text style={styles.title}>{title}</Text>
-      <View style={styles.content}>{children}</View>
-      <Pressable disabled={!enabled} onPress={onContinue} style={[styles.cta, !enabled && styles.disabled]}>
-        <Text style={styles.ctaLabel}>{continueLabel}</Text>
-      </Pressable>
+    <Animated.View entering={SlideInRight.duration(300)} style={[styles.step, { paddingTop: Math.max(insets.top, spacing.lg) + spacing.lg }]}>
+      <View style={styles.mainContent}>
+        <Text style={styles.title}>{title}</Text>
+        <View style={styles.content}>{children}</View>
+      </View>
+      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}>
+        <Pressable disabled={!enabled} onPress={onContinue} style={[styles.cta, !enabled && styles.disabled]}>
+          <Text style={styles.ctaLabel}>{continueLabel}</Text>
+        </Pressable>
+      </View>
     </Animated.View>
   );
 }
@@ -195,9 +206,11 @@ function MiniNode({ label }: { label: string }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  step: { flex: 1, padding: spacing.xxl, justifyContent: "space-between" },
-  title: { color: colors.textPrimary, fontSize: fontSize.xl, fontWeight: "800", marginBottom: spacing.xl },
-  content: { gap: spacing.md, flex: 1 },
+  step: { flex: 1, paddingHorizontal: spacing.xxl, justifyContent: "space-between" },
+  mainContent: { flex: 1 },
+  title: { color: colors.textPrimary, fontSize: fontSize.xl, fontWeight: "800", marginBottom: spacing.xl, lineHeight: 40 },
+  content: { gap: spacing.md, flexGrow: 1 },
+  footer: { paddingTop: spacing.lg },
   choiceCard: {
     backgroundColor: colors.card,
     borderColor: colors.border,

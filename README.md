@@ -28,7 +28,8 @@ npm install
 npm run ios
 ```
 
-The app points to `http://localhost:4000/api` in `src/services/api.ts`.
+The app defaults to `http://localhost:4000/api` in development and uses `EXPO_PUBLIC_API_BASE_URL` in production builds.
+Realtime duel sockets default to `http://localhost:4000/duel` in development and use `EXPO_PUBLIC_DUEL_SOCKET_URL` in production builds.
 
 ## Implemented Product Areas
 
@@ -47,3 +48,4 @@ The app points to `http://localhost:4000/api` in `src/services/api.ts`.
 
 - Sound and Lottie packages are installed; hook up final asset files in `mobile/assets`.
 - Update `DATABASE_URL` in `backend/.env` for your local PostgreSQL instance.
+- Privacy policy and support references for App Store submission are provided in `PRIVACY_POLICY.md` and `SUPPORT.md`.

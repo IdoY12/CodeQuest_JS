@@ -1,4 +1,7 @@
-const API_BASE_URL = "http://localhost:4000/api";
+const DEFAULT_API_BASE_URL = __DEV__
+  ? "http://localhost:4000/api"
+  : "https://api.questcodejs.com/api";
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL ?? DEFAULT_API_BASE_URL;
 
 interface ApiOptions extends RequestInit {
   token?: string;

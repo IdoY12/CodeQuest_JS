@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Alert, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import { AntDesign, FontAwesome } from "@expo/vector-icons";
+import { FontAwesome } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { colors, fontSize, radius, spacing } from "../../theme/theme";
 import { useAppStore } from "../../stores/useAppStore";
@@ -38,6 +38,10 @@ export function AuthScreen() {
               username: string;
               onboardingCompleted: boolean;
               pathKey: "BEGINNER" | "ADVANCED";
+              goal?: "JOB" | "WORK" | "FUN" | "PROJECT" | null;
+              experienceLevel?: "BEGINNER" | "BASICS" | "INTERMEDIATE" | "ADVANCED" | null;
+              dailyCommitmentMinutes?: number | null;
+              notificationsEnabled?: boolean | null;
             };
             accessToken: string;
             refreshToken: string;
@@ -52,6 +56,10 @@ export function AuthScreen() {
               username: string;
               onboardingCompleted: boolean;
               pathKey: "BEGINNER" | "ADVANCED";
+              goal?: "JOB" | "WORK" | "FUN" | "PROJECT" | null;
+              experienceLevel?: "BEGINNER" | "BASICS" | "INTERMEDIATE" | "ADVANCED" | null;
+              dailyCommitmentMinutes?: number | null;
+              notificationsEnabled?: boolean | null;
             };
             accessToken: string;
             refreshToken: string;
@@ -68,6 +76,10 @@ export function AuthScreen() {
         refreshToken: response.refreshToken,
         onboardingCompleted: response.user.onboardingCompleted,
         pathKey: response.user.pathKey,
+        goal: response.user.goal,
+        experienceLevel: response.user.experienceLevel,
+        dailyCommitmentMinutes: response.user.dailyCommitmentMinutes,
+        notificationsEnabled: response.user.notificationsEnabled,
       });
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : "Unable to continue");
@@ -138,13 +150,11 @@ export function AuthScreen() {
       <Pressable
         style={({ pressed }) => [styles.secondaryButton, pressed && styles.secondaryPressed]}
         onPress={onSocialPress}
-        accessibilityLabel="Continue with Google"
+        accessibilityLabel="Continue with external provider"
       >
         <View style={styles.socialRow}>
-          <View style={styles.googleIconWrap}>
-            <AntDesign name="google" size={16} color="#4285F4" />
-          </View>
-          <Text style={styles.secondaryLabel}>Continue with Google</Text>
+          <FontAwesome name="user-circle-o" size={18} color={colors.textPrimary} style={styles.socialIcon} />
+          <Text style={styles.secondaryLabel}>Continue with Provider</Text>
         </View>
       </Pressable>
       <Text style={styles.terms}>By continuing, you agree to our Terms and Privacy Policy.</Text>
@@ -197,15 +207,6 @@ const styles = StyleSheet.create({
   secondaryPressed: { opacity: 0.85 },
   socialRow: { flexDirection: "row", alignItems: "center", justifyContent: "center" },
   socialIcon: { marginRight: spacing.sm },
-  googleIconWrap: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: spacing.sm,
-  },
   secondaryLabel: { color: colors.textPrimary, fontWeight: "700" },
   terms: { marginTop: spacing.xl, color: colors.textSecondary, fontSize: fontSize.sm, textAlign: "center" },
   errorText: { color: colors.danger, marginTop: spacing.md, textAlign: "center" },

@@ -67,6 +67,7 @@ model User {
   duelSessionsP1 DuelSession[] @relation("Player1Sessions")
   duelSessionsP2 DuelSession[] @relation("Player2Sessions")
   wonSessions    DuelSession[] @relation("WinnerSessions")
+  dailyPracticeLogs DailyPracticeLog[]
 }
 
 model LearningPath {
@@ -130,6 +131,7 @@ model UserProgress {
   goal             String?
   experienceLevel  String?
   dailyCommitmentMinutes Int?
+  notificationsEnabled Boolean @default(true)
   onboardingCompleted Boolean @default(false)
   currentChapterId String?
   currentLessonId  String?
@@ -142,6 +144,20 @@ model UserProgress {
   heartsLastRefill DateTime?
   user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   path             LearningPath @relation(fields: [pathId], references: [id], onDelete: Cascade)
+}
+
+model DailyPracticeLog {
+  id                       String   @id @default(cuid())
+  userId                   String
+  dateKey                  String
+  practicedSeconds         Int      @default(0)
+  incompleteReminderCount  Int      @default(0)
+  completeReminderSent     Boolean  @default(false)
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+  user                     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, dateKey])
 }
 
 model UserExerciseHistory {

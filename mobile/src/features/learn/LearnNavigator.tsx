@@ -1,12 +1,14 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, AppState, AppStateStatus, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { useIsFocused } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import { colors, fontSize, radius, spacing } from "../../theme/theme";
 import { CodeSnippet } from "../../components/CodeSnippet";
 import { useAppStore } from "../../stores/useAppStore";
 import { apiRequest } from "../../services/api";
+import { getExercisePoolForLevel, PersonalizationLevel } from "../../data/personalizedExercisePool";
 
 const Stack = createNativeStackNavigator();
 
@@ -54,6 +56,7 @@ export function LearnNavigator() {
 
 function LearnRoadmapScreen({ navigation }: { navigation: any }) {
   const path = useAppStore((s) => s.path);
+  const experience = useAppStore((s) => s.experience);
   const [chapterData, setChapterData] = useState<ApiChapter[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -90,6 +93,14 @@ function LearnRoadmapScreen({ navigation }: { navigation: any }) {
               <Pressable
                 style={styles.lessonButton}
                 onPress={async () => {
+                  if (experience) {
+                    navigation.navigate("Lesson", {
+                      lessonId: `personalized-${experience}`,
+                      lessonTitle: `${experience} Personalized Practice`,
+                      personalizedLevel: experience,
+                    });
+                    return;
+                  }
                   const lessons = await apiRequest<ApiLesson[]>(`/learning/lessons/${chapter.id}`);
                   if (lessons.length === 0) return;
                   navigation.navigate("Lesson", {
@@ -111,7 +122,9 @@ function LearnRoadmapScreen({ navigation }: { navigation: any }) {
 function LessonScreen({ navigation, route }: { navigation: any; route: any }) {
   const lessonId = route.params?.lessonId as string;
   const lessonTitle = route.params?.lessonTitle as string;
+  const personalizedLevel = route.params?.personalizedLevel as PersonalizationLevel | undefined;
   const addXp = useAppStore((s) => s.addXp);
+  const accessToken = useAppStore((s) => s.accessToken);
   const [exercises, setExercises] = useState<ApiExercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [exerciseIndex, setExerciseIndex] = useState(0);
@@ -123,6 +136,16 @@ function LessonScreen({ navigation, route }: { navigation: any; route: any }) {
     const load = async () => {
       setLoading(true);
       try {
+        if (personalizedLevel) {
+          const payload = getExercisePoolForLevel(personalizedLevel);
+          if (isActive) {
+            setExercises(payload);
+            setExerciseIndex(0);
+            setCorrectCount(0);
+            setAttemptedCount(0);
+          }
+          return;
+        }
         const payload = await apiRequest<ApiExercise[]>(`/learning/exercises/${lessonId}`);
         if (isActive) {
           setExercises(payload);
@@ -138,10 +161,57 @@ function LessonScreen({ navigation, route }: { navigation: any; route: any }) {
     return () => {
       isActive = false;
     };
-  }, [lessonId]);
+  }, [lessonId, personalizedLevel]);
 
   const exercise = exercises[exerciseIndex];
   const progress = exercises.length > 0 ? ((exerciseIndex + 1) / exercises.length) * 100 : 0;
+  const isFocused = useIsFocused();
+  const appStateRef = useRef<AppStateStatus>(AppState.currentState);
+  const trackedSecondsRef = useRef(0);
+
+  const flushPracticeSeconds = useCallback(async () => {
+    if (!accessToken || trackedSecondsRef.current <= 0) return;
+    const seconds = trackedSecondsRef.current;
+    trackedSecondsRef.current = 0;
+    try {
+      const dateKey = new Date().toLocaleDateString("en-CA");
+      await apiRequest<{ practicedSeconds: number }>("/user/practice-log", {
+        method: "POST",
+        token: accessToken,
+        body: JSON.stringify({
+          dateKey,
+          practicedSeconds: seconds,
+        }),
+      });
+    } catch {
+      trackedSecondsRef.current += seconds;
+    }
+  }, [accessToken]);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (nextState) => {
+      if (appStateRef.current === "active" && nextState !== "active") {
+        void flushPracticeSeconds();
+      }
+      appStateRef.current = nextState;
+    });
+    return () => {
+      subscription.remove();
+    };
+  }, [flushPracticeSeconds]);
+
+  useEffect(() => {
+    if (!isFocused || loading || !exercise) return;
+    const timer = setInterval(() => {
+      if (appStateRef.current === "active") {
+        trackedSecondsRef.current += 1;
+      }
+    }, 1000);
+    return () => {
+      clearInterval(timer);
+      void flushPracticeSeconds();
+    };
+  }, [exercise?.id, flushPracticeSeconds, isFocused, loading]);
 
   const onAnswer = (isCorrect: boolean, xp: number) => {
     setAttemptedCount((v) => v + 1);
@@ -527,7 +597,7 @@ const styles = StyleSheet.create({
   hearts: { fontSize: fontSize.lg, marginBottom: spacing.sm },
   line: { borderWidth: 1, borderColor: colors.border, borderRadius: radius.button, padding: spacing.md, marginBottom: spacing.sm },
   lineSelected: { borderColor: colors.accent },
-  lineText: { color: colors.textPrimary, fontFamily: "JetBrainsMono_400Regular" },
+  lineText: { color: colors.textPrimary, fontFamily: "monospace" },
   answerPreview: { color: colors.textSecondary, marginTop: spacing.md },
   answerZone: {
     borderWidth: 1,

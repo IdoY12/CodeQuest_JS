@@ -96,7 +96,12 @@ export function useDuelSocket() {
   const [state, setState] = useState<DuelState>(sharedState);
   const mockTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const url = useMemo(() => "http://localhost:4000/duel", []);
+  const url = useMemo(() => {
+    const defaultSocketUrl = __DEV__
+      ? "http://localhost:4000/duel"
+      : "https://api.questcodejs.com/duel";
+    return process.env.EXPO_PUBLIC_DUEL_SOCKET_URL ?? defaultSocketUrl;
+  }, []);
 
   useEffect(() => {
     ensureSocket(url);

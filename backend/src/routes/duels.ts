@@ -9,7 +9,13 @@ duelRouter.use(authMiddleware);
 duelRouter.get("/stats", async (req: AuthenticatedRequest, res) => {
   logInfo("[DUEL]", "stats:fetch", { userId: req.user?.userId });
   const rating = await prisma.duelRating.findUnique({ where: { userId: req.user!.userId } });
-  return res.json(rating);
+  return res.json({
+    rating: rating?.rating ?? 0,
+    wins: rating?.wins ?? 0,
+    losses: rating?.losses ?? 0,
+    draws: rating?.draws ?? 0,
+    rankTier: rating?.rankTier ?? "BRONZE",
+  });
 });
 
 duelRouter.get("/history", async (req: AuthenticatedRequest, res) => {

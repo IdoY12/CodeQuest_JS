@@ -1,5 +1,6 @@
 import { Server, Socket } from "socket.io";
 import { prisma } from "../lib/prisma.js";
+import { verifyAccessToken } from "../lib/auth.js";
 import { logError, logInfo } from "../lib/logger.js";
 
 interface QueueEntry {
@@ -24,6 +25,13 @@ interface SessionState {
   answered: boolean;
   roundTimeout: ReturnType<typeof setTimeout> | null;
   roundNonce: number;
+  roundReplay: Array<{
+    roundNumber: number;
+    winnerUserId: string | null;
+    correctAnswer: string;
+    player1TimeMs: number;
+    player2TimeMs: number;
+  }>;
 }
 
 const queue: QueueEntry[] = [];
@@ -47,7 +55,15 @@ export function attachDuelNamespace(io: Server) {
     });
 
     socket.on("join_queue", async (payload: { token?: string; rating?: number; userId?: string; username?: string }) => {
-      const userId = payload.userId ?? `guest-${socket.id.slice(0, 8)}`;
+      let userId = payload.userId ?? `guest-${socket.id.slice(0, 8)}`;
+      if (payload.token) {
+        try {
+          const decoded = verifyAccessToken(payload.token);
+          userId = decoded.userId;
+        } catch {
+          logInfo("[DUEL]", "queue:invalid-token", { socketId: socket.id });
+        }
+      }
       const user = await prisma.user.findUnique({ where: { id: userId } }).catch(() => null);
       const ratingFromDb = await prisma.duelRating.findUnique({ where: { userId } }).catch(() => null);
       const progress = await prisma.userProgress.findUnique({ where: { userId } }).catch(() => null);
@@ -97,6 +113,7 @@ export function attachDuelNamespace(io: Server) {
         answered: false,
         roundTimeout: null,
         roundNonce: 0,
+        roundReplay: [],
       });
       logInfo("[DUEL]", "match:created", {
         sessionId,
@@ -123,9 +140,7 @@ export function attachDuelNamespace(io: Server) {
       try {
         const session = sessions.get(payload.session_id);
         if (!session) return;
-        const userId =
-          payload.userId ??
-          (socket.id === session.player1.socketId ? session.player1.userId : session.player2.userId);
+        const userId = socket.id === session.player1.socketId ? session.player1.userId : session.player2.userId;
         session.readyUserIds.add(userId);
         if (session.readyUserIds.size >= 2 && session.round === 0) {
           await startRound(duel, session);
@@ -158,11 +173,20 @@ export function attachDuelNamespace(io: Server) {
           }
 
           const answeredByPlayer1 = payload.userId === session.player1.userId || socket.id === session.player1.socketId;
+          const player1TimeMs = answeredByPlayer1 ? payload.time_taken_ms : 0;
+          const player2TimeMs = answeredByPlayer1 ? 0 : payload.time_taken_ms;
           if (answeredByPlayer1) {
             session.score.player1 += 1;
           } else {
             session.score.player2 += 1;
           }
+          session.roundReplay.push({
+            roundNumber: session.round,
+            winnerUserId: answeredByPlayer1 ? session.player1.userId : session.player2.userId,
+            correctAnswer: question.correctAnswer,
+            player1TimeMs,
+            player2TimeMs,
+          });
 
           duel.to(session.roomId).emit("round_result", {
             winner_user_id: answeredByPlayer1 ? session.player1.userId : session.player2.userId,
@@ -170,7 +194,7 @@ export function attachDuelNamespace(io: Server) {
             explanation: question.explanation,
             scores: { player1: session.score.player1, player2: session.score.player2 },
             player_ids: { player1: session.player1.userId, player2: session.player2.userId },
-            response_times: { player1_ms: answeredByPlayer1 ? payload.time_taken_ms : 0, player2_ms: answeredByPlayer1 ? 0 : payload.time_taken_ms },
+            response_times: { player1_ms: player1TimeMs, player2_ms: player2TimeMs },
           });
 
           if (session.round >= 5) {
@@ -257,6 +281,13 @@ async function startRound(io: ReturnType<Server["of"]>, sessionOrId: string | Se
         player_ids: { player1: session.player1.userId, player2: session.player2.userId },
         response_times: { player1_ms: 0, player2_ms: 0 },
       });
+      session.roundReplay.push({
+        roundNumber: session.round,
+        winnerUserId: null,
+        correctAnswer: question.correctAnswer,
+        player1TimeMs: 0,
+        player2TimeMs: 0,
+      });
       if (session.round >= 5) {
         await endSession(io, session);
         return;
@@ -284,12 +315,14 @@ async function endSession(io: ReturnType<Server["of"]>, session: SessionState) {
     final_scores: { player1: session.score.player1, player2: session.score.player2 },
     rating_change: winnerIsP1 ? 50 : -20,
     xp_earned: winnerIsP1 ? 100 : 30,
+    round_replay: session.roundReplay,
   });
   io.to(session.player2.socketId).emit("duel_end", {
     winner_user_id: winner.userId,
     final_scores: { player1: session.score.player1, player2: session.score.player2 },
     rating_change: winnerIsP1 ? -20 : 50,
     xp_earned: winnerIsP1 ? 30 : 100,
+    round_replay: session.roundReplay,
   });
 
   await prisma.duelSession
@@ -301,6 +334,7 @@ async function endSession(io: ReturnType<Server["of"]>, session: SessionState) {
         player1Score: session.score.player1,
         player2Score: session.score.player2,
         roundsPlayed: session.round,
+        roundReplay: session.roundReplay,
         endedAt: new Date(),
       },
     })
@@ -322,6 +356,9 @@ async function endSession(io: ReturnType<Server["of"]>, session: SessionState) {
       update: { rating: { decrement: 20 }, losses: { increment: 1 } },
     })
     .catch(() => null);
+
+  await applyXpReward(session.player1.userId, winnerIsP1 ? 100 : 30);
+  await applyXpReward(session.player2.userId, winnerIsP1 ? 30 : 100);
 }
 
 async function pickQuestionForSession(session: SessionState) {
@@ -350,4 +387,20 @@ async function pickQuestionForSession(session: SessionState) {
     where: { difficulty: targetDifficulty as "BEGINNER" | "ADVANCED" },
     skip: Math.floor(Math.random() * Math.max(1, total - 1)),
   });
+}
+
+async function applyXpReward(userId: string, xpToAdd: number) {
+  const progress = await prisma.userProgress.findUnique({ where: { userId } }).catch(() => null);
+  if (!progress) return;
+  const nextXp = progress.xpTotal + xpToAdd;
+  const nextLevel = Math.max(1, Math.floor(nextXp / 250) + 1);
+  await prisma.userProgress
+    .update({
+      where: { userId },
+      data: {
+        xpTotal: nextXp,
+        level: nextLevel,
+      },
+    })
+    .catch(() => null);
 }

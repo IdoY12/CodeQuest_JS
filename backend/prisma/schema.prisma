@@ -55,6 +55,7 @@ model User {
   username      String
   hashedPassword String
   avatarId      String      @default("avatar-braces")
+  tokenVersion  Int         @default(0)
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   lastActiveAt  DateTime?
@@ -140,6 +141,8 @@ model UserProgress {
   streakCurrent    Int      @default(0)
   streakLongest    Int      @default(0)
   streakLastDate   DateTime?
+  streakShieldAvailable Boolean @default(false)
+  streakShieldConsumedAt DateTime?
   heartsRemaining  Int      @default(3)
   heartsLastRefill DateTime?
   user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -194,6 +197,7 @@ model DuelSession {
   player1Score     Int      @default(0)
   player2Score     Int      @default(0)
   roundsPlayed     Int      @default(0)
+  roundReplay      Json?
   startedAt        DateTime @default(now())
   endedAt          DateTime?
   disconnectReason String?

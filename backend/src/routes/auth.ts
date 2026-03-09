@@ -8,6 +8,7 @@ import {
   signRefreshToken,
   verifyRefreshToken,
 } from "../lib/auth.js";
+import { authMiddleware, AuthenticatedRequest } from "../middleware/auth.js";
 import { logError, logInfo, logWarn } from "../lib/logger.js";
 
 export const authRouter = Router();
@@ -68,8 +69,8 @@ authRouter.post("/register", async (req, res) => {
       },
     });
 
-    const accessToken = signAccessToken({ userId: user.id, email: user.email });
-    const refreshToken = signRefreshToken({ userId: user.id, email: user.email });
+    const accessToken = signAccessToken({ userId: user.id, email: user.email, tokenVersion: user.tokenVersion });
+    const refreshToken = signRefreshToken({ userId: user.id, email: user.email, tokenVersion: user.tokenVersion });
     logInfo("[AUTH]", "register:success", { userId: user.id, email: user.email });
     return res.status(201).json({
       user: {
@@ -138,8 +139,13 @@ authRouter.post("/login", async (req, res) => {
     });
 
     const pathKey = mapExperienceToPath(progress.experienceLevel) ?? progress.path?.key ?? "BEGINNER";
-    const accessToken = signAccessToken({ userId: user.id, email: user.email });
-    const refreshToken = signRefreshToken({ userId: user.id, email: user.email });
+    await prisma.duelRating.upsert({
+      where: { userId: user.id },
+      create: { userId: user.id, rating: 1000 },
+      update: {},
+    });
+    const accessToken = signAccessToken({ userId: user.id, email: user.email, tokenVersion: user.tokenVersion });
+    const refreshToken = signRefreshToken({ userId: user.id, email: user.email, tokenVersion: user.tokenVersion });
     logInfo("[AUTH]", "login:success", { userId: user.id, onboardingCompleted: progress?.onboardingCompleted ?? false });
     return res.json({
       user: {
@@ -170,13 +176,32 @@ authRouter.post("/refresh", async (req, res) => {
   }
   try {
     const payload = verifyRefreshToken(refreshToken);
-    const accessToken = signAccessToken(payload);
+    const user = await prisma.user.findUnique({
+      where: { id: payload.userId },
+      select: { id: true, email: true, tokenVersion: true },
+    });
+    if (!user || user.tokenVersion !== payload.tokenVersion) {
+      return res.status(401).json({ error: "Invalid refresh token" });
+    }
+    const accessToken = signAccessToken({ userId: user.id, email: user.email, tokenVersion: user.tokenVersion });
     logInfo("[AUTH]", "refresh:success", { userId: payload.userId });
     return res.json({ accessToken });
   } catch (error) {
     logError("[AUTH]", error, { phase: "refresh" });
     return res.status(401).json({ error: "Invalid refresh token" });
   }
+});
+
+authRouter.get("/me", authMiddleware, async (req: AuthenticatedRequest, res) => {
+  const userId = req.user!.userId;
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, email: true, username: true, avatarId: true, tokenVersion: true },
+  });
+  if (!user) {
+    return res.status(401).json({ error: "Invalid token" });
+  }
+  return res.json(user);
 });
 
 authRouter.post("/logout", async (_req, res) => {

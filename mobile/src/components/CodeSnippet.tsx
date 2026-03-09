@@ -11,18 +11,20 @@ export function CodeSnippet({ code }: Props) {
 
   return (
     <View style={styles.container} accessibilityLabel="Code snippet">
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <View style={styles.codeBlock}>
-          {highlighted.map((line, lineIndex) => (
-            <Text key={lineIndex} style={styles.code}>
-              {line.map((token, tokenIndex) => (
-                <Text key={`${lineIndex}-${tokenIndex}`} style={{ color: token.color }}>
-                  {token.text}
-                </Text>
-              ))}
-            </Text>
-          ))}
-        </View>
+      <ScrollView style={styles.codeVerticalScroll} nestedScrollEnabled>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          <View style={styles.codeBlock}>
+            {highlighted.map((line, lineIndex) => (
+              <Text key={lineIndex} style={styles.code}>
+                {line.map((token, tokenIndex) => (
+                  <Text key={`${lineIndex}-${tokenIndex}`} style={{ color: token.color }}>
+                    {token.text}
+                  </Text>
+                ))}
+              </Text>
+            ))}
+          </View>
+        </ScrollView>
       </ScrollView>
       <View style={styles.output}>
         <Text style={styles.outputTitle}>Live Output</Text>
@@ -41,6 +43,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     marginVertical: spacing.lg,
   },
+  codeVerticalScroll: { maxHeight: 170 },
   code: {
     color: "#d1d5db",
     fontFamily: "monospace",

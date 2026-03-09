@@ -35,6 +35,12 @@ export function ProfileScreen() {
   const username = useAppStore((s) => s.username);
   const level = useAppStore((s) => s.level);
   const xp = useAppStore((s) => s.xpTotal);
+  const streakCurrent = useAppStore((s) => s.streakCurrent);
+  const lessonsCompleted = useAppStore((s) => s.lessonsCompleted);
+  const duelWins = useAppStore((s) => s.duelWins);
+  const duelLosses = useAppStore((s) => s.duelLosses);
+  const duelRating = useAppStore((s) => s.duelRating);
+  const streakShieldAvailable = useAppStore((s) => s.streakShieldAvailable);
   const goal = useAppStore((s) => s.goal);
   const experience = useAppStore((s) => s.experience);
   const commitment = useAppStore((s) => s.commitment);
@@ -53,6 +59,8 @@ export function ProfileScreen() {
   const [draftNotifications, setDraftNotifications] = React.useState<boolean>(notificationsEnabled);
   const [saving, setSaving] = React.useState(false);
   const [saveMessage, setSaveMessage] = React.useState<string | null>(null);
+  const duelTotal = duelWins + duelLosses;
+  const duelWinRate = duelTotal > 0 ? `${Math.round((duelWins / duelTotal) * 100)}%` : "0%";
 
   const onSavePreferences = async () => {
     if (!accessToken || saving) return;
@@ -103,13 +111,15 @@ export function ProfileScreen() {
           <Text style={styles.meta}>
             Level {level} · {xp} XP
           </Text>
+          <Text style={styles.shieldText}>{streakShieldAvailable ? "🛡️ Streak Shield ready" : "No active shield"}</Text>
         </View>
 
       <View style={styles.grid}>
-        <StatCard label="🔥 Current Streak" value="7 days" />
+        <StatCard label="🔥 Current Streak" value={`${streakCurrent} days`} />
         <StatCard label="⚡ Total XP" value={String(xp)} />
-        <StatCard label="⚔️ Duel Win Rate" value="66%" />
-        <StatCard label="📚 Lessons Completed" value="12" />
+        <StatCard label="⚔️ Duel Win Rate" value={duelWinRate} />
+        <StatCard label="📚 Lessons Completed" value={String(lessonsCompleted)} />
+        <StatCard label="🏅 Duel Rating" value={String(duelRating)} />
       </View>
 
         <View style={styles.card}>
@@ -244,6 +254,7 @@ const styles = StyleSheet.create({
   name: { marginTop: spacing.sm, color: colors.textPrimary, fontSize: fontSize.lg, fontWeight: "800" },
   title: { color: colors.textSecondary, marginTop: spacing.xs },
   meta: { color: colors.success, marginTop: spacing.sm, fontWeight: "700" },
+  shieldText: { marginTop: spacing.sm, color: colors.textSecondary, fontSize: fontSize.sm },
   grid: { flexDirection: "row", flexWrap: "wrap", gap: spacing.md },
   statCard: {
     width: "48%",

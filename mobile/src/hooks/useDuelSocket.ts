@@ -17,7 +17,20 @@ interface DuelState {
   opponent: { username: string; rating: number } | null;
   round: DuelRound | null;
   score: { me: number; opp: number };
-  duelEnd: { won: boolean; ratingDelta: number; xpEarned: number } | null;
+  duelEnd:
+    | {
+        won: boolean;
+        ratingDelta: number;
+        xpEarned: number;
+        roundReplay: Array<{
+          roundNumber: number;
+          winnerUserId: string | null;
+          correctAnswer: string;
+          player1TimeMs: number;
+          player2TimeMs: number;
+        }>;
+      }
+    | null;
 }
 
 const listeners = new Set<(state: DuelState) => void>();
@@ -90,13 +103,39 @@ function ensureSocket(url: string) {
         won: currentUserId ? winnerId === currentUserId : winnerId === socket.id,
         ratingDelta: payload.rating_change,
         xpEarned: payload.xp_earned,
+        roundReplay: Array.isArray(payload.round_replay)
+          ? payload.round_replay.map((entry: unknown) => {
+              const replayEntry = entry as {
+                roundNumber?: number;
+                round_number?: number;
+                winnerUserId?: string;
+                winner_user_id?: string | null;
+                correctAnswer?: string;
+                correct_answer?: string;
+                player1TimeMs?: number;
+                player1_ms?: number;
+                player2TimeMs?: number;
+                player2_ms?: number;
+              };
+              return {
+                roundNumber: Number(replayEntry.roundNumber ?? replayEntry.round_number ?? 0),
+                winnerUserId:
+                  typeof replayEntry.winnerUserId === "string"
+                    ? replayEntry.winnerUserId
+                    : replayEntry.winner_user_id ?? null,
+                correctAnswer: String(replayEntry.correctAnswer ?? replayEntry.correct_answer ?? ""),
+                player1TimeMs: Number(replayEntry.player1TimeMs ?? replayEntry.player1_ms ?? 0),
+                player2TimeMs: Number(replayEntry.player2TimeMs ?? replayEntry.player2_ms ?? 0),
+              };
+            })
+          : [],
       },
     });
   });
   socket.on("opponent_disconnected", () => {
     logDuel("opponent:disconnected");
     publish({
-      duelEnd: { won: true, ratingDelta: 25, xpEarned: 80 },
+      duelEnd: { won: true, ratingDelta: 25, xpEarned: 80, roundReplay: [] },
     });
   });
   sharedSocket = socket;
@@ -155,7 +194,7 @@ export function useDuelSocket() {
   }, []);
 
   const joinQueue = useCallback(
-    (payload: { userId: string; username: string; rating: number }) => {
+    (payload: { userId: string; username: string; rating: number; token?: string | null }) => {
       const socket = ensureSocket(url);
       currentUserId = payload.userId;
       socket.emit("join_queue", payload);
@@ -169,9 +208,9 @@ export function useDuelSocket() {
   }, []);
 
   const playerReady = useCallback(
-    (sessionId: string, userId: string) => {
+    (sessionId: string) => {
       if (!sharedSocket) return;
-      sharedSocket.emit("player_ready", { session_id: sessionId, userId });
+      sharedSocket.emit("player_ready", { session_id: sessionId });
     },
     [],
   );
@@ -182,7 +221,6 @@ export function useDuelSocket() {
       roundNumber: number;
       answer: string;
       timeTakenMs: number;
-      userId: string;
     }) => {
       if (!sharedSocket) return;
       sharedSocket.emit("submit_answer", {
@@ -190,7 +228,6 @@ export function useDuelSocket() {
         round_number: payload.roundNumber,
         answer: payload.answer,
         time_taken_ms: payload.timeTakenMs,
-        userId: payload.userId,
       });
     },
     [],

@@ -1,6 +1,7 @@
 import React from "react";
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppStore } from "../stores/useAppStore";
@@ -10,10 +11,61 @@ import { HomeScreen } from "../features/home/HomeScreen";
 import { LearnNavigator } from "../features/learn/LearnNavigator";
 import { DuelNavigator } from "../features/duel/DuelNavigator";
 import { ProfileScreen } from "../features/profile/ProfileScreen";
+import { DailyPuzzleScreen } from "../features/puzzle/DailyPuzzleScreen";
 import { colors } from "../theme/theme";
 import { logNav } from "../services/logger";
 
 const Tabs = createBottomTabNavigator();
+const HomeStack = createNativeStackNavigator();
+
+function HomeNavigator() {
+  return (
+    <HomeStack.Navigator
+      screenOptions={{
+        headerStyle: { backgroundColor: colors.background },
+        headerTintColor: colors.textPrimary,
+        contentStyle: { backgroundColor: colors.background },
+      }}
+    >
+      <HomeStack.Screen name="HomeMain" component={HomeScreen} options={{ headerShown: false, title: "Home" }} />
+      <HomeStack.Screen name="DailyPuzzle" component={DailyPuzzleScreen} options={{ title: "Daily Puzzle" }} />
+    </HomeStack.Navigator>
+  );
+}
+
+function MainTabs() {
+  return (
+    <Tabs.Navigator
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: { backgroundColor: colors.card, borderTopColor: colors.border },
+        tabBarActiveTintColor: colors.accent,
+        tabBarInactiveTintColor: colors.textSecondary,
+      }}
+    >
+      <Tabs.Screen
+        name="Home"
+        component={HomeNavigator}
+        options={{ tabBarIcon: () => <TabIcon label="🏠" />, tabBarLabel: "Home" }}
+      />
+      <Tabs.Screen
+        name="LearnTab"
+        component={LearnNavigator}
+        options={{ tabBarIcon: () => <TabIcon label="📚" />, tabBarLabel: "Learn" }}
+      />
+      <Tabs.Screen
+        name="DuelTab"
+        component={DuelNavigator}
+        options={{ tabBarIcon: () => <TabIcon label="⚔️" />, tabBarLabel: "Duel" }}
+      />
+      <Tabs.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{ tabBarIcon: () => <TabIcon label="👤" />, tabBarLabel: "Profile" }}
+      />
+    </Tabs.Navigator>
+  );
+}
 
 export function RootNavigator() {
   const hasHydrated = useAppStore((s) => s.hasHydrated);
@@ -74,35 +126,7 @@ export function RootNavigator() {
         },
       }}
     >
-      <Tabs.Navigator
-        screenOptions={{
-          headerShown: false,
-          tabBarStyle: { backgroundColor: colors.card, borderTopColor: colors.border },
-          tabBarActiveTintColor: colors.accent,
-          tabBarInactiveTintColor: colors.textSecondary,
-        }}
-      >
-        <Tabs.Screen
-          name="Home"
-          component={HomeScreen}
-          options={{ tabBarIcon: () => <TabIcon label="🏠" />, tabBarLabel: "Home" }}
-        />
-        <Tabs.Screen
-          name="LearnTab"
-          component={LearnNavigator}
-          options={{ tabBarIcon: () => <TabIcon label="📚" />, tabBarLabel: "Learn" }}
-        />
-        <Tabs.Screen
-          name="DuelTab"
-          component={DuelNavigator}
-          options={{ tabBarIcon: () => <TabIcon label="⚔️" />, tabBarLabel: "Duel" }}
-        />
-        <Tabs.Screen
-          name="Profile"
-          component={ProfileScreen}
-          options={{ tabBarIcon: () => <TabIcon label="👤" />, tabBarLabel: "Profile" }}
-        />
-      </Tabs.Navigator>
+      <MainTabs />
     </NavigationContainer>
   );
 }

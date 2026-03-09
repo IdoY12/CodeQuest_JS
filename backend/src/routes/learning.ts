@@ -69,12 +69,18 @@ learningRouter.post("/submit-exercise", async (req: AuthenticatedRequest, res) =
   });
 
   if (isCorrect) {
-    await prisma.userProgress.update({
-      where: { userId: req.user!.userId },
-      data: {
-        xpTotal: { increment: exercise.xpReward },
-      },
-    });
+    const existingProgress = await prisma.userProgress.findUnique({ where: { userId: req.user!.userId } });
+    if (existingProgress) {
+      const nextXp = existingProgress.xpTotal + exercise.xpReward;
+      const nextLevel = Math.max(1, Math.floor(nextXp / 250) + 1);
+      await prisma.userProgress.update({
+        where: { userId: req.user!.userId },
+        data: {
+          xpTotal: nextXp,
+          level: nextLevel,
+        },
+      });
+    }
   }
 
   return res.json({

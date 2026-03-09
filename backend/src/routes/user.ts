@@ -13,6 +13,16 @@ function resolvePathKey(level: "BEGINNER" | "BASICS" | "INTERMEDIATE" | "ADVANCE
   return level === "BEGINNER" || level === "BASICS" ? "BEGINNER" : "ADVANCED";
 }
 
+function buildRecentStreakDays(dateKeys: string[], today = new Date()): boolean[] {
+  const set = new Set(dateKeys);
+  return Array.from({ length: 7 }, (_value, index) => {
+    const date = new Date(today);
+    date.setDate(today.getDate() - (6 - index));
+    const key = date.toLocaleDateString("en-CA");
+    return set.has(key);
+  });
+}
+
 userRouter.get("/profile", async (req: AuthenticatedRequest, res) => {
   const user = await prisma.user.findUnique({
     where: { id: req.user!.userId },
@@ -33,8 +43,37 @@ userRouter.patch("/profile", async (req: AuthenticatedRequest, res) => {
 });
 
 userRouter.get("/progress-summary", async (req: AuthenticatedRequest, res) => {
-  const progress = await prisma.userProgress.findUnique({ where: { userId: req.user!.userId } });
-  return res.json(progress);
+  const userId = req.user!.userId;
+  const [progress, duelRating, recentPractice, history] = await Promise.all([
+    prisma.userProgress.findUnique({ where: { userId } }),
+    prisma.duelRating.findUnique({ where: { userId } }),
+    prisma.dailyPracticeLog.findMany({
+      where: { userId },
+      orderBy: { dateKey: "desc" },
+      take: 7,
+      select: { dateKey: true },
+    }),
+    prisma.userExerciseHistory.findMany({
+      where: { userId, isCorrect: true },
+      select: { exercise: { select: { lessonId: true } } },
+    }),
+  ]);
+
+  const lessonsCompleted = new Set(history.map((item) => item.exercise.lessonId)).size;
+  const streakDays = buildRecentStreakDays(recentPractice.map((entry) => entry.dateKey));
+
+  return res.json({
+    xpTotal: progress?.xpTotal ?? 0,
+    level: progress?.level ?? 1,
+    streakCurrent: progress?.streakCurrent ?? 0,
+    streakDays,
+    lessonsCompleted,
+    duelWins: duelRating?.wins ?? 0,
+    duelLosses: duelRating?.losses ?? 0,
+    duelDraws: duelRating?.draws ?? 0,
+    duelRating: duelRating?.rating ?? 0,
+    streakShieldAvailable: progress?.streakShieldAvailable ?? false,
+  });
 });
 
 userRouter.post("/onboarding", async (req: AuthenticatedRequest, res) => {
@@ -189,6 +228,51 @@ userRouter.post("/practice-log", async (req: AuthenticatedRequest, res) => {
       practicedSeconds: { increment: parsed.data.practicedSeconds },
     },
   });
+
+  const progress = await prisma.userProgress.findUnique({
+    where: { userId: req.user!.userId },
+    select: { streakCurrent: true, streakLastDate: true, streakLongest: true, streakShieldAvailable: true },
+  });
+
+  if (progress) {
+    const today = new Date(parsed.data.dateKey);
+    const streakLastDate = progress.streakLastDate ? new Date(progress.streakLastDate) : null;
+    const msInDay = 1000 * 60 * 60 * 24;
+    const daysBetween = streakLastDate ? Math.floor((today.getTime() - streakLastDate.getTime()) / msInDay) : null;
+
+    let nextStreak = progress.streakCurrent;
+    let shieldAvailable = progress.streakShieldAvailable;
+    let shieldConsumedAt: Date | null = null;
+
+    if (daysBetween === null || daysBetween <= 0) {
+      nextStreak = Math.max(1, progress.streakCurrent);
+    } else if (daysBetween === 1) {
+      nextStreak = progress.streakCurrent + 1;
+    } else if (daysBetween > 1) {
+      if (progress.streakShieldAvailable) {
+        shieldAvailable = false;
+        shieldConsumedAt = today;
+        nextStreak = progress.streakCurrent;
+      } else {
+        nextStreak = 1;
+      }
+    }
+
+    if (nextStreak >= 7 && !shieldAvailable) {
+      shieldAvailable = true;
+    }
+
+    await prisma.userProgress.update({
+      where: { userId: req.user!.userId },
+      data: {
+        streakCurrent: nextStreak,
+        streakLongest: Math.max(progress.streakLongest, nextStreak),
+        streakLastDate: today,
+        streakShieldAvailable: shieldAvailable,
+        streakShieldConsumedAt: shieldConsumedAt ?? undefined,
+      },
+    });
+  }
   logInfo("[TASKS]", "practice-log:write-success", { userId: req.user?.userId, practicedSeconds: log.practicedSeconds });
   return res.json({ practicedSeconds: log.practicedSeconds });
 });
@@ -216,12 +300,17 @@ userRouter.get("/daily-goal-status/:dateKey", async (req: AuthenticatedRequest, 
   const remainingMinutes = Math.max(0, goalMinutes - practicedMinutes);
   const canSendIncomplete = progress.notificationsEnabled && remainingMinutes > 0 && (log?.incompleteReminderCount ?? 0) < 2;
   const canSendComplete = progress.notificationsEnabled && remainingMinutes === 0 && !(log?.completeReminderSent ?? false);
+  const shieldConsumedDateKey = progress.streakShieldConsumedAt
+    ? new Date(progress.streakShieldConsumedAt).toLocaleDateString("en-CA")
+    : null;
   return res.json({
     dateKey,
     goalMinutes,
     practicedMinutes,
     remainingMinutes,
     notificationsEnabled: progress.notificationsEnabled,
+    streakShieldAvailable: progress.streakShieldAvailable,
+    shieldConsumedToday: shieldConsumedDateKey === dateKey,
     canSendIncomplete,
     canSendComplete,
   });
@@ -281,7 +370,7 @@ userRouter.post("/change-password", async (req: AuthenticatedRequest, res) => {
   if (!valid) return res.status(401).json({ error: "Current password is incorrect" });
   await prisma.user.update({
     where: { id: user.id },
-    data: { hashedPassword: await hashPassword(parsed.data.newPassword) },
+    data: { hashedPassword: await hashPassword(parsed.data.newPassword), tokenVersion: { increment: 1 } },
   });
   return res.json({ ok: true });
 });

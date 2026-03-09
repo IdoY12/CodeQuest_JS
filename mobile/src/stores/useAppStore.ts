@@ -26,6 +26,16 @@ interface AppState {
   xpTotal: number;
   streakCurrent: number;
   streakDays: boolean[];
+  lessonsCompleted: number;
+  duelWins: number;
+  duelLosses: number;
+  duelDraws: number;
+  duelRating: number;
+  streakShieldAvailable: boolean;
+  lastDailyPuzzleSolvedDate: string | null;
+  puzzleSolvedIdByDate: Record<string, string>;
+  xpMultiplierFactor: number;
+  xpMultiplierEndsAt: number | null;
   soundsEnabled: boolean;
   hapticsEnabled: boolean;
   currentLessonId: string;
@@ -54,6 +64,22 @@ interface AppState {
   }) => void;
   signOut: () => void;
   addXp: (amount: number) => void;
+  setProgressSnapshot: (payload: {
+    xpTotal: number;
+    level: number;
+    streakCurrent: number;
+    streakDays: boolean[];
+    lessonsCompleted: number;
+    duelWins: number;
+    duelLosses: number;
+    duelDraws: number;
+    duelRating: number;
+    streakShieldAvailable: boolean;
+  }) => void;
+  markDailyPuzzleSolved: (dateKey: string, puzzleId: string) => void;
+  setXpMultiplier: (payload: { factor: number; endsAt: number | null }) => void;
+  incrementLessonsCompleted: () => void;
+  applyDuelResult: (payload: { won: boolean; draw?: boolean; ratingDelta: number }) => void;
   setCurrentLesson: (lessonId: string) => void;
   setExerciseIndex: (index: number) => void;
   setLessonAccuracy: (accuracy: number) => void;
@@ -122,7 +148,17 @@ export const useAppStore = create<AppState>()(
       level: 1,
       xpTotal: 0,
       streakCurrent: 0,
-      streakDays: [true, true, true, true, true, true, false],
+      streakDays: [false, false, false, false, false, false, false],
+      lessonsCompleted: 0,
+      duelWins: 0,
+      duelLosses: 0,
+      duelDraws: 0,
+      duelRating: 0,
+      streakShieldAvailable: false,
+      lastDailyPuzzleSolvedDate: null,
+      puzzleSolvedIdByDate: {},
+      xpMultiplierFactor: 1,
+      xpMultiplierEndsAt: null,
       soundsEnabled: true,
       hapticsEnabled: true,
       currentLessonId: "b1-l1",
@@ -174,6 +210,22 @@ export const useAppStore = create<AppState>()(
               ? (String(dailyCommitmentMinutes) as Commitment)
               : get().commitment,
           notificationsEnabled: notificationsEnabled ?? true,
+          level: 1,
+          xpTotal: 0,
+          streakCurrent: 0,
+          streakDays: [false, false, false, false, false, false, false],
+          lessonsCompleted: 0,
+          duelWins: 0,
+          duelLosses: 0,
+          duelDraws: 0,
+          duelRating: 0,
+          streakShieldAvailable: false,
+          puzzleSolvedIdByDate: {},
+          xpMultiplierFactor: 1,
+          xpMultiplierEndsAt: null,
+          currentLessonId: "b1-l1",
+          lessonExerciseIndex: 0,
+          lessonAccuracy: 0,
         });
       },
       signOut: () => {
@@ -191,14 +243,65 @@ export const useAppStore = create<AppState>()(
           commitment: "15",
           notificationsEnabled: true,
           path: "BEGINNER",
+          level: 1,
+          xpTotal: 0,
+          streakCurrent: 0,
+          streakDays: [false, false, false, false, false, false, false],
+          lessonsCompleted: 0,
+          duelWins: 0,
+          duelLosses: 0,
+          duelDraws: 0,
+          duelRating: 0,
+          streakShieldAvailable: false,
+          xpMultiplierFactor: 1,
+          xpMultiplierEndsAt: null,
+          lastDailyPuzzleSolvedDate: null,
+          puzzleSolvedIdByDate: {},
+          currentLessonId: "b1-l1",
           lessonExerciseIndex: 0,
+          lessonAccuracy: 0,
         });
       },
       addXp: (amount) => {
-        const nextXp = get().xpTotal + amount;
+        const { xpMultiplierEndsAt, xpMultiplierFactor } = get();
+        const now = Date.now();
+        const multiplierIsActive =
+          xpMultiplierEndsAt !== null && xpMultiplierEndsAt > now && xpMultiplierFactor > 1;
+        const appliedAmount = Math.round(amount * (multiplierIsActive ? xpMultiplierFactor : 1));
+        const nextXp = get().xpTotal + appliedAmount;
         const nextLevel = Math.max(1, Math.floor(nextXp / 250) + 1);
         set({ xpTotal: nextXp, level: nextLevel });
       },
+      setProgressSnapshot: (payload) =>
+        set({
+          xpTotal: payload.xpTotal,
+          level: payload.level,
+          streakCurrent: payload.streakCurrent,
+          streakDays: payload.streakDays,
+          lessonsCompleted: payload.lessonsCompleted,
+          duelWins: payload.duelWins,
+          duelLosses: payload.duelLosses,
+          duelDraws: payload.duelDraws,
+          duelRating: payload.duelRating,
+          streakShieldAvailable: payload.streakShieldAvailable,
+        }),
+      markDailyPuzzleSolved: (dateKey, puzzleId) =>
+        set({
+          lastDailyPuzzleSolvedDate: dateKey,
+          puzzleSolvedIdByDate: {
+            ...get().puzzleSolvedIdByDate,
+            [dateKey]: puzzleId,
+          },
+        }),
+      setXpMultiplier: ({ factor, endsAt }) => set({ xpMultiplierFactor: factor, xpMultiplierEndsAt: endsAt }),
+      incrementLessonsCompleted: () => set({ lessonsCompleted: get().lessonsCompleted + 1 }),
+      applyDuelResult: ({ won, draw, ratingDelta }) =>
+        set({
+          duelWins: won ? get().duelWins + 1 : get().duelWins,
+          duelLosses: !won && !draw ? get().duelLosses + 1 : get().duelLosses,
+          duelDraws: draw ? get().duelDraws + 1 : get().duelDraws,
+          duelRating: Math.max(0, get().duelRating + ratingDelta),
+        }),
       setCurrentLesson: (lessonId) => set({ currentLessonId: lessonId, lessonExerciseIndex: 0 }),
       setExerciseIndex: (index) => set({ lessonExerciseIndex: index }),
       setLessonAccuracy: (accuracy) => set({ lessonAccuracy: accuracy }),

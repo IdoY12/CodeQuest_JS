@@ -30,7 +30,9 @@ export async function apiRequest<T>(path: string, options: ApiOptions = {}): Pro
       : options.body
         ? JSON.stringify(options.body)
         : undefined;
-  console.log(`[Request] URL: ${url} | Method: ${method} | Body: ${bodyForLog ?? "<empty>"}`);
+  if (__DEV__) {
+    console.log(`[Request] URL: ${url} | Method: ${method} | Body: ${bodyForLog ?? "<empty>"}`);
+  }
   logApi("request:start", { method, path, url });
   let response: Response;
   try {
@@ -43,7 +45,9 @@ export async function apiRequest<T>(path: string, options: ApiOptions = {}): Pro
       },
     });
   } catch (error) {
-    console.log("[Error] Full Error Object:", error);
+    if (__DEV__) {
+      console.log("[Error] Full Error Object:", error);
+    }
     logApi("request:exception", {
       method,
       path,
@@ -70,7 +74,9 @@ export async function apiRequest<T>(path: string, options: ApiOptions = {}): Pro
       responseData = text;
       message = text || message;
     }
-    console.log(`[Response] Status: ${response.status} | Data:`, responseData);
+    if (__DEV__) {
+      console.log(`[Response] Status: ${response.status} | Data:`, responseData);
+    }
     logApi("request:fail", {
       method,
       path,
@@ -83,7 +89,9 @@ export async function apiRequest<T>(path: string, options: ApiOptions = {}): Pro
   }
 
   const data = (await response.json()) as T;
-  console.log(`[Response] Status: ${response.status} | Data:`, data);
+  if (__DEV__) {
+    console.log(`[Response] Status: ${response.status} | Data:`, data);
+  }
   logApi("request:success", {
     method,
     path,

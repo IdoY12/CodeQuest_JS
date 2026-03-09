@@ -2,13 +2,14 @@ import React from "react";
 import { StatusBar } from "expo-status-bar";
 import { AppState, AppStateStatus, Platform, StyleSheet, Text, View } from "react-native";
 import * as Notifications from "expo-notifications";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import NetInfo from "@react-native-community/netinfo";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { RootNavigator } from "./src/navigation/RootNavigator";
 import { colors } from "./src/theme/theme";
 import { useAppStore } from "./src/stores/useAppStore";
-import { apiRequest, ApiError } from "./src/services/api";
+import { apiRequest } from "./src/services/api";
 import { logApp, logAuth, logError } from "./src/services/logger";
 
 const queryClient = new QueryClient();
@@ -18,12 +19,11 @@ export default function App() {
   const hasHydrated = useAppStore((s) => s.hasHydrated);
   const isAuthenticated = useAppStore((s) => s.isAuthenticated);
   const accessToken = useAppStore((s) => s.accessToken);
-  const refreshToken = useAppStore((s) => s.refreshToken);
   const notificationsEnabled = useAppStore((s) => s.notificationsEnabled);
   const signOut = useAppStore((s) => s.signOut);
-  const setAccessToken = useAppStore((s) => s.setAccessToken);
   const setOnboardingCompleted = useAppStore((s) => s.setOnboardingCompleted);
   const updatePreferences = useAppStore((s) => s.updatePreferences);
+  const setProgressSnapshot = useAppStore((s) => s.setProgressSnapshot);
   const setAuthChecked = useAppStore((s) => s.setAuthChecked);
   const appStateRef = React.useRef<AppStateStatus>(AppState.currentState);
   const authBootstrappedRef = React.useRef(false);
@@ -70,6 +70,10 @@ export default function App() {
   React.useEffect(() => {
     if (!hasHydrated || authBootstrappedRef.current) return;
     authBootstrappedRef.current = true;
+    const clearPersistedSession = async () => {
+      await AsyncStorage.removeItem("codequest-app-store");
+      signOut();
+    };
     const bootstrapAuth = async () => {
       setAuthChecked(false);
       logAuth("bootstrap:start", { isAuthenticated, hasAccessToken: Boolean(accessToken) });
@@ -88,8 +92,24 @@ export default function App() {
           notificationsEnabled: boolean;
           pathKey: "BEGINNER" | "ADVANCED";
         }>("/user/preferences", { token });
+      const verifySession = async (token: string) =>
+        apiRequest<{ id: string; email: string }>("/auth/me", { token });
+      const fetchProgress = async (token: string) =>
+        apiRequest<{
+          xpTotal: number;
+          level: number;
+          streakCurrent: number;
+          streakDays: boolean[];
+          lessonsCompleted: number;
+          duelWins: number;
+          duelLosses: number;
+          duelDraws: number;
+          duelRating: number;
+          streakShieldAvailable: boolean;
+        }>("/user/progress-summary", { token });
 
       try {
+        await verifySession(accessToken);
         const prefs = await fetchPreferences(accessToken);
         setOnboardingCompleted(prefs.hasCompletedOnboarding);
         if (prefs.userGoal && prefs.userLevel && prefs.dailyGoalMinutes) {
@@ -101,28 +121,14 @@ export default function App() {
             path: prefs.pathKey,
           });
         }
+        const progress = await fetchProgress(accessToken);
+        setProgressSnapshot(progress);
         logAuth("bootstrap:success", { hasCompletedOnboarding: prefs.hasCompletedOnboarding });
         setAuthChecked(true);
       } catch (error) {
-        const is401 = error instanceof ApiError && error.status === 401;
-        if (is401 && refreshToken) {
-          try {
-            logAuth("bootstrap:refresh-token");
-            const refreshed = await apiRequest<{ accessToken: string }>("/auth/refresh", {
-              method: "POST",
-              body: JSON.stringify({ refreshToken }),
-            });
-            setAccessToken(refreshed.accessToken);
-            await fetchPreferences(refreshed.accessToken);
-            logAuth("bootstrap:refresh-success");
-            setAuthChecked(true);
-            return;
-          } catch (refreshError) {
-            logError("[AUTH]", refreshError, { phase: "bootstrap-refresh" });
-          }
-        }
-        signOut();
-        logAuth("bootstrap:signout-invalid-session");
+        logError("[AUTH]", error, { phase: "bootstrap-verify" });
+        await clearPersistedSession();
+        logAuth("bootstrap:signout-invalid-session-or-user-missing");
       }
       setAuthChecked(true);
     };
@@ -131,10 +137,9 @@ export default function App() {
     accessToken,
     hasHydrated,
     isAuthenticated,
-    refreshToken,
-    setAccessToken,
     setAuthChecked,
     setOnboardingCompleted,
+    setProgressSnapshot,
     signOut,
     updatePreferences,
   ]);
@@ -172,9 +177,21 @@ export default function App() {
         goalMinutes: number;
         practicedMinutes: number;
         remainingMinutes: number;
+        streakShieldAvailable: boolean;
+        shieldConsumedToday: boolean;
         canSendIncomplete: boolean;
         canSendComplete: boolean;
       }>(`/user/daily-goal-status/${dateKey}`, { token: accessToken });
+
+      if (status.shieldConsumedToday) {
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: "Streak Shield activated",
+            body: "You missed a day, but your shield protected the streak.",
+          },
+          trigger: null,
+        });
+      }
 
       if (status.canSendComplete) {
         await Notifications.scheduleNotificationAsync({
@@ -216,12 +233,18 @@ export default function App() {
     void checkDailyGoalAndNotify();
     const subscription = AppState.addEventListener("change", (nextState) => {
       if (appStateRef.current !== "active" && nextState === "active") {
+        if (isAuthenticated && accessToken) {
+          void apiRequest<{ id: string; email: string }>("/auth/me", { token: accessToken }).catch(async () => {
+            await AsyncStorage.removeItem("codequest-app-store");
+            signOut();
+          });
+        }
         void checkDailyGoalAndNotify();
       }
       appStateRef.current = nextState;
     });
     return () => subscription.remove();
-  }, [checkDailyGoalAndNotify]);
+  }, [accessToken, checkDailyGoalAndNotify, isAuthenticated, signOut]);
 
   return (
     <SafeAreaProvider>

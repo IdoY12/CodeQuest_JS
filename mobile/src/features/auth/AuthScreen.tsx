@@ -35,11 +35,13 @@ export function AuthScreen() {
   const onSubmit = async () => {
     if (!canSubmit || loading) return;
     logAuth("submit:start", { mode: isLogin ? "login" : "register", email });
-    console.log("[AUTH] submit:start", {
-      mode: isLogin ? "login" : "register",
-      email,
-      apiBaseUrl: process.env.EXPO_PUBLIC_API_BASE_URL ?? "default-dev-url",
-    });
+    if (__DEV__) {
+      console.log("[AUTH] submit:start", {
+        mode: isLogin ? "login" : "register",
+        email,
+        apiBaseUrl: process.env.EXPO_PUBLIC_API_BASE_URL ?? "default-dev-url",
+      });
+    }
     setLoading(true);
     setError(null);
     try {
@@ -81,11 +83,13 @@ export function AuthScreen() {
             body: JSON.stringify({ email, username, password }),
           });
 
-      console.log("[AUTH] submit:response", {
-        mode: isLogin ? "login" : "register",
-        userId: response.user.id,
-        onboardingCompleted: response.user.onboardingCompleted,
-      });
+      if (__DEV__) {
+        console.log("[AUTH] submit:response", {
+          mode: isLogin ? "login" : "register",
+          userId: response.user.id,
+          onboardingCompleted: response.user.onboardingCompleted,
+        });
+      }
       signIn({
         userId: response.user.id,
         email: response.user.email,
@@ -105,7 +109,9 @@ export function AuthScreen() {
         onboardingCompleted: response.user.onboardingCompleted,
       });
     } catch (submitError) {
-      console.log("[AUTH] submit:error", submitError);
+      if (__DEV__) {
+        console.log("[AUTH] submit:error", submitError);
+      }
       logError("[AUTH]", submitError, { mode: isLogin ? "login" : "register" });
       setError(submitError instanceof Error ? submitError.message : "Unable to continue");
     } finally {

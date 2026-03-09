@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { colors, fontSize, radius, spacing } from "../../theme/theme";
 import { useDuelSocket } from "../../hooks/useDuelSocket";
@@ -29,14 +29,20 @@ export function DuelNavigator() {
 
 function DuelHomeScreen({ navigation }: { navigation: any }) {
   const { resetDuel } = useDuelSocket();
+  const duelRating = useAppStore((s) => s.duelRating);
+  const duelWins = useAppStore((s) => s.duelWins);
+  const duelLosses = useAppStore((s) => s.duelLosses);
+  const duelDraws = useAppStore((s) => s.duelDraws);
   useEffect(() => {
     logNav("screen:enter", { screen: "DuelHomeScreen" });
     return () => logNav("screen:leave", { screen: "DuelHomeScreen" });
   }, []);
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
-      <Text style={styles.title}>Duel Rating: 1247 RP</Text>
-      <Text style={styles.sub}>Win/Loss: 18 / 9 · Rank: Gold</Text>
+      <Text style={styles.title}>Duel Rating: {duelRating} RP</Text>
+      <Text style={styles.sub}>
+        Win/Loss/Draw: {duelWins} / {duelLosses} / {duelDraws}
+      </Text>
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Recent Duels</Text>
         <Text style={styles.sub}>vs AsyncNinja · Win · +0.8s faster</Text>
@@ -57,9 +63,11 @@ function DuelHomeScreen({ navigation }: { navigation: any }) {
 }
 
 function MatchmakingScreen({ navigation }: { navigation: any }) {
-  const { playersOnline, sessionId, opponent, joinQueue, leaveQueue } = useDuelSocket();
-  const userId = useAppStore((s) => s.userId) ?? "me";
+  const { playersOnline, sessionId, opponent, joinQueue, leaveQueue, startLocalMockMatch } = useDuelSocket();
+  const userId = useAppStore((s) => s.userId);
   const username = useAppStore((s) => s.username);
+  const duelRating = useAppStore((s) => s.duelRating);
+  const accessToken = useAppStore((s) => s.accessToken);
   const [seconds, setSeconds] = useState(0);
   const [countdown, setCountdown] = useState(3);
 
@@ -69,15 +77,22 @@ function MatchmakingScreen({ navigation }: { navigation: any }) {
   }, []);
 
   useEffect(() => {
-    joinQueue({ userId, username, rating: 1000 });
+    if (!userId) return;
+    joinQueue({ userId, username, rating: duelRating, token: accessToken });
     logDuel("queue:join", { userId });
     const interval = setInterval(() => setSeconds((v) => v + 1), 1000);
+    const timeout = setTimeout(() => {
+      if (!sessionId) {
+        startLocalMockMatch();
+      }
+    }, 20000);
     return () => {
       clearInterval(interval);
-      logDuel("queue:leave", { userId });
+      clearTimeout(timeout);
+      logDuel("queue:leave", { userId: userId ?? "unknown" });
       leaveQueue();
     };
-  }, [joinQueue, leaveQueue, userId, username]);
+  }, [accessToken, duelRating, joinQueue, leaveQueue, sessionId, startLocalMockMatch, userId, username]);
 
   useEffect(() => {
     if (sessionId && opponent) {
@@ -111,7 +126,8 @@ function MatchmakingScreen({ navigation }: { navigation: any }) {
 function ActiveDuelScreen({ navigation }: { navigation: any }) {
   const { round, score, sessionId, submitAnswer, playerReady, duelEnd, opponent } = useDuelSocket();
   const addXp = useAppStore((s) => s.addXp);
-  const userId = useAppStore((s) => s.userId) ?? "me";
+  const applyDuelResult = useAppStore((s) => s.applyDuelResult);
+  const userId = useAppStore((s) => s.userId);
   const username = useAppStore((s) => s.username);
   const opponentName = opponent?.username ?? "Opponent";
   const [roundNumber, setRoundNumber] = useState(1);
@@ -146,8 +162,8 @@ function ActiveDuelScreen({ navigation }: { navigation: any }) {
   }, [round]);
 
   useEffect(() => {
-    if (sessionId) {
-      playerReady(sessionId, userId);
+    if (sessionId && userId) {
+      playerReady(sessionId);
     }
   }, [playerReady, sessionId, userId]);
 
@@ -155,12 +171,14 @@ function ActiveDuelScreen({ navigation }: { navigation: any }) {
     if (duelEnd) {
       logDuel("duel:end", { won: duelEnd.won, xpEarned: duelEnd.xpEarned });
       addXp(duelEnd.xpEarned);
+      applyDuelResult({ won: duelEnd.won, ratingDelta: duelEnd.ratingDelta });
       navigation.replace("DuelResults", {
         won: duelEnd.won,
         score: `${myScore}-${oppScore}`,
+        replay: duelEnd.roundReplay,
       });
     }
-  }, [addXp, duelEnd, myScore, navigation, oppScore]);
+  }, [addXp, applyDuelResult, duelEnd, myScore, navigation, oppScore]);
 
   useEffect(() => {
     setTimeLeft(15);
@@ -177,13 +195,12 @@ function ActiveDuelScreen({ navigation }: { navigation: any }) {
   }
 
   const submit = (answer: string) => {
-    if (!sessionId) return;
+    if (!sessionId || !userId) return;
     submitAnswer({
       sessionId,
       roundNumber,
       answer,
       timeTakenMs: (15 - timeLeft) * 1000,
-      userId,
     });
     setSelected(answer);
   };
@@ -196,7 +213,7 @@ function ActiveDuelScreen({ navigation }: { navigation: any }) {
           style={[styles.option, selected === String(idx + 1) && styles.correct]}
           onPress={() => submit(String(idx + 1))}
         >
-          <Text style={styles.optionLabel}>
+          <Text style={styles.optionLabel} numberOfLines={3} adjustsFontSizeToFit minimumFontScale={0.9}>
             {idx + 1}. {line}
           </Text>
         </Pressable>
@@ -213,26 +230,34 @@ function ActiveDuelScreen({ navigation }: { navigation: any }) {
         ]}
         onPress={() => submit(option)}
       >
-        <Text style={styles.optionLabel}>{option}</Text>
+        <Text style={styles.optionLabel} numberOfLines={4} adjustsFontSizeToFit minimumFontScale={0.9}>
+          {option}
+        </Text>
       </Pressable>
     ));
   };
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
-      <View style={styles.progressBar}>
-        <View style={[styles.progressInner, { width: `${(timeLeft / 15) * 100}%` }]} />
-      </View>
-      <View style={styles.scoreRow}>
-        <Text style={styles.score}>{username} {myScore}</Text>
-        <Text style={styles.score}>Round {roundNumber}/5</Text>
-        <Text style={styles.score}>{opponentName} {oppScore}</Text>
-      </View>
-      <Text style={styles.cardTitle}>{round.prompt}</Text>
-      <CodeSnippet code={round.codeSnippet} />
-      <View style={styles.card}>
-        {renderAnswerZone()}
-      </View>
+      <ScrollView style={styles.container} contentContainerStyle={styles.duelContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.progressBar}>
+          <View style={[styles.progressInner, { width: `${(timeLeft / 15) * 100}%` }]} />
+        </View>
+        <View style={styles.scoreRow}>
+          <Text style={styles.score}>{username} {myScore}</Text>
+          <Text style={styles.score}>Round {roundNumber}/5</Text>
+          <Text style={styles.score}>{opponentName} {oppScore}</Text>
+        </View>
+        <Text style={styles.cardTitle}>{round.prompt}</Text>
+        <View style={styles.codeWrap}>
+          <CodeSnippet code={round.codeSnippet} />
+        </View>
+        <View style={styles.card}>
+          <ScrollView style={styles.answersScroll} nestedScrollEnabled>
+            {renderAnswerZone()}
+          </ScrollView>
+        </View>
+      </ScrollView>
       {overlayVisible && (
         <View style={styles.overlay}>
           <Text style={styles.overlayTitle}>Round Update</Text>
@@ -248,6 +273,12 @@ function ActiveDuelScreen({ navigation }: { navigation: any }) {
 
 function DuelResultsScreen({ route, navigation }: { route: any; navigation: any }) {
   const { won, score } = route.params;
+  const replay = (route.params?.replay ?? []) as Array<{
+    roundNumber: number;
+    player1TimeMs: number;
+    player2TimeMs: number;
+    winnerUserId: string | null;
+  }>;
 
   useEffect(() => {
     logNav("screen:enter", { screen: "DuelResultsScreen" });
@@ -256,21 +287,45 @@ function DuelResultsScreen({ route, navigation }: { route: any; navigation: any 
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
-      <Text style={styles.title}>{won ? "Victory!" : "Defeat"}</Text>
-      <Text style={styles.sub}>Final score: {score}</Text>
-      <Text style={styles.sub}>{won ? "+50 RP · +100 XP" : "-20 RP · +30 XP"}</Text>
-      <Pressable style={styles.matchBtn} onPress={() => navigation.navigate("DuelHome")}>
-        <Text style={styles.matchLabel}>Back to Duel Home</Text>
-      </Pressable>
-      <Pressable style={styles.secondaryBtn} onPress={() => navigation.replace("Matchmaking")}>
-        <Text style={styles.secondaryLabel}>Play Again</Text>
-      </Pressable>
+      <ScrollView contentContainerStyle={styles.duelContent}>
+        <Text style={styles.title}>{won ? "Victory!" : "Defeat"}</Text>
+        <Text style={styles.sub}>Final score: {score}</Text>
+        <Text style={styles.sub}>{won ? "+50 RP · +100 XP" : "-20 RP · +30 XP"}</Text>
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Code Replay</Text>
+          {replay.length === 0 ? (
+            <Text style={styles.sub}>Replay is unavailable for this duel.</Text>
+          ) : (
+            replay.map((item) => {
+              const total = Math.max(1, item.player1TimeMs + item.player2TimeMs);
+              const p1Flex = Math.max(0.25, item.player1TimeMs / total);
+              const p2Flex = Math.max(0.25, item.player2TimeMs / total);
+              return (
+                <View key={`replay-${item.roundNumber}`} style={styles.replayRow}>
+                  <Text style={styles.sub}>Round {item.roundNumber}</Text>
+                  <View style={styles.replayTrack}>
+                    <View style={[styles.replayBarMine, { flex: p1Flex }]} />
+                    <View style={[styles.replayBarOpp, { flex: p2Flex }]} />
+                  </View>
+                </View>
+              );
+            })
+          )}
+        </View>
+        <Pressable style={styles.matchBtn} onPress={() => navigation.navigate("DuelHome")}>
+          <Text style={styles.matchLabel}>Back to Duel Home</Text>
+        </Pressable>
+        <Pressable style={styles.secondaryBtn} onPress={() => navigation.replace("Matchmaking")}>
+          <Text style={styles.secondaryLabel}>Play Again</Text>
+        </Pressable>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background, padding: spacing.xxl },
+  duelContent: { gap: spacing.md, paddingBottom: spacing.massive },
   title: { color: colors.textPrimary, fontSize: fontSize.xl, fontWeight: "800" },
   sub: { color: colors.textSecondary, marginTop: spacing.sm },
   card: { marginTop: spacing.xl, backgroundColor: colors.card, borderRadius: radius.card, borderColor: colors.border, borderWidth: 1, padding: spacing.lg },
@@ -286,7 +341,7 @@ const styles = StyleSheet.create({
   scoreRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: spacing.sm },
   score: { color: colors.textPrimary, fontWeight: "800" },
   option: { padding: spacing.md, borderRadius: radius.button, borderWidth: 1, borderColor: colors.border, marginTop: spacing.sm },
-  optionLabel: { color: colors.textPrimary },
+  optionLabel: { color: colors.textPrimary, flexShrink: 1, lineHeight: 20 },
   correct: { borderColor: colors.success, backgroundColor: "rgba(78,205,196,0.2)" },
   wrong: { borderColor: colors.danger, backgroundColor: "rgba(255,107,107,0.2)" },
   overlay: {
@@ -303,4 +358,17 @@ const styles = StyleSheet.create({
   },
   overlayTitle: { color: colors.textPrimary, fontWeight: "800", fontSize: fontSize.md },
   overlayText: { color: colors.textSecondary, marginTop: spacing.sm },
+  codeWrap: { maxHeight: 220 },
+  answersScroll: { maxHeight: 250 },
+  replayRow: { marginTop: spacing.md },
+  replayTrack: {
+    height: 10,
+    borderRadius: radius.pill,
+    overflow: "hidden",
+    backgroundColor: colors.surface,
+    marginTop: spacing.sm,
+    flexDirection: "row",
+  },
+  replayBarMine: { height: 10, backgroundColor: colors.success },
+  replayBarOpp: { height: 10, backgroundColor: colors.duel },
 });

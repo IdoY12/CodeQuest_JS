@@ -15,6 +15,7 @@ const REFRESH_SECRET = requireSecret("JWT_REFRESH_SECRET");
 export interface AuthTokenPayload {
   userId: string;
   email: string;
+  tokenVersion: number;
 }
 
 export async function hashPassword(password: string): Promise<string> {
@@ -38,10 +39,10 @@ export function verifyAccessToken(token: string): AuthTokenPayload {
   if (typeof payload !== "object" || payload === null) {
     throw new Error("Invalid access token payload");
   }
-  if (typeof payload.userId !== "string" || typeof payload.email !== "string") {
+  if (typeof payload.userId !== "string" || typeof payload.email !== "string" || typeof payload.tokenVersion !== "number") {
     throw new Error("Invalid access token shape");
   }
-  return { userId: payload.userId, email: payload.email };
+  return { userId: payload.userId, email: payload.email, tokenVersion: payload.tokenVersion };
 }
 
 export function verifyRefreshToken(token: string): AuthTokenPayload {
@@ -49,8 +50,8 @@ export function verifyRefreshToken(token: string): AuthTokenPayload {
   if (typeof payload !== "object" || payload === null) {
     throw new Error("Invalid refresh token payload");
   }
-  if (typeof payload.userId !== "string" || typeof payload.email !== "string") {
+  if (typeof payload.userId !== "string" || typeof payload.email !== "string" || typeof payload.tokenVersion !== "number") {
     throw new Error("Invalid refresh token shape");
   }
-  return { userId: payload.userId, email: payload.email };
+  return { userId: payload.userId, email: payload.email, tokenVersion: payload.tokenVersion };
 }

@@ -89,18 +89,22 @@ function LearnRoadmapScreen({ navigation }: { navigation: any }) {
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-        <Text style={styles.title}>{path} Path</Text>
+        <Text style={styles.title}>{path} Concept Map</Text>
         {loading ? (
           <ActivityIndicator color={colors.accent} />
         ) : (
           chapterData.map((chapter, index) => (
-            <View key={chapter.id} style={styles.chapterNode}>
-              <Text style={styles.chapterTitle}>
-                Chapter {index + 1}: {chapter.title}
-              </Text>
-              <Text style={styles.chapterDesc}>{chapter.description}</Text>
+            <View key={chapter.id} style={styles.nodeWrap}>
+              <View style={[styles.chapterNode, index === 0 && styles.chapterNodeActive]}>
+                <Text style={styles.chapterTitle}>
+                  Node {index + 1}: {chapter.title}
+                </Text>
+                <Text style={styles.chapterDesc}>{chapter.description}</Text>
+                <Text style={styles.nodeStatus}>{index === 0 ? "Current node" : "Locked until previous node complete"}</Text>
+              </View>
               <Pressable
-                style={styles.lessonButton}
+                style={[styles.lessonButton, index > 0 && styles.disabled]}
+                disabled={index > 0}
                 onPress={async () => {
                   if (experience) {
                     navigation.navigate("Lesson", {
@@ -118,8 +122,9 @@ function LearnRoadmapScreen({ navigation }: { navigation: any }) {
                   });
                 }}
               >
-                <Text style={styles.lessonButtonLabel}>Start Lesson</Text>
+                <Text style={styles.lessonButtonLabel}>{index === 0 ? "Enter Node" : "Locked"}</Text>
               </Pressable>
+              {index < chapterData.length - 1 ? <View style={styles.connector} /> : null}
             </View>
           ))
         )}
@@ -231,11 +236,29 @@ function LessonScreen({ navigation, route }: { navigation: any; route: any }) {
     };
   }, [exercise?.id, flushPracticeSeconds, isFocused, loading]);
 
-  const onAnswer = (isCorrect: boolean, xp: number) => {
+  const onAnswer = async (isCorrect: boolean, xp: number, answer: string) => {
     setAttemptedCount((v) => v + 1);
     if (isCorrect) {
       setCorrectCount((v) => v + 1);
-      addXp(xp);
+      if (accessToken && !personalizedLevel) {
+        try {
+          const result = await apiRequest<{ xpEarned: number }>("/learning/submit-exercise", {
+            method: "POST",
+            token: accessToken,
+            body: JSON.stringify({
+              exerciseId: exercise.id,
+              answer,
+              timeTakenMs: 1000,
+              attempts: 1,
+            }),
+          });
+          addXp(result.xpEarned);
+        } catch {
+          addXp(xp);
+        }
+      } else {
+        addXp(xp);
+      }
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } else {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
@@ -272,7 +295,7 @@ function LessonScreen({ navigation, route }: { navigation: any; route: any }) {
         </Text>
         <Text style={styles.prompt}>{exercise.prompt}</Text>
         <CodeSnippet code={exercise.codeSnippet} />
-        <ExerciseRenderer exercise={exercise} onAnswer={onAnswer} />
+        <ExerciseRenderer exercise={exercise} onAnswer={(isCorrectAnswer, reward, answerValue) => void onAnswer(isCorrectAnswer, reward, answerValue)} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -283,12 +306,14 @@ function LessonResultsScreen({ navigation, route }: { navigation: any; route: an
   const lessonTitle = route.params?.lessonTitle ?? "Lesson";
   const level = useAppStore((s) => s.level);
   const xp = useAppStore((s) => s.xpTotal);
+  const incrementLessonsCompleted = useAppStore((s) => s.incrementLessonsCompleted);
   const stars = accuracy > 90 ? 3 : accuracy > 70 ? 2 : 1;
 
   useEffect(() => {
     logNav("screen:enter", { screen: "LessonResultsScreen" });
+    incrementLessonsCompleted();
     return () => logNav("screen:leave", { screen: "LessonResultsScreen" });
-  }, []);
+  }, [incrementLessonsCompleted]);
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
@@ -312,7 +337,7 @@ function ExerciseRenderer({
   onAnswer,
 }: {
   exercise: ApiExercise;
-  onAnswer: (isCorrect: boolean, xp: number) => void;
+  onAnswer: (isCorrect: boolean, xp: number, answer: string) => void;
 }) {
   const [selected, setSelected] = useState<string | null>(null);
   const [input, setInput] = useState("");
@@ -337,7 +362,7 @@ function ExerciseRenderer({
     return (
       <View style={styles.exerciseCard}>
         <Text style={styles.explanation}>{exercise.explanation}</Text>
-        <Pressable style={styles.lessonButton} onPress={() => onAnswer(true, exercise.xpReward)}>
+        <Pressable style={styles.lessonButton} onPress={() => onAnswer(true, exercise.xpReward, "concept-card")}>
           <Text style={styles.lessonButtonLabel}>Got it</Text>
         </Pressable>
       </View>
@@ -378,7 +403,7 @@ function ExerciseRenderer({
             <Text style={[styles.feedback, isCorrect ? styles.feedbackGood : styles.feedbackBad]}>
               {isCorrect ? "Correct!" : "Not quite."}
             </Text>
-            <Pressable style={styles.lessonButton} onPress={() => onAnswer(Boolean(isCorrect), exercise.xpReward)}>
+            <Pressable style={styles.lessonButton} onPress={() => onAnswer(Boolean(isCorrect), exercise.xpReward, selected ?? "")}>
               <Text style={styles.lessonButtonLabel}>Next</Text>
             </Pressable>
           </>
@@ -424,7 +449,7 @@ function ExerciseRenderer({
             <Text style={[styles.feedback, isCorrect ? styles.feedbackGood : styles.feedbackBad]}>
               {isCorrect ? "Great catch." : "Bug revealed. Review explanation and continue."}
             </Text>
-            <Pressable style={styles.lessonButton} onPress={() => onAnswer(Boolean(isCorrect), exercise.xpReward)}>
+            <Pressable style={styles.lessonButton} onPress={() => onAnswer(Boolean(isCorrect), exercise.xpReward, selected ?? "")}>
               <Text style={styles.lessonButtonLabel}>Next</Text>
             </Pressable>
           </>
@@ -502,7 +527,7 @@ function ExerciseRenderer({
             <Text style={[styles.feedback, isCorrect ? styles.feedbackGood : styles.feedbackBad]}>
               {isCorrect ? "Perfect order." : "Order is incorrect. Reset and try again, or continue."}
             </Text>
-            <Pressable style={styles.lessonButton} onPress={() => onAnswer(Boolean(isCorrect), exercise.xpReward)}>
+            <Pressable style={styles.lessonButton} onPress={() => onAnswer(Boolean(isCorrect), exercise.xpReward, normalizedAnswer)}>
               <Text style={styles.lessonButtonLabel}>Next</Text>
             </Pressable>
           </>
@@ -551,7 +576,7 @@ function ExerciseRenderer({
             <Text style={[styles.feedback, isCorrect ? styles.feedbackGood : styles.feedbackBad]}>
               {isCorrect ? "Nice work." : "Try another token combination next time."}
             </Text>
-            <Pressable style={styles.lessonButton} onPress={() => onAnswer(Boolean(isCorrect), exercise.xpReward)}>
+            <Pressable style={styles.lessonButton} onPress={() => onAnswer(Boolean(isCorrect), exercise.xpReward, input)}>
               <Text style={styles.lessonButtonLabel}>Next</Text>
             </Pressable>
           </>
@@ -589,7 +614,7 @@ function ExerciseRenderer({
           <Text style={[styles.feedback, isCorrect ? styles.feedbackGood : styles.feedbackBad]}>
             {isCorrect ? "Token identified." : "Wrong token. Continue and review."}
           </Text>
-          <Pressable style={styles.lessonButton} onPress={() => onAnswer(Boolean(isCorrect), exercise.xpReward)}>
+          <Pressable style={styles.lessonButton} onPress={() => onAnswer(Boolean(isCorrect), exercise.xpReward, selected ?? "")}>
             <Text style={styles.lessonButtonLabel}>Next</Text>
           </Pressable>
         </>
@@ -603,7 +628,11 @@ const styles = StyleSheet.create({
   content: { padding: spacing.xxl, gap: spacing.lg },
   title: { color: colors.textPrimary, fontSize: fontSize.xl, fontWeight: "800" },
   chapterNode: { backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, borderRadius: radius.card, padding: spacing.lg, marginBottom: spacing.lg },
+  chapterNodeActive: { borderColor: colors.accent },
   chapterTitle: { color: colors.textPrimary, fontSize: fontSize.md, fontWeight: "700" },
+  nodeStatus: { color: colors.success, marginTop: spacing.sm, fontSize: fontSize.sm },
+  nodeWrap: { alignItems: "center" },
+  connector: { width: 2, height: spacing.lg, backgroundColor: colors.border, marginTop: spacing.sm },
   chapterDesc: { color: colors.textSecondary, marginTop: spacing.sm, marginBottom: spacing.lg },
   lessonButton: { backgroundColor: colors.accent, padding: spacing.md, borderRadius: radius.button, alignItems: "center", marginTop: spacing.md },
   lessonButtonLabel: { color: "#111", fontWeight: "800" },

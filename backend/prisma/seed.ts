@@ -982,16 +982,16 @@ async function main() {
     questionText: `Advanced Token ${index + 1}: Complete the snippet.`,
     codeSnippet:
       index % 4 === 0
-        ? "const { a, ...rest } = obj;\nconsole.log(rest.___);"
+        ? "const { a, ...rest } = obj;\nconsole.log(Object.___(rest).length);"
         : index % 4 === 1
           ? "router.get('/users', auth, ___);"
           : index % 4 === 2
             ? "const result = await Promise.___([a(), b()]);"
             : "const value = config?.service?.port ___ 3000;",
-    correctAnswer: index % 4 === 0 ? "length" : index % 4 === 1 ? "handler" : index % 4 === 2 ? "all" : "??",
+    correctAnswer: index % 4 === 0 ? "keys" : index % 4 === 1 ? "handler" : index % 4 === 2 ? "all" : "??",
     options:
       index % 4 === 0
-        ? ["length", "size", "count", "keys"]
+        ? ["keys", "values", "entries", "assign"]
         : index % 4 === 1
           ? ["handler", "middleware", "listen", "post"]
           : index % 4 === 2
@@ -1027,6 +1027,7 @@ async function main() {
       { name: "Champion", description: "Reach Gold rank", iconKey: "champion", category: "Duel", unlockConditionJson: "{\"tier\":\"GOLD\"}" },
       { name: "Speed Coder", description: "Answer in under 2 seconds", iconKey: "speed-coder", category: "Speed", unlockConditionJson: "{\"answerMs\":2000}" },
       { name: "Lightning", description: "Five consecutive fast answers", iconKey: "lightning", category: "Speed", unlockConditionJson: "{\"fastAnswers\":5}" },
+      { name: "Puzzle Solved", description: "Solve the Daily Code Puzzle", iconKey: "puzzle-solved", category: "Learning", unlockConditionJson: "{\"dailyPuzzle\":1}" },
     ],
   });
 

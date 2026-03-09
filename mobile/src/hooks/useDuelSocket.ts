@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
+import { logDuel, logError } from "../services/logger";
 
 interface DuelRound {
   roundNumber: number;
@@ -39,6 +40,15 @@ function publish(nextState: Partial<DuelState>) {
 function ensureSocket(url: string) {
   if (sharedSocket) return sharedSocket;
   const socket = io(url, { transports: ["websocket"] });
+  socket.on("connect", () => {
+    logDuel("socket:connected", { socketId: socket.id });
+  });
+  socket.on("disconnect", (reason) => {
+    logDuel("socket:disconnected", { reason });
+  });
+  socket.on("connect_error", (error) => {
+    logError("[DUEL]", error, { phase: "socket-connect" });
+  });
   socket.on("queue_status", (payload) => {
     publish({ playersOnline: payload.players_online ?? 0 });
   });
@@ -84,6 +94,7 @@ function ensureSocket(url: string) {
     });
   });
   socket.on("opponent_disconnected", () => {
+    logDuel("opponent:disconnected");
     publish({
       duelEnd: { won: true, ratingDelta: 25, xpEarned: 80 },
     });
@@ -97,8 +108,9 @@ export function useDuelSocket() {
   const mockTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const url = useMemo(() => {
+    const devSocketOrigin = "http://192.168.1.158:4000";
     const defaultSocketUrl = __DEV__
-      ? "http://localhost:4000/duel"
+      ? `${devSocketOrigin}/duel`
       : "https://api.questcodejs.com/duel";
     return process.env.EXPO_PUBLIC_DUEL_SOCKET_URL ?? defaultSocketUrl;
   }, []);

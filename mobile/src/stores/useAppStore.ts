@@ -1,12 +1,15 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
 import { createJSONStorage, persist, StateStorage } from "zustand/middleware";
+import { logAuth } from "../services/logger";
 
 type Goal = "JOB" | "WORK" | "FUN" | "PROJECT";
 type Experience = "BEGINNER" | "BASICS" | "INTERMEDIATE" | "ADVANCED";
 type Commitment = "10" | "15" | "30";
 
 interface AppState {
+  hasHydrated: boolean;
+  authChecked: boolean;
   isAuthenticated: boolean;
   accessToken: string | null;
   refreshToken: string | null;
@@ -64,6 +67,10 @@ interface AppState {
   toggleSounds: (value?: boolean) => void;
   toggleHaptics: (value?: boolean) => void;
   setNotificationsEnabled: (value: boolean) => void;
+  setHasHydrated: (value: boolean) => void;
+  setAccessToken: (token: string | null) => void;
+  setOnboardingCompleted: (value: boolean) => void;
+  setAuthChecked: (value: boolean) => void;
 }
 
 const memoryStorage = new Map<string, string>();
@@ -99,6 +106,8 @@ export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
       isAuthenticated: false,
+      hasHydrated: false,
+      authChecked: false,
       accessToken: null,
       refreshToken: null,
       userId: null,
@@ -147,7 +156,8 @@ export const useAppStore = create<AppState>()(
         experienceLevel,
         dailyCommitmentMinutes,
         notificationsEnabled,
-      }) =>
+      }) => {
+        logAuth("signin:store-session", { userId, onboardingCompleted, pathKey });
         set({
           isAuthenticated: true,
           userId,
@@ -164,8 +174,10 @@ export const useAppStore = create<AppState>()(
               ? (String(dailyCommitmentMinutes) as Commitment)
               : get().commitment,
           notificationsEnabled: notificationsEnabled ?? true,
-        }),
-      signOut: () =>
+        });
+      },
+      signOut: () => {
+        logAuth("signout:clear-session");
         set({
           isAuthenticated: false,
           userId: null,
@@ -180,7 +192,8 @@ export const useAppStore = create<AppState>()(
           notificationsEnabled: true,
           path: "BEGINNER",
           lessonExerciseIndex: 0,
-        }),
+        });
+      },
       addXp: (amount) => {
         const nextXp = get().xpTotal + amount;
         const nextLevel = Math.max(1, Math.floor(nextXp / 250) + 1);
@@ -194,11 +207,22 @@ export const useAppStore = create<AppState>()(
       toggleSounds: (value) => set({ soundsEnabled: typeof value === "boolean" ? value : !get().soundsEnabled }),
       toggleHaptics: (value) => set({ hapticsEnabled: typeof value === "boolean" ? value : !get().hapticsEnabled }),
       setNotificationsEnabled: (value) => set({ notificationsEnabled: value }),
+      setHasHydrated: (value) => {
+        set({ hasHydrated: value });
+        logAuth("storage:hydrated", { value });
+      },
+      setAccessToken: (token) => {
+        set({ accessToken: token });
+        logAuth("token:set-access-token", { hasToken: Boolean(token) });
+      },
+      setOnboardingCompleted: (value) => set({ hasCompletedOnboarding: value }),
+      setAuthChecked: (value) => set({ authChecked: value }),
     }),
     {
       name: "codequest-app-store",
       storage: createJSONStorage(() => safeStorage),
-      onRehydrateStorage: () => () => {
+      onRehydrateStorage: (state) => () => {
+        state?.setHasHydrated(true);
         // Intentionally swallow hydration errors to avoid boot-time crashes.
       },
     },

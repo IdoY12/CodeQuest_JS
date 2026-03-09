@@ -3,8 +3,14 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppStore } from "../../stores/useAppStore";
 import { colors, fontSize, radius, spacing } from "../../theme/theme";
+import { logNav } from "../../services/logger";
 
 export function HomeScreen({ navigation }: { navigation: any }) {
+  React.useEffect(() => {
+    logNav("screen:enter", { screen: "HomeScreen" });
+    return () => logNav("screen:leave", { screen: "HomeScreen" });
+  }, []);
+
   const username = useAppStore((s) => s.username);
   const level = useAppStore((s) => s.level);
   const xp = useAppStore((s) => s.xpTotal);
@@ -15,7 +21,7 @@ export function HomeScreen({ navigation }: { navigation: any }) {
   const currentLevelProgress = Math.min(100, (xp / nextLevelXp) * 100);
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
         <Text style={styles.greeting}>Good morning, {username} 👋</Text>
         <Text style={styles.date}>{new Date().toDateString()}</Text>

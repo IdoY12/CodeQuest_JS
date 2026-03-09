@@ -1,5 +1,6 @@
 import { Server, Socket } from "socket.io";
 import { prisma } from "../lib/prisma.js";
+import { logError, logInfo } from "../lib/logger.js";
 
 interface QueueEntry {
   socketId: string;
@@ -39,6 +40,7 @@ export function attachDuelNamespace(io: Server) {
   const duel = io.of("/duel");
 
   duel.on("connection", (socket: Socket) => {
+    logInfo("[DUEL]", "socket:connected", { socketId: socket.id });
     socket.emit("queue_status", {
       players_online: Math.max(1, duel.sockets.size),
       estimated_wait_seconds: 8,
@@ -60,6 +62,7 @@ export function attachDuelNamespace(io: Server) {
         joinedAt: Date.now(),
       };
 
+      logInfo("[DUEL]", "queue:join", { userId: entry.userId, socketId: socket.id, rating: entry.rating });
       const opponentIndex = queue.findIndex((candidate) => {
         if (candidate.socketId === entry.socketId) return false;
         const range = Math.max(pickRange(candidate), pickRange(entry));
@@ -95,6 +98,11 @@ export function attachDuelNamespace(io: Server) {
         roundTimeout: null,
         roundNonce: 0,
       });
+      logInfo("[DUEL]", "match:created", {
+        sessionId,
+        player1: opponent.userId,
+        player2: entry.userId,
+      });
 
       duel.to(opponent.socketId).emit("match_found", {
         session_id: sessionId,
@@ -123,7 +131,7 @@ export function attachDuelNamespace(io: Server) {
           await startRound(duel, session);
         }
       } catch (error) {
-        console.error("player_ready failed", error);
+        logError("[DUEL]", error, { phase: "player_ready" });
       }
     });
 
@@ -176,12 +184,13 @@ export function attachDuelNamespace(io: Server) {
             }
           }, 1800);
         } catch (error) {
-          console.error("submit_answer failed", error);
+          logError("[DUEL]", error, { phase: "submit_answer" });
         }
       },
     );
 
     socket.on("disconnect", () => {
+      logInfo("[DUEL]", "socket:disconnected", { socketId: socket.id });
       const queued = queue.findIndex((entry) => entry.socketId === socket.id);
       if (queued >= 0) queue.splice(queued, 1);
       sessions.forEach((session, sessionId) => {
@@ -218,7 +227,7 @@ async function startRound(io: ReturnType<Server["of"]>, sessionOrId: string | Se
 
     const question = await pickQuestionForSession(session);
     if (!question) {
-      console.error("No duel question available for session", session.sessionId);
+      logInfo("[DUEL]", "question:none-available", { sessionId: session.sessionId });
       return;
     }
     session.currentQuestionId = question.id;
@@ -257,7 +266,7 @@ async function startRound(io: ReturnType<Server["of"]>, sessionOrId: string | Se
       }
     }, 15000);
   } catch (error) {
-    console.error("startRound failed", error);
+    logError("[DUEL]", error, { phase: "start-round" });
   }
 }
 

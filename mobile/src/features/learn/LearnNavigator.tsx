@@ -9,6 +9,7 @@ import { CodeSnippet } from "../../components/CodeSnippet";
 import { useAppStore } from "../../stores/useAppStore";
 import { apiRequest } from "../../services/api";
 import { getExercisePoolForLevel, PersonalizationLevel } from "../../data/personalizedExercisePool";
+import { logError, logNav, logTasks } from "../../services/logger";
 
 const Stack = createNativeStackNavigator();
 
@@ -61,12 +62,20 @@ function LearnRoadmapScreen({ navigation }: { navigation: any }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    logNav("screen:enter", { screen: "LearnRoadmapScreen" });
+    return () => logNav("screen:leave", { screen: "LearnRoadmapScreen" });
+  }, []);
+
+  useEffect(() => {
     let isActive = true;
     const load = async () => {
       setLoading(true);
       try {
         const chapters = await apiRequest<ApiChapter[]>(`/learning/chapters/${path}`);
+        logTasks("chapters:loaded", { path, count: chapters.length });
         if (isActive) setChapterData(chapters);
+      } catch (error) {
+        logError("[TASKS]", error, { phase: "load-chapters", path });
       } finally {
         if (isActive) setLoading(false);
       }
@@ -78,7 +87,7 @@ function LearnRoadmapScreen({ navigation }: { navigation: any }) {
   }, [path]);
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
         <Text style={styles.title}>{path} Path</Text>
         {loading ? (
@@ -132,12 +141,18 @@ function LessonScreen({ navigation, route }: { navigation: any; route: any }) {
   const [attemptedCount, setAttemptedCount] = useState(0);
 
   useEffect(() => {
+    logNav("screen:enter", { screen: "LessonScreen", lessonId });
+    return () => logNav("screen:leave", { screen: "LessonScreen", lessonId });
+  }, [lessonId]);
+
+  useEffect(() => {
     let isActive = true;
     const load = async () => {
       setLoading(true);
       try {
         if (personalizedLevel) {
           const payload = getExercisePoolForLevel(personalizedLevel);
+          logTasks("lesson:loaded-personalized", { level: personalizedLevel, count: payload.length });
           if (isActive) {
             setExercises(payload);
             setExerciseIndex(0);
@@ -147,12 +162,15 @@ function LessonScreen({ navigation, route }: { navigation: any; route: any }) {
           return;
         }
         const payload = await apiRequest<ApiExercise[]>(`/learning/exercises/${lessonId}`);
+        logTasks("lesson:loaded-api", { lessonId, count: payload.length });
         if (isActive) {
           setExercises(payload);
           setExerciseIndex(0);
           setCorrectCount(0);
           setAttemptedCount(0);
         }
+      } catch (error) {
+        logError("[TASKS]", error, { phase: "load-exercises", lessonId });
       } finally {
         if (isActive) setLoading(false);
       }
@@ -233,7 +251,7 @@ function LessonScreen({ navigation, route }: { navigation: any; route: any }) {
 
   if (loading || !exercise) {
     return (
-      <SafeAreaView style={styles.container} edges={["top"]}>
+      <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
         <View style={styles.content}>
           <Text style={styles.title}>Loading lesson...</Text>
           <ActivityIndicator color={colors.accent} />
@@ -243,7 +261,7 @@ function LessonScreen({ navigation, route }: { navigation: any; route: any }) {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
         <Text style={styles.chapterDesc}>{lessonTitle}</Text>
         <View style={styles.progressTrack}>
@@ -267,8 +285,13 @@ function LessonResultsScreen({ navigation, route }: { navigation: any; route: an
   const xp = useAppStore((s) => s.xpTotal);
   const stars = accuracy > 90 ? 3 : accuracy > 70 ? 2 : 1;
 
+  useEffect(() => {
+    logNav("screen:enter", { screen: "LessonResultsScreen" });
+    return () => logNav("screen:leave", { screen: "LessonResultsScreen" });
+  }, []);
+
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <View style={[styles.content, { justifyContent: "center" }]}>
         <Text style={styles.title}>Lesson Complete</Text>
         <Text style={styles.resultText}>{lessonTitle}</Text>

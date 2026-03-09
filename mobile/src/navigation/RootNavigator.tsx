@@ -2,6 +2,7 @@ import React from "react";
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppStore } from "../stores/useAppStore";
 import { OnboardingFlow } from "../features/onboarding/OnboardingFlow";
 import { AuthScreen } from "../features/auth/AuthScreen";
@@ -10,12 +11,30 @@ import { LearnNavigator } from "../features/learn/LearnNavigator";
 import { DuelNavigator } from "../features/duel/DuelNavigator";
 import { ProfileScreen } from "../features/profile/ProfileScreen";
 import { colors } from "../theme/theme";
+import { logNav } from "../services/logger";
 
 const Tabs = createBottomTabNavigator();
 
 export function RootNavigator() {
+  const hasHydrated = useAppStore((s) => s.hasHydrated);
+  const authChecked = useAppStore((s) => s.authChecked);
   const isAuthenticated = useAppStore((s) => s.isAuthenticated);
   const hasCompletedOnboarding = useAppStore((s) => s.hasCompletedOnboarding);
+  const routeNameRef = React.useRef<string | undefined>(undefined);
+
+  React.useEffect(() => {
+    if (!hasHydrated) return;
+    const route = !isAuthenticated ? "Auth" : !hasCompletedOnboarding ? "Onboarding" : "MainTabs";
+    logNav("root:route-selected", { route });
+  }, [hasCompletedOnboarding, hasHydrated, isAuthenticated]);
+
+  if (!hasHydrated || !authChecked) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: colors.background, alignItems: "center", justifyContent: "center" }}>
+        <Text style={{ color: colors.textPrimary }}>Loading...</Text>
+      </SafeAreaView>
+    );
+  }
 
   if (!isAuthenticated) {
     return <AuthScreen />;
@@ -27,6 +46,22 @@ export function RootNavigator() {
 
   return (
     <NavigationContainer
+      onReady={() => {
+        const currentRoute = routeNameRef.current;
+        logNav("screen:enter", { screen: currentRoute ?? "Home" });
+      }}
+      onStateChange={(state) => {
+        const route = state?.routes[state.index];
+        const current = route?.name;
+        const previous = routeNameRef.current;
+        if (previous && previous !== current) {
+          logNav("screen:leave", { screen: previous });
+        }
+        if (current && previous !== current) {
+          logNav("screen:enter", { screen: current });
+        }
+        routeNameRef.current = current;
+      }}
       theme={{
         ...DefaultTheme,
         colors: {

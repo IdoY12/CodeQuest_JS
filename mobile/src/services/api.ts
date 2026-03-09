@@ -1,5 +1,8 @@
+import { logApi } from "./logger";
+
+const DEV_API_ORIGIN = "http://192.168.1.158:4000";
 const DEFAULT_API_BASE_URL = __DEV__
-  ? "http://localhost:4000/api"
+  ? `${DEV_API_ORIGIN}/api`
   : "https://api.questcodejs.com/api";
 const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL ?? DEFAULT_API_BASE_URL;
 
@@ -7,20 +10,56 @@ interface ApiOptions extends RequestInit {
   token?: string;
 }
 
+export class ApiError extends Error {
+  status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "ApiError";
+    this.status = status;
+  }
+}
+
 export async function apiRequest<T>(path: string, options: ApiOptions = {}): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.token ? { Authorization: `Bearer ${options.token}` } : {}),
-      ...(options.headers ?? {}),
-    },
-  });
+  const method = options.method ?? "GET";
+  const url = `${API_BASE_URL}${path}`;
+  const startedAt = Date.now();
+  const bodyForLog =
+    typeof options.body === "string"
+      ? options.body
+      : options.body
+        ? JSON.stringify(options.body)
+        : undefined;
+  console.log(`[Request] URL: ${url} | Method: ${method} | Body: ${bodyForLog ?? "<empty>"}`);
+  logApi("request:start", { method, path, url });
+  let response: Response;
+  try {
+    response = await fetch(url, {
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        ...(options.token ? { Authorization: `Bearer ${options.token}` } : {}),
+        ...(options.headers ?? {}),
+      },
+    });
+  } catch (error) {
+    console.log("[Error] Full Error Object:", error);
+    logApi("request:exception", {
+      method,
+      path,
+      url,
+      durationMs: Date.now() - startedAt,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    throw error;
+  }
 
   if (!response.ok) {
     let message = "API request failed";
+    let responseData: unknown = null;
     try {
       const json = (await response.json()) as { error?: unknown };
+      responseData = json;
       if (typeof json.error === "string") {
         message = json.error;
       } else if (json.error) {
@@ -28,10 +67,29 @@ export async function apiRequest<T>(path: string, options: ApiOptions = {}): Pro
       }
     } catch {
       const text = await response.text();
+      responseData = text;
       message = text || message;
     }
-    throw new Error(message);
+    console.log(`[Response] Status: ${response.status} | Data:`, responseData);
+    logApi("request:fail", {
+      method,
+      path,
+      url,
+      status: response.status,
+      durationMs: Date.now() - startedAt,
+      message,
+    });
+    throw new ApiError(message, response.status);
   }
 
-  return response.json() as Promise<T>;
+  const data = (await response.json()) as T;
+  console.log(`[Response] Status: ${response.status} | Data:`, data);
+  logApi("request:success", {
+    method,
+    path,
+    url,
+    status: response.status,
+    durationMs: Date.now() - startedAt,
+  });
+  return data;
 }

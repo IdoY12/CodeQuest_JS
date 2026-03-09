@@ -4,6 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppStore } from "../../stores/useAppStore";
 import { colors, fontSize, radius, spacing } from "../../theme/theme";
 import { apiRequest } from "../../services/api";
+import { logError, logNav } from "../../services/logger";
 
 const goals = [
   { key: "JOB", label: "Land a dev job" },
@@ -26,6 +27,11 @@ const commitmentOptions = [
 ] as const;
 
 export function ProfileScreen() {
+  React.useEffect(() => {
+    logNav("screen:enter", { screen: "ProfileScreen" });
+    return () => logNav("screen:leave", { screen: "ProfileScreen" });
+  }, []);
+
   const username = useAppStore((s) => s.username);
   const level = useAppStore((s) => s.level);
   const xp = useAppStore((s) => s.xpTotal);
@@ -80,6 +86,7 @@ export function ProfileScreen() {
       setNotificationsEnabled(response.notificationsEnabled);
       setSaveMessage("Preferences updated!");
     } catch (error) {
+      logError("[AUTH]", error, { phase: "save-preferences" });
       setSaveMessage(error instanceof Error ? error.message : "Could not save preferences.");
     } finally {
       setSaving(false);
@@ -87,7 +94,7 @@ export function ProfileScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
         <View style={styles.header}>
           <Text style={styles.avatar}>{"{ }"}</Text>

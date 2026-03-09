@@ -1,10 +1,11 @@
 import React, { useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import Animated, { SlideInRight } from "react-native-reanimated";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { colors, fontSize, radius, spacing } from "../../theme/theme";
 import { useAppStore } from "../../stores/useAppStore";
 import { apiRequest } from "../../services/api";
+import { logError, logNav, logOnboarding } from "../../services/logger";
 
 const goals = [
   { key: "JOB", title: "Land a dev job", subtitle: "Build skills that get you hired" },
@@ -44,8 +45,24 @@ export function OnboardingFlow() {
     [level],
   );
 
+  React.useEffect(() => {
+    logNav("screen:enter", { screen: "OnboardingFlow" });
+    return () => logNav("screen:leave", { screen: "OnboardingFlow" });
+  }, []);
+
+  React.useEffect(() => {
+    logOnboarding("step:view", { step });
+  }, [step]);
+
   const submitOnboarding = async () => {
     if (!goal || !level || !accessToken || submitting) return;
+    logOnboarding("submit:start", {
+      step,
+      hasToken: Boolean(accessToken),
+      goal,
+      level,
+      commitment,
+    });
     setSubmitting(true);
     setError(null);
     try {
@@ -63,6 +80,7 @@ export function OnboardingFlow() {
       });
       setOnboarding(goal, level, commitment);
       if (response.onboardingCompleted) {
+        logOnboarding("submit:success", { pathKey: response.pathKey });
         completeOnboarding({
           path: response.pathKey,
           goal,
@@ -72,6 +90,7 @@ export function OnboardingFlow() {
         });
       }
     } catch (submitError) {
+      logError("[ONBOARDING]", submitError, { phase: "submit" });
       setError(submitError instanceof Error ? submitError.message : "We could not save your setup. Please try again.");
     } finally {
       setSubmitting(false);
@@ -81,7 +100,14 @@ export function OnboardingFlow() {
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       {step === 1 && (
-        <StepFrame title="What brings you to CodeQuest?" onContinue={() => setStep(2)} enabled={!!goal}>
+        <StepFrame
+          title="What brings you to CodeQuest?"
+          onContinue={() => {
+            logOnboarding("step:complete", { step: 1, goal });
+            setStep(2);
+          }}
+          enabled={!!goal}
+        >
           {goals.map((option) => (
             <ChoiceCard
               key={option.key}
@@ -95,7 +121,14 @@ export function OnboardingFlow() {
       )}
 
       {step === 2 && (
-        <StepFrame title="How comfortable are you with JavaScript?" onContinue={() => setStep(3)} enabled={!!level}>
+        <StepFrame
+          title="How comfortable are you with JavaScript?"
+          onContinue={() => {
+            logOnboarding("step:complete", { step: 2, level });
+            setStep(3);
+          }}
+          enabled={!!level}
+        >
           {levels.map((option) => (
             <ChoiceCard
               key={option.key}
@@ -109,7 +142,14 @@ export function OnboardingFlow() {
       )}
 
       {step === 3 && (
-        <StepFrame title="How much time can you dedicate daily?" onContinue={() => setStep(4)} enabled>
+        <StepFrame
+          title="How much time can you dedicate daily?"
+          onContinue={() => {
+            logOnboarding("step:complete", { step: 3, commitment });
+            setStep(4);
+          }}
+          enabled
+        >
           <View style={styles.row}>
             {commitments.map((option) => (
               <Pressable
@@ -160,14 +200,15 @@ function StepFrame({
   continueLabel?: string;
   children: React.ReactNode;
 }) {
-  const insets = useSafeAreaInsets();
   return (
-    <Animated.View entering={SlideInRight.duration(300)} style={[styles.step, { paddingTop: Math.max(insets.top, spacing.lg) + spacing.lg }]}>
+    <Animated.View entering={SlideInRight.duration(300)} style={styles.step}>
       <View style={styles.mainContent}>
         <Text style={styles.title}>{title}</Text>
-        <View style={styles.content}>{children}</View>
+        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+          {children}
+        </ScrollView>
       </View>
-      <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, spacing.md) }]}>
+      <View style={styles.footer}>
         <Pressable disabled={!enabled} onPress={onContinue} style={[styles.cta, !enabled && styles.disabled]}>
           <Text style={styles.ctaLabel}>{continueLabel}</Text>
         </Pressable>
@@ -206,11 +247,11 @@ function MiniNode({ label }: { label: string }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  step: { flex: 1, paddingHorizontal: spacing.xxl, justifyContent: "space-between" },
+  step: { flex: 1, paddingTop: spacing.huge, paddingHorizontal: spacing.xxl, justifyContent: "space-between" },
   mainContent: { flex: 1 },
   title: { color: colors.textPrimary, fontSize: fontSize.xl, fontWeight: "800", marginBottom: spacing.xl, lineHeight: 40 },
-  content: { gap: spacing.md, flexGrow: 1 },
-  footer: { paddingTop: spacing.lg },
+  content: { gap: spacing.md, flexGrow: 1, paddingBottom: spacing.md },
+  footer: { paddingTop: spacing.lg, paddingBottom: spacing.md },
   choiceCard: {
     backgroundColor: colors.card,
     borderColor: colors.border,

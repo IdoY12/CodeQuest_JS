@@ -3,6 +3,7 @@ import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
 import { authMiddleware, AuthenticatedRequest } from "../middleware/auth.js";
 import { comparePassword, hashPassword } from "../lib/auth.js";
+import { logError, logInfo, logWarn } from "../lib/logger.js";
 
 export const userRouter = Router();
 
@@ -37,6 +38,7 @@ userRouter.get("/progress-summary", async (req: AuthenticatedRequest, res) => {
 });
 
 userRouter.post("/onboarding", async (req: AuthenticatedRequest, res) => {
+  logInfo("[ONBOARDING]", "submit:attempt", { userId: req.user?.userId });
   const parsed = z
     .object({
       goal: z.enum(["JOB", "WORK", "FUN", "PROJECT"]),
@@ -44,41 +46,50 @@ userRouter.post("/onboarding", async (req: AuthenticatedRequest, res) => {
       dailyCommitmentMinutes: z.number().int().min(10).max(60),
     })
     .safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  if (!parsed.success) {
+    logWarn("[ONBOARDING]", "submit:validation-failed", { errors: parsed.error.flatten(), userId: req.user?.userId });
+    return res.status(400).json({ error: parsed.error.flatten() });
+  }
 
-  const assignedPathKey = resolvePathKey(parsed.data.experienceLevel);
-  const assignedPath = await prisma.learningPath.findUnique({ where: { key: assignedPathKey } });
-  if (!assignedPath) return res.status(400).json({ error: "Assigned learning path not found" });
+  try {
+    const assignedPathKey = resolvePathKey(parsed.data.experienceLevel);
+    const assignedPath = await prisma.learningPath.findUnique({ where: { key: assignedPathKey } });
+    if (!assignedPath) return res.status(400).json({ error: "Assigned learning path not found" });
 
-  const updated = await prisma.userProgress.upsert({
-    where: { userId: req.user!.userId },
-    create: {
-      userId: req.user!.userId,
-      pathId: assignedPath.id,
-      goal: parsed.data.goal,
-      experienceLevel: parsed.data.experienceLevel,
-      dailyCommitmentMinutes: parsed.data.dailyCommitmentMinutes,
-      onboardingCompleted: true,
-      notificationsEnabled: true,
-    },
-    update: {
-      goal: parsed.data.goal,
-      experienceLevel: parsed.data.experienceLevel,
-      dailyCommitmentMinutes: parsed.data.dailyCommitmentMinutes,
-      onboardingCompleted: true,
-      pathId: assignedPath.id,
-    },
-    include: { path: true },
-  });
+    const updated = await prisma.userProgress.upsert({
+      where: { userId: req.user!.userId },
+      create: {
+        userId: req.user!.userId,
+        pathId: assignedPath.id,
+        goal: parsed.data.goal,
+        experienceLevel: parsed.data.experienceLevel,
+        dailyCommitmentMinutes: parsed.data.dailyCommitmentMinutes,
+        onboardingCompleted: true,
+        notificationsEnabled: true,
+      },
+      update: {
+        goal: parsed.data.goal,
+        experienceLevel: parsed.data.experienceLevel,
+        dailyCommitmentMinutes: parsed.data.dailyCommitmentMinutes,
+        onboardingCompleted: true,
+        pathId: assignedPath.id,
+      },
+      include: { path: true },
+    });
 
-  return res.json({
-    onboardingCompleted: updated.onboardingCompleted,
-    pathKey: updated.path.key,
-    goal: updated.goal,
-    experienceLevel: updated.experienceLevel,
-    dailyCommitmentMinutes: updated.dailyCommitmentMinutes,
-    notificationsEnabled: updated.notificationsEnabled,
-  });
+    logInfo("[ONBOARDING]", "submit:success", { userId: req.user?.userId, pathKey: updated.path.key });
+    return res.json({
+      onboardingCompleted: updated.onboardingCompleted,
+      pathKey: updated.path.key,
+      goal: updated.goal,
+      experienceLevel: updated.experienceLevel,
+      dailyCommitmentMinutes: updated.dailyCommitmentMinutes,
+      notificationsEnabled: updated.notificationsEnabled,
+    });
+  } catch (error) {
+    logError("[ONBOARDING]", error, { phase: "submit", userId: req.user?.userId });
+    return res.status(500).json({ error: "Failed to save onboarding" });
+  }
 });
 
 userRouter.get("/preferences", async (req: AuthenticatedRequest, res) => {
@@ -100,6 +111,7 @@ userRouter.get("/preferences", async (req: AuthenticatedRequest, res) => {
 });
 
 userRouter.patch("/preferences", async (req: AuthenticatedRequest, res) => {
+  logInfo("[AUTH]", "preferences:update-attempt", { userId: req.user?.userId });
   const parsed = z
     .object({
       goal: z.enum(["JOB", "WORK", "FUN", "PROJECT"]),
@@ -108,7 +120,10 @@ userRouter.patch("/preferences", async (req: AuthenticatedRequest, res) => {
       notificationsEnabled: z.boolean(),
     })
     .safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  if (!parsed.success) {
+    logWarn("[AUTH]", "preferences:update-validation-failed", { userId: req.user?.userId, errors: parsed.error.flatten() });
+    return res.status(400).json({ error: parsed.error.flatten() });
+  }
 
   const pathKey = resolvePathKey(parsed.data.experienceLevel);
   const path = await prisma.learningPath.findUnique({ where: { key: pathKey } });
@@ -146,13 +161,17 @@ userRouter.patch("/preferences", async (req: AuthenticatedRequest, res) => {
 });
 
 userRouter.post("/practice-log", async (req: AuthenticatedRequest, res) => {
+  logInfo("[TASKS]", "practice-log:write-attempt", { userId: req.user?.userId, dateKey: req.body?.dateKey });
   const parsed = z
     .object({
       dateKey: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
       practicedSeconds: z.number().int().min(1).max(60 * 60),
     })
     .safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  if (!parsed.success) {
+    logWarn("[TASKS]", "practice-log:validation-failed", { userId: req.user?.userId, errors: parsed.error.flatten() });
+    return res.status(400).json({ error: parsed.error.flatten() });
+  }
 
   const log = await prisma.dailyPracticeLog.upsert({
     where: {
@@ -170,6 +189,7 @@ userRouter.post("/practice-log", async (req: AuthenticatedRequest, res) => {
       practicedSeconds: { increment: parsed.data.practicedSeconds },
     },
   });
+  logInfo("[TASKS]", "practice-log:write-success", { userId: req.user?.userId, practicedSeconds: log.practicedSeconds });
   return res.json({ practicedSeconds: log.practicedSeconds });
 });
 

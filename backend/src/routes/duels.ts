@@ -1,16 +1,19 @@
 import { Router } from "express";
 import { prisma } from "../lib/prisma.js";
 import { authMiddleware, AuthenticatedRequest } from "../middleware/auth.js";
+import { logInfo } from "../lib/logger.js";
 
 export const duelRouter = Router();
 duelRouter.use(authMiddleware);
 
 duelRouter.get("/stats", async (req: AuthenticatedRequest, res) => {
+  logInfo("[DUEL]", "stats:fetch", { userId: req.user?.userId });
   const rating = await prisma.duelRating.findUnique({ where: { userId: req.user!.userId } });
   return res.json(rating);
 });
 
 duelRouter.get("/history", async (req: AuthenticatedRequest, res) => {
+  logInfo("[DUEL]", "history:fetch", { userId: req.user?.userId });
   const sessions = await prisma.duelSession.findMany({
     where: {
       OR: [{ player1Id: req.user!.userId }, { player2Id: req.user!.userId }],
@@ -22,6 +25,7 @@ duelRouter.get("/history", async (req: AuthenticatedRequest, res) => {
 });
 
 duelRouter.get("/leaderboard", async (_req, res) => {
+  logInfo("[DUEL]", "leaderboard:fetch");
   const leaderboard = await prisma.duelRating.findMany({
     orderBy: { rating: "desc" },
     take: 50,
@@ -31,6 +35,7 @@ duelRouter.get("/leaderboard", async (_req, res) => {
 });
 
 duelRouter.get("/questions", async (_req, res) => {
+  logInfo("[DUEL]", "questions:fetch");
   const questions = await prisma.duelQuestion.findMany({ take: 100 });
   return res.json(questions);
 });

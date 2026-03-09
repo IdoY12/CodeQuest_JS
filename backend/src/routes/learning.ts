@@ -2,6 +2,7 @@ import { Router } from "express";
 import { z } from "zod";
 import { authMiddleware, AuthenticatedRequest } from "../middleware/auth.js";
 import { prisma } from "../lib/prisma.js";
+import { logError, logInfo } from "../lib/logger.js";
 
 export const learningRouter = Router();
 
@@ -11,6 +12,7 @@ learningRouter.get("/paths", async (_req, res) => {
 });
 
 learningRouter.get("/chapters/:pathKey", async (req, res) => {
+  logInfo("[TASKS]", "chapters:fetch", { pathKey: req.params.pathKey });
   const path = await prisma.learningPath.findUnique({
     where: { key: req.params.pathKey as "BEGINNER" | "ADVANCED" },
     include: { chapters: { orderBy: { orderIndex: "asc" } } },
@@ -20,6 +22,7 @@ learningRouter.get("/chapters/:pathKey", async (req, res) => {
 });
 
 learningRouter.get("/lessons/:chapterId", async (req, res) => {
+  logInfo("[TASKS]", "lessons:fetch", { chapterId: req.params.chapterId });
   const lessons = await prisma.lesson.findMany({
     where: { chapterId: req.params.chapterId },
     orderBy: { orderIndex: "asc" },
@@ -28,6 +31,7 @@ learningRouter.get("/lessons/:chapterId", async (req, res) => {
 });
 
 learningRouter.get("/exercises/:lessonId", async (req, res) => {
+  logInfo("[TASKS]", "exercises:fetch", { lessonId: req.params.lessonId });
   const exercises = await prisma.exercise.findMany({
     where: { lessonId: req.params.lessonId },
     orderBy: { orderIndex: "asc" },
@@ -39,6 +43,7 @@ learningRouter.get("/exercises/:lessonId", async (req, res) => {
 learningRouter.use(authMiddleware);
 
 learningRouter.post("/submit-exercise", async (req: AuthenticatedRequest, res) => {
+  logInfo("[TASKS]", "exercise:submit-attempt", { userId: req.user?.userId, exerciseId: req.body?.exerciseId });
   const parsed = z
     .object({
       exerciseId: z.string().min(3),
@@ -81,6 +86,7 @@ learningRouter.post("/submit-exercise", async (req: AuthenticatedRequest, res) =
 });
 
 learningRouter.get("/lesson-results/:lessonId", async (req: AuthenticatedRequest, res) => {
+  logInfo("[TASKS]", "lesson-results:fetch", { userId: req.user?.userId, lessonId: req.params.lessonId });
   const lessonId = String(req.params.lessonId);
   const history = await prisma.userExerciseHistory.findMany({
     where: {
@@ -95,6 +101,12 @@ learningRouter.get("/lesson-results/:lessonId", async (req: AuthenticatedRequest
 });
 
 learningRouter.get("/resume", async (req: AuthenticatedRequest, res) => {
-  const progress = await prisma.userProgress.findUnique({ where: { userId: req.user!.userId } });
-  return res.json(progress);
+  try {
+    logInfo("[TASKS]", "resume:fetch", { userId: req.user?.userId });
+    const progress = await prisma.userProgress.findUnique({ where: { userId: req.user!.userId } });
+    return res.json(progress);
+  } catch (error) {
+    logError("[TASKS]", error, { phase: "resume", userId: req.user?.userId });
+    return res.status(500).json({ error: "Failed to fetch resume" });
+  }
 });

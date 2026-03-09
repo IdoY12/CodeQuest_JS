@@ -38,7 +38,10 @@ export function verifyAccessToken(token: string): AuthTokenPayload {
   if (typeof payload !== "object" || payload === null) {
     throw new Error("Invalid access token payload");
   }
-  return payload as AuthTokenPayload;
+  if (typeof payload.userId !== "string" || typeof payload.email !== "string") {
+    throw new Error("Invalid access token shape");
+  }
+  return { userId: payload.userId, email: payload.email };
 }
 
 export function verifyRefreshToken(token: string): AuthTokenPayload {
@@ -46,5 +49,8 @@ export function verifyRefreshToken(token: string): AuthTokenPayload {
   if (typeof payload !== "object" || payload === null) {
     throw new Error("Invalid refresh token payload");
   }
-  return payload as AuthTokenPayload;
+  if (typeof payload.userId !== "string" || typeof payload.email !== "string") {
+    throw new Error("Invalid refresh token shape");
+  }
+  return { userId: payload.userId, email: payload.email };
 }

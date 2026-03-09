@@ -6,6 +6,7 @@ import { colors, fontSize, radius, spacing } from "../../theme/theme";
 import { useDuelSocket } from "../../hooks/useDuelSocket";
 import { CodeSnippet } from "../../components/CodeSnippet";
 import { useAppStore } from "../../stores/useAppStore";
+import { logDuel, logNav } from "../../services/logger";
 
 const Stack = createNativeStackNavigator();
 
@@ -28,8 +29,12 @@ export function DuelNavigator() {
 
 function DuelHomeScreen({ navigation }: { navigation: any }) {
   const { resetDuel } = useDuelSocket();
+  useEffect(() => {
+    logNav("screen:enter", { screen: "DuelHomeScreen" });
+    return () => logNav("screen:leave", { screen: "DuelHomeScreen" });
+  }, []);
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <Text style={styles.title}>Duel Rating: 1247 RP</Text>
       <Text style={styles.sub}>Win/Loss: 18 / 9 · Rank: Gold</Text>
       <View style={styles.card}>
@@ -40,6 +45,7 @@ function DuelHomeScreen({ navigation }: { navigation: any }) {
       <Pressable
         style={styles.matchBtn}
         onPress={() => {
+          logDuel("matchmaking:start");
           resetDuel();
           navigation.navigate("Matchmaking");
         }}
@@ -58,10 +64,17 @@ function MatchmakingScreen({ navigation }: { navigation: any }) {
   const [countdown, setCountdown] = useState(3);
 
   useEffect(() => {
+    logNav("screen:enter", { screen: "MatchmakingScreen" });
+    return () => logNav("screen:leave", { screen: "MatchmakingScreen" });
+  }, []);
+
+  useEffect(() => {
     joinQueue({ userId, username, rating: 1000 });
+    logDuel("queue:join", { userId });
     const interval = setInterval(() => setSeconds((v) => v + 1), 1000);
     return () => {
       clearInterval(interval);
+      logDuel("queue:leave", { userId });
       leaveQueue();
     };
   }, [joinQueue, leaveQueue, userId, username]);
@@ -83,7 +96,7 @@ function MatchmakingScreen({ navigation }: { navigation: any }) {
   }, [countdown, navigation, opponent, sessionId]);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <Text style={styles.searching}>Searching for an opponent...</Text>
       <Text style={styles.sub}>⚡ {playersOnline || 143} players online</Text>
       <Text style={styles.sub}>Estimated wait: {seconds}s</Text>
@@ -108,6 +121,11 @@ function ActiveDuelScreen({ navigation }: { navigation: any }) {
   const [oppScore, setOppScore] = useState(0);
   const [overlayVisible, setOverlayVisible] = useState(false);
   const currentRound = useMemo(() => roundNumber, [roundNumber]);
+
+  useEffect(() => {
+    logNav("screen:enter", { screen: "ActiveDuelScreen" });
+    return () => logNav("screen:leave", { screen: "ActiveDuelScreen" });
+  }, []);
 
   useEffect(() => {
     setMyScore(score.me);
@@ -135,6 +153,7 @@ function ActiveDuelScreen({ navigation }: { navigation: any }) {
 
   useEffect(() => {
     if (duelEnd) {
+      logDuel("duel:end", { won: duelEnd.won, xpEarned: duelEnd.xpEarned });
       addXp(duelEnd.xpEarned);
       navigation.replace("DuelResults", {
         won: duelEnd.won,
@@ -151,7 +170,7 @@ function ActiveDuelScreen({ navigation }: { navigation: any }) {
 
   if (!round) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
         <Text style={styles.sub}>Waiting for round start...</Text>
       </SafeAreaView>
     );
@@ -200,7 +219,7 @@ function ActiveDuelScreen({ navigation }: { navigation: any }) {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <View style={styles.progressBar}>
         <View style={[styles.progressInner, { width: `${(timeLeft / 15) * 100}%` }]} />
       </View>
@@ -230,8 +249,13 @@ function ActiveDuelScreen({ navigation }: { navigation: any }) {
 function DuelResultsScreen({ route, navigation }: { route: any; navigation: any }) {
   const { won, score } = route.params;
 
+  useEffect(() => {
+    logNav("screen:enter", { screen: "DuelResultsScreen" });
+    return () => logNav("screen:leave", { screen: "DuelResultsScreen" });
+  }, []);
+
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <Text style={styles.title}>{won ? "Victory!" : "Defeat"}</Text>
       <Text style={styles.sub}>Final score: {score}</Text>
       <Text style={styles.sub}>{won ? "+50 RP · +100 XP" : "-20 RP · +30 XP"}</Text>

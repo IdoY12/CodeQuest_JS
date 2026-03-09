@@ -1,10 +1,11 @@
 import React, { useMemo, useState } from "react";
-import { Alert, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { colors, fontSize, radius, spacing } from "../../theme/theme";
 import { useAppStore } from "../../stores/useAppStore";
 import { apiRequest } from "../../services/api";
+import { logAuth, logError, logNav } from "../../services/logger";
 
 export function AuthScreen() {
   const signIn = useAppStore((s) => s.signIn);
@@ -25,8 +26,20 @@ export function AuthScreen() {
       "Social login will be available in the full app build. For now, please create an account with email and password.",
     );
   };
+
+  React.useEffect(() => {
+    logNav("screen:enter", { screen: "AuthScreen" });
+    return () => logNav("screen:leave", { screen: "AuthScreen" });
+  }, []);
+
   const onSubmit = async () => {
     if (!canSubmit || loading) return;
+    logAuth("submit:start", { mode: isLogin ? "login" : "register", email });
+    console.log("[AUTH] submit:start", {
+      mode: isLogin ? "login" : "register",
+      email,
+      apiBaseUrl: process.env.EXPO_PUBLIC_API_BASE_URL ?? "default-dev-url",
+    });
     setLoading(true);
     setError(null);
     try {
@@ -68,6 +81,11 @@ export function AuthScreen() {
             body: JSON.stringify({ email, username, password }),
           });
 
+      console.log("[AUTH] submit:response", {
+        mode: isLogin ? "login" : "register",
+        userId: response.user.id,
+        onboardingCompleted: response.user.onboardingCompleted,
+      });
       signIn({
         userId: response.user.id,
         email: response.user.email,
@@ -81,7 +99,14 @@ export function AuthScreen() {
         dailyCommitmentMinutes: response.user.dailyCommitmentMinutes,
         notificationsEnabled: response.user.notificationsEnabled,
       });
+      logAuth("submit:success", {
+        mode: isLogin ? "login" : "register",
+        userId: response.user.id,
+        onboardingCompleted: response.user.onboardingCompleted,
+      });
     } catch (submitError) {
+      console.log("[AUTH] submit:error", submitError);
+      logError("[AUTH]", submitError, { mode: isLogin ? "login" : "register" });
       setError(submitError instanceof Error ? submitError.message : "Unable to continue");
     } finally {
       setLoading(false);
@@ -89,86 +114,89 @@ export function AuthScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={["top"]}>
-      <Text style={styles.title}>
-        {isLogin ? "Welcome back. Sign in to continue." : "Save your progress. Create a free account."}
-      </Text>
-      <TextInput
-        value={email}
-        onChangeText={setEmail}
-        placeholder="Email"
-        placeholderTextColor={colors.textMuted}
-        style={styles.input}
-        keyboardType="email-address"
-        autoCapitalize="none"
-        accessibilityLabel="Email input"
-      />
-      {!isLogin && (
+    <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+        <Text style={styles.title}>
+          {isLogin ? "Welcome back. Sign in to continue." : "Save your progress. Create a free account."}
+        </Text>
         <TextInput
-          value={username}
-          onChangeText={setUsername}
-          placeholder="Username"
+          value={email}
+          onChangeText={setEmail}
+          placeholder="Email"
           placeholderTextColor={colors.textMuted}
           style={styles.input}
+          keyboardType="email-address"
           autoCapitalize="none"
-          accessibilityLabel="Username input"
+          accessibilityLabel="Email input"
         />
-      )}
-      <View style={styles.passwordRow}>
-        <TextInput
-          value={password}
-          onChangeText={setPassword}
-          placeholder="Password"
-          placeholderTextColor={colors.textMuted}
-          style={[styles.input, styles.passwordInput]}
-          secureTextEntry={secure}
-          accessibilityLabel="Password input"
-        />
-        <Pressable onPress={() => setSecure((v) => !v)} style={styles.showHide}>
-          <Text style={styles.showHideText}>{secure ? "Show" : "Hide"}</Text>
+        {!isLogin && (
+          <TextInput
+            value={username}
+            onChangeText={setUsername}
+            placeholder="Username"
+            placeholderTextColor={colors.textMuted}
+            style={styles.input}
+            autoCapitalize="none"
+            accessibilityLabel="Username input"
+          />
+        )}
+        <View style={styles.passwordRow}>
+          <TextInput
+            value={password}
+            onChangeText={setPassword}
+            placeholder="Password"
+            placeholderTextColor={colors.textMuted}
+            style={[styles.input, styles.passwordInput]}
+            secureTextEntry={secure}
+            accessibilityLabel="Password input"
+          />
+          <Pressable onPress={() => setSecure((v) => !v)} style={styles.showHide}>
+            <Text style={styles.showHideText}>{secure ? "Show" : "Hide"}</Text>
+          </Pressable>
+        </View>
+        <Pressable
+          disabled={!canSubmit}
+          style={[styles.primaryButton, !canSubmit && styles.disabled]}
+          onPress={onSubmit}
+          accessibilityLabel={isLogin ? "Sign in" : "Create account"}
+        >
+          <Text style={styles.primaryLabel}>{loading ? "Please wait..." : isLogin ? "Sign In" : "Create Account"}</Text>
         </Pressable>
-      </View>
-      <Pressable
-        disabled={!canSubmit}
-        style={[styles.primaryButton, !canSubmit && styles.disabled]}
-        onPress={onSubmit}
-        accessibilityLabel={isLogin ? "Sign in" : "Create account"}
-      >
-        <Text style={styles.primaryLabel}>{loading ? "Please wait..." : isLogin ? "Sign In" : "Create Account"}</Text>
-      </Pressable>
-      {error ? <Text style={styles.errorText}>{error}</Text> : null}
-      <Pressable
-        style={({ pressed }) => [styles.secondaryButton, pressed && styles.secondaryPressed]}
-        onPress={onSocialPress}
-        accessibilityLabel="Continue with Apple"
-      >
-        <View style={styles.socialRow}>
-          <FontAwesome name="apple" size={20} color={colors.textPrimary} style={styles.socialIcon} />
-          <Text style={styles.secondaryLabel}>Continue with Apple</Text>
-        </View>
-      </Pressable>
-      <Pressable
-        style={({ pressed }) => [styles.secondaryButton, pressed && styles.secondaryPressed]}
-        onPress={onSocialPress}
-        accessibilityLabel="Continue with external provider"
-      >
-        <View style={styles.socialRow}>
-          <FontAwesome name="user-circle-o" size={18} color={colors.textPrimary} style={styles.socialIcon} />
-          <Text style={styles.secondaryLabel}>Continue with Provider</Text>
-        </View>
-      </Pressable>
-      <Text style={styles.terms}>By continuing, you agree to our Terms and Privacy Policy.</Text>
-      <Pressable onPress={() => setIsLogin((v) => !v)} style={styles.switchAuthBtn}>
-        <Text style={styles.switchAuthText}>
-          {isLogin ? "Need an account? Register" : "Already have an account? Sign in"}
-        </Text>
-      </Pressable>
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+        <Pressable
+          style={({ pressed }) => [styles.secondaryButton, pressed && styles.secondaryPressed]}
+          onPress={onSocialPress}
+          accessibilityLabel="Continue with Apple"
+        >
+          <View style={styles.socialRow}>
+            <FontAwesome name="apple" size={20} color={colors.textPrimary} style={styles.socialIcon} />
+            <Text style={styles.secondaryLabel}>Continue with Apple</Text>
+          </View>
+        </Pressable>
+        <Pressable
+          style={({ pressed }) => [styles.secondaryButton, pressed && styles.secondaryPressed]}
+          onPress={onSocialPress}
+          accessibilityLabel="Continue with external provider"
+        >
+          <View style={styles.socialRow}>
+            <FontAwesome name="user-circle-o" size={18} color={colors.textPrimary} style={styles.socialIcon} />
+            <Text style={styles.secondaryLabel}>Continue with Provider</Text>
+          </View>
+        </Pressable>
+        <Text style={styles.terms}>By continuing, you agree to our Terms and Privacy Policy.</Text>
+        <Pressable onPress={() => setIsLogin((v) => !v)} style={styles.switchAuthBtn}>
+          <Text style={styles.switchAuthText}>
+            {isLogin ? "Need an account? Register" : "Already have an account? Sign in"}
+          </Text>
+        </Pressable>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background, padding: spacing.xxl, justifyContent: "center" },
+  container: { flex: 1, backgroundColor: colors.background },
+  content: { flexGrow: 1, justifyContent: "center", padding: spacing.xxl, paddingTop: spacing.huge, paddingBottom: spacing.xl },
   title: { color: colors.textPrimary, fontSize: fontSize.lg, fontWeight: "800", marginBottom: spacing.xxl },
   input: {
     backgroundColor: colors.card,

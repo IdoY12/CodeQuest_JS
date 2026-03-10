@@ -1,10 +1,5 @@
 import { logApi } from "./logger";
-
-const DEV_API_ORIGIN = "http://192.168.1.158:4000";
-const DEFAULT_API_BASE_URL = __DEV__
-  ? `${DEV_API_ORIGIN}/api`
-  : "https://api.questcodejs.com/api";
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL ?? DEFAULT_API_BASE_URL;
+import { API_BASE_URL } from "../config/network";
 
 interface ApiOptions extends RequestInit {
   token?: string;

@@ -6,6 +6,7 @@ import { colors, fontSize, radius, spacing } from "../../theme/theme";
 import { useAppStore } from "../../stores/useAppStore";
 import { apiRequest } from "../../services/api";
 import { logAuth, logError, logNav } from "../../services/logger";
+import { API_BASE_URL } from "../../config/network";
 
 export function AuthScreen() {
   const signIn = useAppStore((s) => s.signIn);
@@ -39,7 +40,7 @@ export function AuthScreen() {
       console.log("[AUTH] submit:start", {
         mode: isLogin ? "login" : "register",
         email,
-        apiBaseUrl: process.env.EXPO_PUBLIC_API_BASE_URL ?? "default-dev-url",
+        apiBaseUrl: API_BASE_URL,
       });
     }
     setLoading(true);

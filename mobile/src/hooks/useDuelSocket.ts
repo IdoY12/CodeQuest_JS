@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { logDuel, logError } from "../services/logger";
+import { DUEL_SOCKET_URL } from "../config/network";
 
 interface DuelRound {
   roundNumber: number;
@@ -146,13 +147,7 @@ export function useDuelSocket() {
   const [state, setState] = useState<DuelState>(sharedState);
   const mockTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const url = useMemo(() => {
-    const devSocketOrigin = "http://192.168.1.158:4000";
-    const defaultSocketUrl = __DEV__
-      ? `${devSocketOrigin}/duel`
-      : "https://api.questcodejs.com/duel";
-    return process.env.EXPO_PUBLIC_DUEL_SOCKET_URL ?? defaultSocketUrl;
-  }, []);
+  const url = useMemo(() => DUEL_SOCKET_URL, []);
 
   useEffect(() => {
     ensureSocket(url);

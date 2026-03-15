@@ -52,6 +52,7 @@ export function AuthScreen() {
               id: string;
               email: string;
               username: string;
+              avatarUrl?: string | null;
               onboardingCompleted: boolean;
               pathKey: "BEGINNER" | "ADVANCED";
               goal?: "JOB" | "WORK" | "FUN" | "PROJECT" | null;
@@ -70,6 +71,7 @@ export function AuthScreen() {
               id: string;
               email: string;
               username: string;
+              avatarUrl?: string | null;
               onboardingCompleted: boolean;
               pathKey: "BEGINNER" | "ADVANCED";
               goal?: "JOB" | "WORK" | "FUN" | "PROJECT" | null;
@@ -95,6 +97,7 @@ export function AuthScreen() {
         userId: response.user.id,
         email: response.user.email,
         username: response.user.username,
+        avatarUrl: response.user.avatarUrl,
         accessToken: response.accessToken,
         refreshToken: response.refreshToken,
         onboardingCompleted: response.user.onboardingCompleted,

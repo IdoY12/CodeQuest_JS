@@ -78,6 +78,7 @@ authRouter.post("/register", async (req, res) => {
         email: user.email,
         username: user.username,
         avatarId: user.avatarId,
+        avatarUrl: user.avatarUrl,
         onboardingCompleted: false,
         pathKey: "BEGINNER",
         goal: null,
@@ -153,6 +154,7 @@ authRouter.post("/login", async (req, res) => {
         email: user.email,
         username: user.username,
         avatarId: user.avatarId,
+        avatarUrl: user.avatarUrl,
         onboardingCompleted: progress?.onboardingCompleted ?? false,
         pathKey,
         goal: progress.goal,
@@ -196,7 +198,7 @@ authRouter.get("/me", authMiddleware, async (req: AuthenticatedRequest, res) => 
   const userId = req.user!.userId;
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { id: true, email: true, username: true, avatarId: true, tokenVersion: true },
+    select: { id: true, email: true, username: true, avatarId: true, avatarUrl: true, tokenVersion: true },
   });
   if (!user) {
     return res.status(401).json({ error: "Invalid token" });

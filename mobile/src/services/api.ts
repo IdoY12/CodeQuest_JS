@@ -83,6 +83,13 @@ export async function apiRequest<T>(path: string, options: ApiOptions = {}): Pro
     throw new ApiError(message, response.status);
   }
 
+  if (response.status === 204) {
+    return undefined as T;
+  }
+  const rawContentLength = response.headers.get("content-length");
+  if (rawContentLength === "0") {
+    return undefined as T;
+  }
   const data = (await response.json()) as T;
   if (__DEV__) {
     console.log(`[Response] Status: ${response.status} | Data:`, data);

@@ -1,51 +1,121 @@
 # CodeQuest JS
 
-Production-style monorepo for the CodeQuest JS mobile learning platform:
+Production-style monorepo for the CodeQuest JS mobile learning platform.
 
-- `mobile` - Expo + React Native iOS app (TypeScript, Zustand, React Query, Reanimated, Gesture Handler)
-- `backend` - Express + Socket.io + Prisma + PostgreSQL API and realtime duel engine
+- `mobile` - Expo + React Native app (TypeScript, Zustand, React Query)
+- `backend` - Express + Prisma + PostgreSQL + Socket.io API
+- `infra` - local infrastructure scripts (LocalStack S3 init)
 
-## Quick Start
+## Demo Setup (Interview-Ready)
 
-### 1) Backend
+Follow these steps in order to run the full app locally.
+
+## Prerequisites
+
+- Node.js 20+
+- npm 10+
+- Docker + Docker Compose
+- PostgreSQL running locally (or in Docker)
+- iOS Simulator (Xcode) and/or Expo Go
+
+## 1) Start LocalStack (S3 for avatars)
+
+From the repository root:
+
+```bash
+docker compose up -d localstack
+```
+
+Optional verification:
+
+```bash
+docker exec localstack awslocal s3 ls
+```
+
+You should see `questcode-avatars`.
+
+## 2) Start Backend
 
 ```bash
 cd backend
+cp .env.example .env
 npm install
-npm run prisma:generate
-npx prisma migrate dev --name init
+npx prisma generate
+npx prisma migrate dev
 npm run prisma:seed
 npm run dev
 ```
 
-Backend runs on `http://localhost:4000`.
+Backend default URL:
 
-### 2) Mobile
+- `http://localhost:4000`
+
+### Required backend `.env` values
+
+At minimum, make sure these are valid in `backend/.env`:
+
+- `DATABASE_URL`
+- `JWT_ACCESS_SECRET`
+- `JWT_REFRESH_SECRET`
+
+For local avatar upload with LocalStack:
+
+- `AWS_ENDPOINT=http://localhost:4566`
+- `AWS_REGION=us-east-1`
+- `AWS_ACCESS_KEY_ID=test`
+- `AWS_SECRET_ACCESS_KEY=test`
+- `S3_BUCKET=questcode-avatars`
+
+## 3) Start Mobile
+
+In a new terminal:
 
 ```bash
 cd mobile
 npm install
-npm run ios
+npx expo start --clear
 ```
 
-The app defaults to `http://localhost:4000/api` in development and uses `EXPO_PUBLIC_API_BASE_URL` in production builds.
-Realtime duel sockets default to `http://localhost:4000/duel` in development and use `EXPO_PUBLIC_DUEL_SOCKET_URL` in production builds.
+Then:
 
-## Implemented Product Areas
+- Press `i` to open iOS Simulator, or
+- Scan the QR code with Expo Go
 
-- Premium dark design system with centralized tokens in `mobile/src/theme/theme.ts`
-- Full onboarding flow with path assignment and account creation gate
-- Bottom tab navigation with Home, Learn, Duel, Profile
-- Learn roadmap + lesson engine with 6 exercise types
-- Duel flow: home, matchmaking, active duel rounds, results
-- Profile stats and settings toggles (sounds/haptics)
-- REST API groups: auth, user, learning, duels, badges, daily challenge
-- Socket.io `/duel` namespace for matchmaking and rounds
-- Prisma schema for users, progress, curriculum, duels, badges, streaks
-- Seed content for beginner + advanced paths, exercises, badges, and 50 duel questions
+## 4) Quick Demo Checklist
 
-## Notes
+Use this checklist right before your interview demo:
 
-- Sound and Lottie packages are installed; hook up final asset files in `mobile/assets`.
-- Update `DATABASE_URL` in `backend/.env` for your local PostgreSQL instance.
-- Privacy policy and support references for App Store submission are provided in `PRIVACY_POLICY.md` and `SUPPORT.md`.
+1. Register a new user and complete onboarding
+2. Confirm Home / Learn / Duel / Profile tabs work
+3. Open Daily Puzzle and navigate back to Learn
+4. Upload profile image in Profile screen
+5. Change username / password
+6. Save learning preferences
+7. Verify delete-account flow (requires typing `DELETE`)
+
+## 5) Troubleshooting
+
+- **`Network request failed` on mobile**
+  - Verify backend is running on port `4000`
+  - Restart Expo with `npx expo start --clear`
+  - Make sure mobile and backend are on the same network
+
+- **Prisma schema mismatch errors**
+  - Run `cd backend && npx prisma migrate dev && npx prisma generate`
+
+- **Avatar upload fails**
+  - Ensure LocalStack is running (`docker ps`)
+  - Ensure bucket exists (`docker exec localstack awslocal s3 ls`)
+
+## 6) Useful Commands
+
+```bash
+# Backend type-check
+cd backend && npx tsc --noEmit
+
+# Mobile type-check
+cd mobile && npx tsc --noEmit
+
+# Backend health
+curl http://localhost:4000/health
+```

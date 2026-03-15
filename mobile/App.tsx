@@ -22,6 +22,7 @@ export default function App() {
   const notificationsEnabled = useAppStore((s) => s.notificationsEnabled);
   const signOut = useAppStore((s) => s.signOut);
   const setOnboardingCompleted = useAppStore((s) => s.setOnboardingCompleted);
+  const setUserIdentity = useAppStore((s) => s.setUserIdentity);
   const updatePreferences = useAppStore((s) => s.updatePreferences);
   const setProgressSnapshot = useAppStore((s) => s.setProgressSnapshot);
   const setAuthChecked = useAppStore((s) => s.setAuthChecked);
@@ -93,7 +94,7 @@ export default function App() {
           pathKey: "BEGINNER" | "ADVANCED";
         }>("/user/preferences", { token });
       const verifySession = async (token: string) =>
-        apiRequest<{ id: string; email: string }>("/auth/me", { token });
+        apiRequest<{ id: string; email: string; username: string; avatarUrl?: string | null }>("/auth/me", { token });
       const fetchProgress = async (token: string) =>
         apiRequest<{
           xpTotal: number;
@@ -109,7 +110,8 @@ export default function App() {
         }>("/user/progress-summary", { token });
 
       try {
-        await verifySession(accessToken);
+        const me = await verifySession(accessToken);
+        setUserIdentity({ email: me.email, username: me.username, avatarUrl: me.avatarUrl ?? null });
         const prefs = await fetchPreferences(accessToken);
         setOnboardingCompleted(prefs.hasCompletedOnboarding);
         if (prefs.userGoal && prefs.userLevel && prefs.dailyGoalMinutes) {
@@ -139,6 +141,7 @@ export default function App() {
     isAuthenticated,
     setAuthChecked,
     setOnboardingCompleted,
+    setUserIdentity,
     setProgressSnapshot,
     signOut,
     updatePreferences,
@@ -234,17 +237,21 @@ export default function App() {
     const subscription = AppState.addEventListener("change", (nextState) => {
       if (appStateRef.current !== "active" && nextState === "active") {
         if (isAuthenticated && accessToken) {
-          void apiRequest<{ id: string; email: string }>("/auth/me", { token: accessToken }).catch(async () => {
-            await AsyncStorage.removeItem("codequest-app-store");
-            signOut();
-          });
+          void apiRequest<{ id: string; email: string; username: string; avatarUrl?: string | null }>("/auth/me", { token: accessToken })
+            .then((me) => {
+              setUserIdentity({ email: me.email, username: me.username, avatarUrl: me.avatarUrl ?? null });
+            })
+            .catch(async () => {
+              await AsyncStorage.removeItem("codequest-app-store");
+              signOut();
+            });
         }
         void checkDailyGoalAndNotify();
       }
       appStateRef.current = nextState;
     });
     return () => subscription.remove();
-  }, [accessToken, checkDailyGoalAndNotify, isAuthenticated, signOut]);
+  }, [accessToken, checkDailyGoalAndNotify, isAuthenticated, setUserIdentity, signOut]);
 
   return (
     <SafeAreaProvider>

@@ -1,8 +1,15 @@
 import { Router } from "express";
+import { randomUUID } from "crypto";
 import { z } from "zod";
 import { prisma } from "../lib/prisma.js";
 import { authMiddleware, AuthenticatedRequest } from "../middleware/auth.js";
 import { comparePassword, hashPassword } from "../lib/auth.js";
+import {
+  createAvatarUploadUrl,
+  deleteAvatarObject,
+  extractAvatarKeyFromUrl,
+  getAvatarPublicUrl,
+} from "../lib/storage.js";
 import { logError, logInfo, logWarn } from "../lib/logger.js";
 
 export const userRouter = Router();
@@ -26,20 +33,106 @@ function buildRecentStreakDays(dateKeys: string[], today = new Date()): boolean[
 userRouter.get("/profile", async (req: AuthenticatedRequest, res) => {
   const user = await prisma.user.findUnique({
     where: { id: req.user!.userId },
-    include: { progress: true, duelRating: true },
+    select: {
+      id: true,
+      email: true,
+      username: true,
+      avatarUrl: true,
+      createdAt: true,
+      progress: {
+        select: {
+          goal: true,
+          experienceLevel: true,
+          dailyCommitmentMinutes: true,
+          notificationsEnabled: true,
+          onboardingCompleted: true,
+        },
+      },
+      duelRating: {
+        select: { rating: true, wins: true, losses: true, draws: true },
+      },
+    },
   });
   if (!user) return res.status(404).json({ error: "User not found" });
   return res.json(user);
 });
 
 userRouter.patch("/profile", async (req: AuthenticatedRequest, res) => {
-  const parsed = z.object({ username: z.string().min(2).optional(), avatarId: z.string().min(2).optional() }).safeParse(req.body);
+  const parsed = z
+    .object({
+      username: z.string().min(2).max(30).optional(),
+    })
+    .safeParse(req.body);
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+  if (!parsed.data.username) {
+    return res.status(400).json({ error: "No profile fields provided" });
+  }
   const user = await prisma.user.update({
     where: { id: req.user!.userId },
     data: parsed.data,
   });
-  return res.json({ id: user.id, username: user.username, avatarId: user.avatarId });
+  return res.json({ id: user.id, username: user.username, avatarUrl: user.avatarUrl });
+});
+
+userRouter.get("/avatar/presigned-url", async (req: AuthenticatedRequest, res) => {
+  const parsed = z
+    .object({
+      contentType: z.enum(["image/jpeg", "image/png", "image/webp"]),
+      fileSize: z.coerce.number().int().min(1).max(5 * 1024 * 1024),
+    })
+    .safeParse(req.query);
+  if (!parsed.success) {
+    return res.status(400).json({ error: "Invalid upload metadata" });
+  }
+
+  const ext = parsed.data.contentType === "image/jpeg" ? "jpg" : parsed.data.contentType === "image/png" ? "png" : "webp";
+  const key = `avatars/${req.user!.userId}/${randomUUID()}.${ext}`;
+
+  try {
+    const uploadUrl = await createAvatarUploadUrl({
+      key,
+      contentType: parsed.data.contentType,
+    });
+    const publicUrl = getAvatarPublicUrl(key);
+    return res.json({ uploadUrl, publicUrl, maxSizeBytes: 5 * 1024 * 1024 });
+  } catch (error) {
+    logError("[USER]", error, { phase: "avatar-presign", userId: req.user?.userId });
+    return res.status(500).json({ error: "Unable to prepare avatar upload" });
+  }
+});
+
+userRouter.patch("/avatar", async (req: AuthenticatedRequest, res) => {
+  const parsed = z.object({ avatarUrl: z.string().url() }).safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: "Invalid avatar URL" });
+
+  const nextKey = extractAvatarKeyFromUrl(parsed.data.avatarUrl);
+  if (!nextKey) {
+    return res.status(400).json({ error: "Avatar URL is not from configured storage bucket" });
+  }
+
+  const current = await prisma.user.findUnique({
+    where: { id: req.user!.userId },
+    select: { avatarUrl: true },
+  });
+  if (!current) return res.status(404).json({ error: "User not found" });
+
+  await prisma.user.update({
+    where: { id: req.user!.userId },
+    data: { avatarUrl: parsed.data.avatarUrl },
+  });
+
+  if (current.avatarUrl) {
+    const oldKey = extractAvatarKeyFromUrl(current.avatarUrl);
+    if (oldKey && oldKey !== nextKey) {
+      try {
+        await deleteAvatarObject(oldKey);
+      } catch (error) {
+        logWarn("[USER]", "avatar:old-delete-failed", { userId: req.user?.userId, reason: error instanceof Error ? error.message : String(error) });
+      }
+    }
+  }
+
+  return res.json({ avatarUrl: parsed.data.avatarUrl });
 });
 
 userRouter.get("/progress-summary", async (req: AuthenticatedRequest, res) => {
@@ -376,6 +469,49 @@ userRouter.post("/change-password", async (req: AuthenticatedRequest, res) => {
 });
 
 userRouter.delete("/account", async (req: AuthenticatedRequest, res) => {
-  await prisma.user.delete({ where: { id: req.user!.userId } });
-  return res.json({ ok: true });
+  const parsed = z.object({ confirmation: z.literal("DELETE") }).safeParse(req.body ?? {});
+  if (!parsed.success) {
+    return res.status(400).json({ error: "Confirmation text mismatch" });
+  }
+
+  const userId = req.user!.userId;
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, avatarUrl: true },
+  });
+  if (!user) return res.status(404).json({ error: "User not found" });
+
+  const avatarKey = user.avatarUrl ? extractAvatarKeyFromUrl(user.avatarUrl) : null;
+
+  await prisma.$transaction(async (tx) => {
+    await tx.user.update({
+      where: { id: userId },
+      data: { tokenVersion: { increment: 1 } },
+    });
+
+    await tx.dailyPracticeLog.deleteMany({ where: { userId } });
+    await tx.userExerciseHistory.deleteMany({ where: { userId } });
+    await tx.userBadge.deleteMany({ where: { userId } });
+    await tx.streakLog.deleteMany({ where: { userId } });
+    await tx.duelSession.updateMany({
+      where: { winnerId: userId },
+      data: { winnerId: null },
+    });
+    await tx.duelSession.deleteMany({ where: { OR: [{ player1Id: userId }, { player2Id: userId }] } });
+    await tx.duelRating.deleteMany({ where: { userId } });
+    await tx.userProgress.deleteMany({ where: { userId } });
+    await tx.user.delete({ where: { id: userId } });
+  });
+
+  if (avatarKey) {
+    try {
+      await deleteAvatarObject(avatarKey);
+    } catch (error) {
+      logWarn("[USER]", "avatar:delete-failed-during-account-delete", {
+        userId,
+        reason: error instanceof Error ? error.message : String(error),
+      });
+    }
+  }
+  return res.status(204).send();
 });

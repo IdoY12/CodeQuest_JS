@@ -17,6 +17,7 @@ interface AppState {
   hasCompletedOnboarding: boolean;
   username: string;
   email: string;
+  avatarUrl: string | null;
   goal?: Goal;
   experience?: Experience;
   commitment?: Commitment;
@@ -53,6 +54,7 @@ interface AppState {
     userId: string;
     email: string;
     username: string;
+    avatarUrl?: string | null;
     accessToken: string;
     refreshToken: string;
     onboardingCompleted: boolean;
@@ -95,6 +97,7 @@ interface AppState {
   setNotificationsEnabled: (value: boolean) => void;
   setHasHydrated: (value: boolean) => void;
   setAccessToken: (token: string | null) => void;
+  setUserIdentity: (payload: { username?: string; email?: string; avatarUrl?: string | null }) => void;
   setOnboardingCompleted: (value: boolean) => void;
   setAuthChecked: (value: boolean) => void;
 }
@@ -140,6 +143,7 @@ export const useAppStore = create<AppState>()(
       hasCompletedOnboarding: false,
       username: "Coder",
       email: "",
+      avatarUrl: null,
       goal: undefined,
       experience: undefined,
       commitment: "15",
@@ -184,6 +188,7 @@ export const useAppStore = create<AppState>()(
         userId,
         email,
         username,
+        avatarUrl,
         accessToken,
         refreshToken,
         onboardingCompleted,
@@ -199,6 +204,7 @@ export const useAppStore = create<AppState>()(
           userId,
           email,
           username,
+          avatarUrl: avatarUrl ?? null,
           accessToken,
           refreshToken,
           hasCompletedOnboarding: onboardingCompleted,
@@ -237,6 +243,7 @@ export const useAppStore = create<AppState>()(
           username: "Coder",
           accessToken: null,
           refreshToken: null,
+          avatarUrl: null,
           hasCompletedOnboarding: false,
           goal: undefined,
           experience: undefined,
@@ -318,6 +325,15 @@ export const useAppStore = create<AppState>()(
         set({ accessToken: token });
         logAuth("token:set-access-token", { hasToken: Boolean(token) });
       },
+      setUserIdentity: (payload) =>
+        set({
+          username: payload.username ?? get().username,
+          email: payload.email ?? get().email,
+          avatarUrl:
+            typeof payload.avatarUrl === "undefined"
+              ? get().avatarUrl
+              : payload.avatarUrl,
+        }),
       setOnboardingCompleted: (value) => set({ hasCompletedOnboarding: value }),
       setAuthChecked: (value) => set({ authChecked: value }),
     }),

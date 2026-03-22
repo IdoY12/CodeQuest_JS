@@ -141,6 +141,13 @@ Use this checklist right before your interview demo:
   - If needed, restart DB container:
     - `docker restart codequest-db`
 
+- **Postgres.app on macOS: `rejected "trust" authentication` / Electron**
+  - Postgres.app can block passwordless (`trust`) connections from Node. Fix one of:
+    - **Recommended:** Use the Docker PostgreSQL from step 1 and point `DATABASE_URL` at it (stop Postgres.app or use a different port for one of them so only one service uses `5432`).
+    - **Stay on Postgres.app:** In Postgres.app settings, allow your client / use **SCRAM** auth: create or use a role with a password and set e.g. `DATABASE_URL=postgresql://YOUR_USER:YOUR_PASSWORD@localhost:5432/codequest_js?schema=public` in `backend/.env` (database name must exist).
+  - After fixing DB: `cd backend && npx prisma migrate dev && npm run prisma:seed`, then restart `npm run dev`.
+  - Step-by-step: [`backend/README.md`](backend/README.md).
+
 ## 7) Useful Commands
 
 ```bash

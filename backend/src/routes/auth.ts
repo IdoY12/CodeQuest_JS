@@ -10,6 +10,7 @@ import {
 } from "../lib/auth.js";
 import { authMiddleware, AuthenticatedRequest } from "../middleware/auth.js";
 import { logError, logInfo, logWarn } from "../lib/logger.js";
+import { DATABASE_UNAVAILABLE_MESSAGE, isDatabaseUnavailableError } from "../lib/dbErrors.js";
 
 export const authRouter = Router();
 
@@ -91,6 +92,9 @@ authRouter.post("/register", async (req, res) => {
     });
   } catch (error) {
     logError("[AUTH]", error, { phase: "register" });
+    if (isDatabaseUnavailableError(error)) {
+      return res.status(503).json({ error: DATABASE_UNAVAILABLE_MESSAGE });
+    }
     return res.status(500).json({ error: "Registration failed" });
   }
 });
@@ -167,6 +171,9 @@ authRouter.post("/login", async (req, res) => {
     });
   } catch (error) {
     logError("[AUTH]", error, { phase: "login" });
+    if (isDatabaseUnavailableError(error)) {
+      return res.status(503).json({ error: DATABASE_UNAVAILABLE_MESSAGE });
+    }
     return res.status(500).json({ error: "Login failed" });
   }
 });

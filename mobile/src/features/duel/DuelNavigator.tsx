@@ -70,6 +70,7 @@ function MatchmakingScreen({ navigation }: { navigation: any }) {
   const accessToken = useAppStore((s) => s.accessToken);
   const [seconds, setSeconds] = useState(0);
   const [countdown, setCountdown] = useState(3);
+  const hasJoinedQueueRef = React.useRef(false);
 
   useEffect(() => {
     logNav("screen:enter", { screen: "MatchmakingScreen" });
@@ -77,7 +78,8 @@ function MatchmakingScreen({ navigation }: { navigation: any }) {
   }, []);
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId || hasJoinedQueueRef.current) return;
+    hasJoinedQueueRef.current = true;
     joinQueue({ userId, username, rating: duelRating, token: accessToken });
     logDuel("queue:join", { userId });
     const interval = setInterval(() => setSeconds((v) => v + 1), 1000);
@@ -91,8 +93,9 @@ function MatchmakingScreen({ navigation }: { navigation: any }) {
       clearTimeout(timeout);
       logDuel("queue:leave", { userId: userId ?? "unknown" });
       leaveQueue();
+      hasJoinedQueueRef.current = false;
     };
-  }, [accessToken, duelRating, joinQueue, leaveQueue, sessionId, startLocalMockMatch, userId, username]);
+  }, [accessToken, duelRating, joinQueue, leaveQueue, startLocalMockMatch, userId, username]);
 
   useEffect(() => {
     if (sessionId && opponent) {

@@ -3,6 +3,20 @@ import { logInfo } from "../../utils/logger.js";
 import { queue, sessions } from "./state.js";
 import type { DuelNamespace, QueueEntry } from "./types.js";
 
+/**
+ * Computes how wide the matchmaking rating gap is allowed to be, based on how long
+ * the player has already been waiting in the queue.
+ *
+ * `joinedAt` is the timestamp (in ms) when the entry was added to the queue.
+ * `Date.now() - joinedAt` gives the waiting time (also in ms) since they joined.
+ * As wait time increases, we widen the accepted rating difference so matching
+ * becomes more likely over time.
+ *
+ * Returns the allowed absolute rating difference:
+ * - after > 60s => 500
+ * - after > 30s => 300
+ * - otherwise => 200
+ */
 export function pickRange(entry: QueueEntry): number {
   const waited = Date.now() - entry.joinedAt;
   if (waited > 60000) return 500;
@@ -13,17 +27,29 @@ export function pickRange(entry: QueueEntry): number {
 export function handleQueueJoin(socket: Socket, duel: DuelNamespace, entry: QueueEntry): void {
   logInfo("[DUEL]", "queue:join", { userId: entry.userId, socketId: socket.id, rating: entry.rating });
   const opponentIndex = queue.findIndex((candidate) => {
+    // Skip matching the player with themselves (same socketId).
     if (candidate.socketId === entry.socketId) return false;
+    // Compute the allowed rating gap for this matchup.
+    // As players wait longer, pickRange() grows, so matchmaking becomes more flexible over time.
+    // We use the larger range so the pair can match if BOTH are within the widening threshold.
     const range = Math.max(pickRange(candidate), pickRange(entry));
+    // `rating` is the player's matchmaking rating stored on QueueEntry.
+    // Example: candidate.rating = 1050, entry.rating = 1000.
+    // `candidate.rating - entry.rating` is how far apart they are (positive/negative).
+    // `Math.abs(...)` converts it to an absolute gap number (0..infinity).
+    // We match only if that absolute rating gap is <= the allowed gap `range`.
     return Math.abs(candidate.rating - entry.rating) <= range;
   });
 
   if (opponentIndex === -1) {
+    // No suitable opponent found yet, so add this player to the queue.
     queue.push(entry);
+    // Notify the client about current queue stats (players online).
     socket.emit("queue_status", {
+      // How many sockets are currently connected in the duel namespace (min 1 for UI).
       players_online: Math.max(1, duel.sockets.size),
-      estimated_wait_seconds: 12,
     });
+    // Stop here; we'll only start a duel when an opponent is found later.
     return;
   }
 

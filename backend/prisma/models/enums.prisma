@@ -1,0 +1,35 @@
+enum Difficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum ExerciseType {
+  CONCEPT_CARD
+  MULTIPLE_CHOICE
+  FIND_THE_BUG
+  DRAG_DROP
+  CODE_FILL
+  TAP_TOKEN
+}
+
+enum PathType {
+  BEGINNER
+  ADVANCED
+}
+
+enum DuelCategory {
+  OUTPUT
+  SCOPE
+  ASYNC
+  TYPES
+  METHODS
+}
+
+enum RankTier {
+  BRONZE
+  SILVER
+  GOLD
+  PLATINUM
+  DIAMOND
+}

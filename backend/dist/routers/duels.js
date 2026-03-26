@@ -1,0 +1,10 @@
+import { Router } from "express";
+import { authMiddleware } from "../middlewares/auth.js";
+import { getHistory, getLeaderboard, getMatchmakingStatus, getQuestions, getStats, } from "../controllers/duelsController.js";
+export const duelRouter = Router();
+duelRouter.use(authMiddleware);
+duelRouter.get("/stats", getStats);
+duelRouter.get("/history", getHistory);
+duelRouter.get("/leaderboard", getLeaderboard);
+duelRouter.get("/questions", getQuestions);
+duelRouter.get("/matchmaking-status", getMatchmakingStatus);

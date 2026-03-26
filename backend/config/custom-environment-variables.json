@@ -1,0 +1,32 @@
+{
+  "env": "APP_ENV",
+  "app": {
+    "port": "PORT",
+    "host": "HOST",
+    "bodyParserJsonLimit": "APP_BODY_PARSER_JSON_LIMIT",
+    "jwtAccessSecret": "JWT_ACCESS_SECRET",
+    "jwtRefreshSecret": "JWT_REFRESH_SECRET",
+    "cors": {
+      "origin": "CORS_ORIGIN"
+    }
+  },
+  "database": {
+    "url": "DATABASE_URL"
+  },
+  "s3": {
+    "bucket": "S3_BUCKET",
+    "connection": {
+      "endpoint": "AWS_ENDPOINT",
+      "region": "AWS_REGION",
+      "credentials": {
+        "accessKeyId": "AWS_ACCESS_KEY_ID",
+        "secretAccessKey": "AWS_SECRET_ACCESS_KEY"
+      }
+    }
+  },
+  "io": {
+    "cors": {
+      "origin": "IO_CORS_ORIGIN"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+import { logInfo } from "../../utils/logger.js";
+import { registerDisconnect } from "./handlers/disconnect.js";
+import { registerJoinQueue } from "./handlers/joinQueue.js";
+import { registerLeaveQueue } from "./handlers/leaveQueue.js";
+import { registerPlayerReady } from "./handlers/playerReady.js";
+import { registerSubmitAnswer } from "./handlers/submitAnswer.js";
+export function attachDuelNamespace(io) {
+    const duel = io.of("/duel");
+    duel.on("connection", (socket) => {
+        logInfo("[DUEL]", "socket:connected", { socketId: socket.id });
+        socket.emit("queue_status", {
+            players_online: Math.max(1, duel.sockets.size),
+            estimated_wait_seconds: 8,
+        });
+        registerJoinQueue(socket, duel);
+        registerLeaveQueue(socket, duel);
+        registerPlayerReady(socket, duel);
+        registerSubmitAnswer(socket, duel);
+        registerDisconnect(socket, duel);
+    });
+}

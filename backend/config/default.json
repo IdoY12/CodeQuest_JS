@@ -1,0 +1,38 @@
+{
+  "env": "development",
+  "app": {
+    "port": 4000,
+    "host": "0.0.0.0",
+    "name": "codequest-backend dev",
+    "validateSecurity": false,
+    "trustProxy": false,
+    "bodyParserJsonLimit": "1mb",
+    "jwtAccessSecret": "change-me",
+    "jwtRefreshSecret": "change-me-too",
+    "cors": {
+      "origin": "*",
+      "credentials": true
+    }
+  },
+  "database": {
+    "url": "postgresql://postgres:postgres@localhost:5432/codequest_js?schema=public"
+  },
+  "s3": {
+    "bucket": "questcode-avatars",
+    "connection": {
+      "endpoint": "http://localhost:4566",
+      "region": "us-east-1",
+      "credentials": {
+        "accessKeyId": "test",
+        "secretAccessKey": "test"
+      },
+      "forcePathStyle": true
+    }
+  },
+  "io": {
+    "cors": {
+      "origin": "*",
+      "methods": ["GET", "POST", "PATCH", "DELETE"]
+    }
+  }
+}

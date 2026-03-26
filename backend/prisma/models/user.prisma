@@ -1,0 +1,22 @@
+model User {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  username       String
+  hashedPassword String
+  avatarId       String    @default("avatar-braces")
+  avatarUrl      String?
+  tokenVersion   Int       @default(0)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  lastActiveAt   DateTime?
+
+  progress          UserProgress?
+  exerciseHistory   UserExerciseHistory[]
+  duelRating        DuelRating?
+  streakLogs        StreakLog[]
+  userBadges        UserBadge[]
+  duelSessionsP1    DuelSession[]         @relation("Player1Sessions")
+  duelSessionsP2    DuelSession[]         @relation("Player2Sessions")
+  wonSessions       DuelSession[]         @relation("WinnerSessions")
+  dailyPracticeLogs DailyPracticeLog[]
+}

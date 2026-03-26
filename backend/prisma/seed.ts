@@ -1,6 +1,17 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, type Prisma } from "@prisma/client";
+import { injectDatabaseUrlFromConfig } from "../src/db/databaseUrl.js";
+
+injectDatabaseUrlFromConfig();
 
 const prisma = new PrismaClient();
+
+function requireChapterId(map: Map<string, string>, title: string): string {
+  const id = map.get(title);
+  if (id === undefined) {
+    throw new Error(`Seed: chapter not found: ${title}`);
+  }
+  return id;
+}
 
 interface SeedExercise {
   type: "CONCEPT_CARD" | "MULTIPLE_CHOICE" | "FIND_THE_BUG" | "DRAG_DROP" | "CODE_FILL" | "TAP_TOKEN";
@@ -106,10 +117,10 @@ async function main() {
     ],
   });
 
-  const chapterByTitle = new Map(chapters.map((chapter) => [chapter.title, chapter.id]));
+  const chapterByTitle = new Map<string, string>(chapters.map((c) => [c.title, c.id]));
 
   await createLessonWithExercises({
-    chapterId: chapterByTitle.get("What JavaScript Is")!,
+    chapterId: requireChapterId(chapterByTitle, "What JavaScript Is"),
     title: "JavaScript in the Browser",
     description: "Understand JS runtime and console basics",
     estimatedMinutes: 8,
@@ -136,7 +147,7 @@ async function main() {
   });
 
   await createLessonWithExercises({
-    chapterId: chapterByTitle.get("Variables and Values")!,
+    chapterId: requireChapterId(chapterByTitle, "Variables and Values"),
     title: "Storing and Reusing Values",
     description: "Work with let/const and variable reassignment",
     estimatedMinutes: 12,
@@ -192,7 +203,7 @@ async function main() {
   });
 
   await createLessonWithExercises({
-    chapterId: chapterByTitle.get("Data Types")!,
+    chapterId: requireChapterId(chapterByTitle, "Data Types"),
     title: "Primitive Types and typeof",
     description: "Recognize JS primitive values and type checks",
     estimatedMinutes: 10,
@@ -239,7 +250,7 @@ async function main() {
   });
 
   await createLessonWithExercises({
-    chapterId: chapterByTitle.get("Operators and Comparisons")!,
+    chapterId: requireChapterId(chapterByTitle, "Operators and Comparisons"),
     title: "Operators You Use Every Day",
     description: "Arithmetic and boolean expression evaluation",
     estimatedMinutes: 10,
@@ -286,7 +297,7 @@ async function main() {
   });
 
   await createLessonWithExercises({
-    chapterId: chapterByTitle.get("Conditionals")!,
+    chapterId: requireChapterId(chapterByTitle, "Conditionals"),
     title: "Branching Logic",
     description: "if/else and ternary operator behavior",
     estimatedMinutes: 10,
@@ -333,7 +344,7 @@ async function main() {
   });
 
   await createLessonWithExercises({
-    chapterId: chapterByTitle.get("Loops")!,
+    chapterId: requireChapterId(chapterByTitle, "Loops"),
     title: "Loop Fundamentals",
     description: "Understand iteration counts and break behavior",
     estimatedMinutes: 12,
@@ -389,7 +400,7 @@ async function main() {
   });
 
   await createLessonWithExercises({
-    chapterId: chapterByTitle.get("Functions")!,
+    chapterId: requireChapterId(chapterByTitle, "Functions"),
     title: "Functions and Return Values",
     description: "Declare, call, and reason about returned data",
     estimatedMinutes: 12,
@@ -440,7 +451,7 @@ async function main() {
   });
 
   await createLessonWithExercises({
-    chapterId: chapterByTitle.get("Arrays")!,
+    chapterId: requireChapterId(chapterByTitle, "Arrays"),
     title: "Array Basics",
     description: "Indexing and length with simple arrays",
     estimatedMinutes: 8,
@@ -469,7 +480,7 @@ async function main() {
   });
 
   await createLessonWithExercises({
-    chapterId: chapterByTitle.get("Array Methods")!,
+    chapterId: requireChapterId(chapterByTitle, "Array Methods"),
     title: "Mapping, Filtering, and Reduction",
     description: "Core array method behavior and edge cases",
     estimatedMinutes: 14,
@@ -525,7 +536,7 @@ async function main() {
   });
 
   await createLessonWithExercises({
-    chapterId: chapterByTitle.get("Closures and Scope")!,
+    chapterId: requireChapterId(chapterByTitle, "Closures and Scope"),
     title: "Scope and Closure Behavior",
     description: "Track lexical environment and captured values",
     estimatedMinutes: 12,
@@ -572,7 +583,7 @@ async function main() {
   });
 
   await createLessonWithExercises({
-    chapterId: chapterByTitle.get("this Binding")!,
+    chapterId: requireChapterId(chapterByTitle, "this Binding"),
     title: "Understanding this in Context",
     description: "Compare method, standalone, and arrow contexts",
     estimatedMinutes: 10,
@@ -610,7 +621,7 @@ async function main() {
   });
 
   await createLessonWithExercises({
-    chapterId: chapterByTitle.get("Async JavaScript")!,
+    chapterId: requireChapterId(chapterByTitle, "Async JavaScript"),
     title: "Execution Order and Awaiting Promises",
     description: "Reason about event loop and async return values",
     estimatedMinutes: 14,
@@ -666,7 +677,7 @@ async function main() {
   });
 
   await createLessonWithExercises({
-    chapterId: chapterByTitle.get("Destructuring and Spread")!,
+    chapterId: requireChapterId(chapterByTitle, "Destructuring and Spread"),
     title: "Modern Object and Array Patterns",
     description: "Use concise extraction and merge syntax",
     estimatedMinutes: 10,
@@ -704,7 +715,7 @@ async function main() {
   });
 
   await createLessonWithExercises({
-    chapterId: chapterByTitle.get("ES6 Classes")!,
+    chapterId: requireChapterId(chapterByTitle, "ES6 Classes"),
     title: "Classes and Inheritance",
     description: "Constructors, instances, and extending behavior",
     estimatedMinutes: 10,
@@ -747,7 +758,7 @@ async function main() {
   });
 
   await createLessonWithExercises({
-    chapterId: chapterByTitle.get("Node and Express Patterns")!,
+    chapterId: requireChapterId(chapterByTitle, "Node and Express Patterns"),
     title: "Backend Request Flow",
     description: "Understand req/res and middleware order",
     estimatedMinutes: 12,
@@ -794,7 +805,7 @@ async function main() {
   });
 
   await createLessonWithExercises({
-    chapterId: chapterByTitle.get("Error Handling and Edge Cases")!,
+    chapterId: requireChapterId(chapterByTitle, "Error Handling and Edge Cases"),
     title: "Handling Failure Correctly",
     description: "Catch runtime exceptions and avoid null access crashes",
     estimatedMinutes: 10,
@@ -1014,7 +1025,9 @@ async function main() {
     ...advancedTokenQuestions,
   ];
 
-  await prisma.duelQuestion.createMany({ data: duelQuestions });
+  await prisma.duelQuestion.createMany({
+    data: duelQuestions as Prisma.DuelQuestionCreateManyInput[],
+  });
 
   await prisma.badge.createMany({
     data: [

@@ -1,0 +1,11 @@
+model StreakLog {
+  id                 String   @id @default(cuid())
+  userId             String
+  date               DateTime
+  xpEarned           Int      @default(0)
+  exercisesCompleted Int      @default(0)
+  lessonsCompleted   Int      @default(0)
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+}

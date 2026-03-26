@@ -1,40 +1,29 @@
 # CodeQuest backend
 
-Express + Prisma + PostgreSQL. Copy `.env.example` → `.env` before running.
+Express + **Prisma** + PostgreSQL. Configuration uses the **`config`** package (`config/default.json`, merges `production.json` when `NODE_ENV=production`, and `custom-environment-variables.json` for env overrides).
 
 ## Database URL
 
-`DATABASE_URL` must point at a running PostgreSQL instance the Node process can authenticate to.
+Set **`database.url`** in config:
 
-### Recommended: Docker (see repo root `README.md`)
+- **Default (local):** `config/default.json` → `database.url`
+- **Production:** override in `config/production.json` or set **`DATABASE_URL`** (mapped to `database.url` via `custom-environment-variables.json`)
+- **Docker / Compose:** `config/docker.json` or `config/compose.json`
 
-Avoids Postgres.app quirks on macOS.
+The app injects this value into `process.env.DATABASE_URL` only inside `src/db/prisma.ts` (required by Prisma’s engine). Everything else reads from `config`.
 
-### Postgres.app — trust authentication rejected
+### Prisma CLI (`migrate`, `generate`)
 
-Postgres.app can **block passwordless (`trust`) connections** from Node/Electron-based clients.
+Use npm scripts so the URL comes from config:
 
-Pick **one** of these:
+```bash
+npm run prisma:generate
+npm run prisma:migrate
+npm run prisma:seed
+```
 
-1. **Allow the client in Postgres.app**  
-   Follow [Postgres.app — app permissions](https://postgresapp.com/l/app-permissions/) and allow your terminal/Node (or disable the restriction that blocks trust for Electron-linked clients).
+### Postgres.app / Docker
 
-2. **Use a user + password in `DATABASE_URL` (often simplest)**  
-   Set a password on your DB role and use SCRAM in the URL, for example:
+If Postgres.app blocks trust connections, use a **user + password** URL in `database.url` (or `DATABASE_URL`). See repo root `README.md` for Docker-based Postgres.
 
-   ```env
-   DATABASE_URL=postgresql://postgres:YOUR_PASSWORD@localhost:5432/codequest_js?schema=public
-   ```
-
-   Create the database if needed (`codequest_js` or whatever name you use), then:
-
-   ```bash
-   npx prisma migrate dev
-   npm run prisma:seed
-   npm run dev
-   ```
-
-3. **Only one server on port 5432**  
-   If Docker Postgres and Postgres.app both try to use `5432`, stop one or change the port.
-
-After `DATABASE_URL` works, registration should return **201** instead of **503**.
+After the DB is reachable, registration should return **201** instead of **503**.

@@ -1,0 +1,31 @@
+{
+  "env": "production",
+  "app": {
+    "name": "codequest-backend prod",
+    "validateSecurity": true,
+    "trustProxy": true,
+    "cors": {
+      "origin": "",
+      "credentials": true
+    }
+  },
+  "database": {
+    "url": ""
+  },
+  "s3": {
+    "connection": {
+      "endpoint": "",
+      "credentials": {
+        "accessKeyId": "",
+        "secretAccessKey": ""
+      },
+      "forcePathStyle": false
+    }
+  },
+  "io": {
+    "cors": {
+      "origin": "",
+      "methods": ["GET", "POST", "PATCH", "DELETE"]
+    }
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "app": {
+    "jwtAccessSecret": "secret",
+    "jwtRefreshSecret": "secret"
+  },
+  "database": {
+    "url": "postgresql://postgres:postgres@host.docker.internal:5432/codequest_js?schema=public"
+  },
+  "s3": {
+    "connection": {
+      "endpoint": "http://host.docker.internal:4566"
+    }
+  },
+  "io": {
+    "cors": {
+      "origin": "*",
+      "methods": ["GET", "POST", "PATCH", "DELETE"]
+    }
+  }
+}

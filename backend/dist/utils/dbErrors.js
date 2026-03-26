@@ -1,0 +1,21 @@
+import { Prisma } from "@prisma/client";
+/**
+ * True when the database driver reports connectivity / auth failures.
+ */
+export function isDatabaseUnavailableError(error) {
+    if (error instanceof Prisma.PrismaClientInitializationError) {
+        return true;
+    }
+    const msg = error instanceof Error ? error.message : String(error);
+    const name = error instanceof Error ? error.name : "";
+    return (name === "PrismaClientInitializationError" ||
+        /ECONNREFUSED/i.test(msg) ||
+        /connection refused/i.test(msg) ||
+        /timeout/i.test(msg) ||
+        /password authentication failed/i.test(msg) ||
+        /rejected.*trust authentication/i.test(msg) ||
+        /Postgres\.app rejected/i.test(msg) ||
+        /getaddrinfo ENOTFOUND/i.test(msg) ||
+        /Can't reach database server/i.test(msg));
+}
+export const DATABASE_UNAVAILABLE_MESSAGE = "Database unavailable. Start PostgreSQL and set database.url via config (e.g. DATABASE_URL when using custom-environment-variables).";

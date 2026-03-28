@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { logNav } from "../services/logger";
-import { useAppStore } from "@/store/useAppStore";
-import type { ApiChapter } from "../types/learn.types";
+import { useAppSelector } from "@/redux/hooks";
+import type Chapter from "@/models/Chapter";
 import { fetchLearnChapters, logChaptersError, logChaptersLoaded } from "../utils/learnRoadmapLoad";
 
 export function useLearnRoadmapScreen() {
-  const path = useAppStore((s) => s.path);
-  const experience = useAppStore((s) => s.experience);
-  const [chapterData, setChapterData] = useState<ApiChapter[]>([]);
+  const path = useAppSelector((s) => s.profile.path);
+  const experience = useAppSelector((s) => s.profile.experience);
+  const [chapterData, setChapterData] = useState<Chapter[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

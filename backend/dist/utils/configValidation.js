@@ -39,8 +39,4 @@ export function validateProductionSecuritySettings() {
     if (!appOrigin?.trim() || appOrigin === "*") {
         throw new Error("app.cors.origin must be a non-empty explicit origin or comma-separated list when app.validateSecurity is true (set CORS_ORIGIN)");
     }
-    const ioOrigin = config.get("io.cors.origin");
-    if (!ioOrigin?.trim() || ioOrigin === "*") {
-        throw new Error("io.cors.origin must be a non-empty explicit origin or comma-separated list when app.validateSecurity is true (set IO_CORS_ORIGIN)");
-    }
 }

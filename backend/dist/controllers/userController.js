@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { z } from "zod";
-import { prisma } from "../db/prisma.js";
+import { prisma } from "@project/db";
 import { comparePassword, hashPassword } from "../utils/auth.js";
 import { createAvatarUploadUrl, deleteAvatarObject, extractAvatarKeyFromUrl, getAvatarPublicUrl, } from "../utils/storage.js";
 import { logError, logInfo, logWarn } from "../utils/logger.js";

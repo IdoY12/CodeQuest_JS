@@ -7,5 +7,5 @@
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": ["prisma/seed.ts", "src/db/databaseUrl.ts"]
+  "include": ["prisma/seed.ts"]
 }

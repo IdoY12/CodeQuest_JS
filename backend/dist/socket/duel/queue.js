@@ -50,12 +50,21 @@ export function handleQueueJoin(socket, duel, entry) {
         // Stop here; we'll only start a duel when an opponent is found later.
         return;
     }
+    // `opponentIndex` is the matched opponent position in `queue` (found earlier with findIndex).
+    // `splice(opponentIndex, 1)` starts at that index and removes exactly 1 item (just the opponent).
+    // splice returns removed items as an array, so `[0]` picks the opponent object itself.
     const opponent = queue.splice(opponentIndex, 1)[0];
-    const sessionId = `sess_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    // Logical match id (business/game state): stored in `sessions` and sent to clients as `session_id`.
+    const sessionId = `sess_${crypto.randomUUID()}`;
+    // Socket.IO room/channel id (transport routing): derived from sessionId to keep a clear 1:1 mapping.
+    // Technically one id could serve both roles, but separate names keep intent clearer in code.
     const roomId = `duel_${sessionId}`;
+    // `duel` is the `/duel` Socket.IO namespace passed into handleQueueJoin by registerJoinQueue.
     const opponentSocket = duel.sockets.get(opponent.socketId);
+    // If the opponent socket is still connected, add it to this match room.
     opponentSocket?.join(roomId);
     socket.join(roomId);
+    // `sessions` (from `./state.ts`) is the in-memory Map of all currently active duel sessions.
     sessions.set(sessionId, {
         sessionId,
         roomId,

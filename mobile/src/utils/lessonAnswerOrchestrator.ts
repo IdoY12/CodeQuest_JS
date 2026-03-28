@@ -1,4 +1,4 @@
-import type { ApiExercise } from "../types/learn.types";
+import type Exercise from "@/models/Exercise";
 import type { LessonScreenNavigation } from "../types/learnNavigation.types";
 import type { PersonalizationLevel } from "../data/personalizedExercisePool";
 import { finishOrAdvance, grantLocalXp, grantServerXp, hapticForCorrect } from "./lessonAnswerFlow";
@@ -12,7 +12,7 @@ export type LessonAnswerOrchestratorArgs = {
   accessToken: string | null;
   personalizedLevel: PersonalizationLevel | undefined;
   addXp: AddXp;
-  exercises: ApiExercise[];
+  exercises: Exercise[];
   exerciseIndex: number;
   correctCount: number;
   attemptedCount: number;

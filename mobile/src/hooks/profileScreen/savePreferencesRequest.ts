@@ -1,17 +1,9 @@
-import type { AppDispatch } from "../../store/store";
+import type { AppDispatch } from "@/redux/store";
 import { apiRequest } from "../../services/api";
 import { logError } from "../../services/logger";
-import { sessionActions } from "../../store/slices/sessionSlice";
+import { setNotificationsEnabled, updatePreferences } from "@/redux/profile-slice";
+import type UserPreferences from "@/models/UserPreferences";
 import type { CommitmentKey, GoalKey, LevelKey } from "../../types/profile.types";
-import { goals, levels } from "../../constants/profilePreferences";
-
-type PrefsResponse = {
-  goal: (typeof goals)[number]["key"];
-  experienceLevel: (typeof levels)[number]["key"];
-  dailyCommitmentMinutes: 10 | 15 | 30;
-  notificationsEnabled: boolean;
-  pathKey: "BEGINNER" | "ADVANCED";
-};
 
 export async function patchUserPreferences(
   token: string,
@@ -23,7 +15,7 @@ export async function patchUserPreferences(
   setSaveMessage: (m: string | null) => void,
 ): Promise<void> {
   try {
-    const response = await apiRequest<PrefsResponse>("/user/preferences", {
+    const response = await apiRequest<UserPreferences>("/user/preferences", {
       method: "PATCH",
       token,
       body: JSON.stringify({
@@ -34,7 +26,7 @@ export async function patchUserPreferences(
       }),
     });
     dispatch(
-      sessionActions.updatePreferences({
+      updatePreferences({
         goal: response.goal,
         experience: response.experienceLevel,
         commitment: String(response.dailyCommitmentMinutes) as CommitmentKey,
@@ -42,7 +34,7 @@ export async function patchUserPreferences(
         path: response.pathKey,
       }),
     );
-    dispatch(sessionActions.setNotificationsEnabled(response.notificationsEnabled));
+    dispatch(setNotificationsEnabled(response.notificationsEnabled));
     setSaveMessage("Preferences updated.");
   } catch (error) {
     logError("[AUTH]", error, { phase: "save-preferences" });

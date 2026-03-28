@@ -1,0 +1,18 @@
+{
+  "name": "codequest-js",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "io",
+    "mobile",
+    "packages/*"
+  ],
+  "scripts": {
+    "db:generate": "npm --prefix packages/db run prisma:generate",
+    "backend:dev": "npm --prefix backend run dev",
+    "backend:build": "npm --prefix backend run build",
+    "io:dev": "npm --prefix io run dev",
+    "io:build": "npm --prefix io run build",
+    "mobile:start": "npm --prefix mobile run start"
+  }
+}

@@ -1,5 +1,5 @@
 import React from "react";
-import { useAppDispatch } from "../../store/hooks";
+import { useAppDispatcher } from "@/redux/hooks";
 import { patchUserPreferences } from "./savePreferencesRequest";
 import type { useProfileDraftState } from "./useProfileDraftState";
 import type { useProfileRedux } from "./useProfileRedux";
@@ -8,7 +8,7 @@ type R = ReturnType<typeof useProfileRedux>;
 type D = ReturnType<typeof useProfileDraftState>;
 
 export function useProfilePreferenceHandler(r: R, d: D) {
-  const dispatch = useAppDispatch();
+  const dispatch = useAppDispatcher();
   return React.useCallback(async () => {
     if (!r.accessToken || d.saving) return;
     d.setSaving(true);

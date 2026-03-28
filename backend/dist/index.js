@@ -1,12 +1,9 @@
 import config from "config";
 import http from "http";
-import { Server } from "socket.io";
-import { connectDatabase } from "./db/prisma.js";
+import { connectDatabase } from "@project/db";
 import { app } from "./app.js";
-import { attachDuelNamespace } from "./socket/duel/index.js";
 import { validateProductionSecuritySettings } from "./utils/configValidation.js";
 import { logError, logInfo } from "./utils/logger.js";
-import { resolveSocketIoCors } from "./utils/runtimeConfig.js";
 process.on("unhandledRejection", (reason) => {
     logError("[APP]", reason, { type: "unhandledRejection" });
 });
@@ -16,10 +13,6 @@ process.on("uncaughtException", (error) => {
 validateProductionSecuritySettings();
 await connectDatabase();
 const server = http.createServer(app);
-const io = new Server(server, {
-    cors: resolveSocketIoCors(),
-});
-attachDuelNamespace(io);
 const port = Number(config.get("app.port"));
 const host = config.get("app.host");
 server.listen(port, host, () => {

@@ -1,6 +1,6 @@
 import type { Response } from "express";
 import type { AuthenticatedRequest } from "../@types/auth.js";
-import { prisma } from "../db/prisma.js";
+import { prisma } from "@project/db";
 
 export async function listBadges(req: AuthenticatedRequest, res: Response) {
   const badges = await prisma.badge.findMany();

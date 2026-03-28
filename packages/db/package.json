@@ -1,0 +1,32 @@
+{
+  "name": "@project/db",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit",
+    "prisma:generate": "prisma generate --schema ./prisma"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.0",
+    "config": "^4.4.1"
+  },
+  "devDependencies": {
+    "@types/config": "^3.3.5",
+    "@types/node": "^25.3.3",
+    "prisma": "^6.19.0",
+    "typescript": "^5.9.3"
+  },
+  "prisma": {
+    "schema": "./prisma"
+  }
+}

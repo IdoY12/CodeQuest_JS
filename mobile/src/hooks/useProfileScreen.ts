@@ -1,4 +1,4 @@
-import { useAppDispatch } from "../store/hooks";
+import { useAppDispatcher } from "@/redux/hooks";
 import { useProfileAccountHandlers } from "./profileScreen/useProfileAccountHandlers";
 import { useProfileAvatarHandlers } from "./profileScreen/useProfileAvatarHandlers";
 import { useProfileDangerHandlers } from "./profileScreen/useProfileDangerHandlers";
@@ -12,7 +12,7 @@ import {
 } from "./profileScreen/useProfileScreenEffects";
 
 export function useProfileScreen() {
-  const dispatch = useAppDispatch();
+  const dispatch = useAppDispatcher();
   const r = useProfileRedux();
   const d = useProfileDraftState(r);
   useProfileNavLogging();

@@ -1,8 +1,10 @@
 import { Alert } from "react-native";
-import type { AppDispatch } from "../../store/store";
+import type { AppDispatch } from "@/redux/store";
 import { apiRequest } from "../../services/api";
 import { logError } from "../../services/logger";
-import { sessionActions } from "../../store/slices/sessionSlice";
+import { setUserIdentity } from "@/redux/profile-slice";
+import type AvatarPatchResponse from "@/models/AvatarPatchResponse";
+import type AvatarPresignedUrl from "@/models/AvatarPresignedUrl";
 import {
   alertIfBlobTooLarge,
   blobFromUri,
@@ -21,16 +23,16 @@ export async function putBlobToSignedUrl(uploadUrl: string, blob: Blob): Promise
 }
 
 export async function persistAvatarUrl(token: string, publicUrl: string, dispatch: AppDispatch): Promise<void> {
-  const saved = await apiRequest<{ avatarUrl: string }>("/user/avatar", {
+  const saved = await apiRequest<AvatarPatchResponse>("/user/avatar", {
     method: "PATCH",
     token,
     body: JSON.stringify({ avatarUrl: publicUrl }),
   });
-  dispatch(sessionActions.setUserIdentity({ avatarUrl: saved.avatarUrl }));
+  dispatch(setUserIdentity({ avatarUrl: saved.avatarUrl }));
 }
 
 export async function requestPresignedAvatarUrl(token: string, size: number) {
-  return apiRequest<{ uploadUrl: string; publicUrl: string; maxSizeBytes: number }>(
+  return apiRequest<AvatarPresignedUrl>(
     `/user/avatar/presigned-url?contentType=${encodeURIComponent("image/jpeg")}&fileSize=${size}`,
     { token },
   );

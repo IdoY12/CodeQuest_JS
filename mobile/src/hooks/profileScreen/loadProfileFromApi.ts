@@ -1,8 +1,8 @@
-import type { AppDispatch } from "../../store/store";
+import type { AppDispatch } from "@/redux/store";
 import { apiRequest } from "../../services/api";
 import { logError } from "../../services/logger";
-import { sessionActions } from "../../store/slices/sessionSlice";
-import type { ProfilePayload } from "../../types/profile.types";
+import { setUserIdentity, updatePreferences, type Commitment } from "@/redux/profile-slice";
+import type UserProfile from "@/models/UserProfile";
 import type { CommitmentKey, GoalKey, LevelKey } from "../../types/profile.types";
 
 export type DraftSetters = {
@@ -25,10 +25,10 @@ export function applyProgressToStore(
   notificationsEnabled: boolean,
 ): void {
   dispatch(
-    sessionActions.updatePreferences({
+    updatePreferences({
       goal,
       experience: exp,
-      commitment: String(minutes) as CommitmentKey,
+      commitment: String(minutes) as Commitment,
       notificationsEnabled,
       path: pathFromExperience(exp),
     }),
@@ -55,10 +55,10 @@ export async function fetchAndApplyProfile(
   isActive: () => boolean,
 ): Promise<void> {
   try {
-    const profile = await apiRequest<ProfilePayload>("/user/profile", { token });
+    const profile = await apiRequest<UserProfile>("/user/profile", { token });
     if (!isActive()) return;
     dispatch(
-      sessionActions.setUserIdentity({
+      setUserIdentity({
         username: profile.username,
         email: profile.email,
         avatarUrl: profile.avatarUrl,

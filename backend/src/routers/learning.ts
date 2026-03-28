@@ -6,6 +6,7 @@ import {
   getLessonResults,
   getLessons,
   getPaths,
+  getPersonalizedExercises,
   getResume,
   submitExercise,
 } from "../controllers/learningController.js";
@@ -16,6 +17,7 @@ learningRouter.get("/paths", getPaths);
 learningRouter.get("/chapters/:pathKey", getChapters);
 learningRouter.get("/lessons/:chapterId", getLessons);
 learningRouter.get("/exercises/:lessonId", getExercises);
+learningRouter.get("/personalized/:level", getPersonalizedExercises);
 learningRouter.use(authMiddleware);
 learningRouter.post("/submit-exercise", submitExercise);
 learningRouter.get("/lesson-results/:lessonId", getLessonResults);

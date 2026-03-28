@@ -2,7 +2,7 @@ import type { Response } from "express";
 import { randomUUID } from "crypto";
 import { z } from "zod";
 import type { AuthenticatedRequest } from "../@types/auth.js";
-import { prisma } from "../db/prisma.js";
+import { prisma } from "@project/db";
 import { comparePassword, hashPassword } from "../utils/auth.js";
 import {
   createAvatarUploadUrl,

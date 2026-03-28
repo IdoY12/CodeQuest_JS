@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { prisma } from "../db/prisma.js";
+import { prisma } from "@project/db";
 import { comparePassword, hashPassword, signAccessToken, signRefreshToken, verifyRefreshToken, } from "../utils/auth.js";
 import { logError, logInfo, logWarn } from "../utils/logger.js";
-import { DATABASE_UNAVAILABLE_MESSAGE, isDatabaseUnavailableError } from "../utils/dbErrors.js";
+import { DATABASE_UNAVAILABLE_MESSAGE, isDatabaseUnavailableError, isUniqueConstraintError, } from "../utils/dbErrors.js";
 function mapExperienceToPath(experience) {
     if (!experience)
         return "BEGINNER";
@@ -79,6 +79,9 @@ export async function register(req, res) {
     }
     catch (error) {
         logError("[AUTH]", error, { phase: "register" });
+        if (isUniqueConstraintError(error, "email")) {
+            return res.status(409).json({ error: "Email already exists" });
+        }
         if (isDatabaseUnavailableError(error)) {
             return res.status(503).json({ error: DATABASE_UNAVAILABLE_MESSAGE });
         }

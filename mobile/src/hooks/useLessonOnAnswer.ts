@@ -1,13 +1,14 @@
 import { useCallback } from "react";
-import { useAppStore } from "@/store/useAppStore";
-import type { ApiExercise } from "../types/learn.types";
+import { useAppDispatcher, useAppSelector } from "@/redux/hooks";
+import { addXp as addXpAction } from "@/redux/xp-slice";
+import type Exercise from "@/models/Exercise";
 import type { LessonScreenNavigation } from "../types/learnNavigation.types";
 import type { PersonalizationLevel } from "../data/personalizedExercisePool";
 import { orchestrateLessonAnswer } from "../utils/lessonAnswerOrchestrator";
 
 export function useLessonOnAnswer(
   navigation: LessonScreenNavigation,
-  exercises: ApiExercise[],
+  exercises: Exercise[],
   exerciseIndex: number,
   correctCount: number,
   attemptedCount: number,
@@ -17,8 +18,9 @@ export function useLessonOnAnswer(
   lessonTitle: string,
   personalizedLevel: PersonalizationLevel | undefined,
 ) {
-  const addXp = useAppStore((s) => s.addXp);
-  const accessToken = useAppStore((s) => s.accessToken);
+  const dispatch = useAppDispatcher();
+  const accessToken = useAppSelector((s) => s.session.accessToken);
+  const addXp = useCallback((n: number) => dispatch(addXpAction(n)), [dispatch]);
 
   return useCallback(
     async (isCorrect: boolean, xp: number, answer: string) => {

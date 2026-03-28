@@ -10,7 +10,7 @@ Set **`database.url`** in config:
 - **Production:** override in `config/production.json` or set **`DATABASE_URL`** (mapped to `database.url` via `custom-environment-variables.json`)
 - **Docker / Compose:** `config/docker.json` or `config/compose.json`
 
-The app injects this value into `process.env.DATABASE_URL` only inside `src/db/prisma.ts` (required by Prisma’s engine). Everything else reads from `config`.
+The app injects this value into `process.env.DATABASE_URL` via the shared `@project/db` package (required by Prisma’s engine). Everything else reads from `config`.
 
 ### Prisma CLI (`migrate`, `generate`)
 

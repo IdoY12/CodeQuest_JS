@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import { logError, logNav, logTasks } from "../services/logger";
 import { apiRequest } from "../services/api";
 import { getExercisePoolForLevel } from "../data/personalizedExercisePool";
-import type { ApiExercise } from "../types/learn.types";
+import type Exercise from "@/models/Exercise";
 import type { PersonalizationLevel } from "../data/personalizedExercisePool";
 import { applyLessonExercisePayload } from "../utils/lessonExerciseReset";
 
 export function useLessonLoad(lessonId: string, personalizedLevel: PersonalizationLevel | undefined) {
-  const [exercises, setExercises] = useState<ApiExercise[]>([]);
+  const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [exerciseIndex, setExerciseIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
@@ -34,7 +34,7 @@ export function useLessonLoad(lessonId: string, personalizedLevel: Personalizati
           }
           return;
         }
-        const payload = await apiRequest<ApiExercise[]>(`/learning/exercises/${lessonId}`);
+        const payload = await apiRequest<Exercise[]>(`/learning/exercises/${lessonId}`);
         logTasks("lesson:loaded-api", { lessonId, count: payload.length });
         if (active) {
           applyLessonExercisePayload(

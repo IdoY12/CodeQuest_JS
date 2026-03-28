@@ -1,0 +1,14 @@
+{
+  "app": {
+    "jwtAccessSecret": "secret"
+  },
+  "database": {
+    "url": "postgresql://postgres:postgres@postgres:5432/codequest_js?schema=public"
+  },
+  "io": {
+    "cors": {
+      "origin": "*",
+      "methods": ["GET", "POST", "PATCH", "DELETE"]
+    }
+  }
+}

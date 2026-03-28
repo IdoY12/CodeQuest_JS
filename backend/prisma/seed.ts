@@ -1,9 +1,45 @@
 import { PrismaClient, type Prisma } from "@prisma/client";
-import { injectDatabaseUrlFromConfig } from "../src/db/databaseUrl.js";
+import { injectDatabaseUrlFromConfig } from "@project/db";
+import { dailyPuzzleBank } from "./content/dailyPuzzles.js";
+import { getExercisePoolForLevel, type PersonalizationLevel } from "./content/personalizedExercisePool.js";
 
 injectDatabaseUrlFromConfig();
 
 const prisma = new PrismaClient();
+
+const PERSONALIZATION_LEVELS: PersonalizationLevel[] = ["BEGINNER", "BASICS", "INTERMEDIATE", "ADVANCED"];
+
+async function seedDailyPuzzlesAndPersonalized() {
+  await prisma.dailyPuzzle.deleteMany();
+  await prisma.personalizedExercise.deleteMany();
+
+  await prisma.dailyPuzzle.createMany({
+    data: dailyPuzzleBank.map((puzzle, index) => ({
+      id: puzzle.id,
+      prompt: puzzle.prompt,
+      acceptedAnswers: puzzle.acceptedAnswers,
+      orderIndex: index,
+    })),
+  });
+
+  for (const level of PERSONALIZATION_LEVELS) {
+    const exercises = getExercisePoolForLevel(level);
+    await prisma.personalizedExercise.createMany({
+      data: exercises.map((exercise, index) => ({
+        id: exercise.id,
+        level,
+        type: exercise.type,
+        prompt: exercise.prompt,
+        codeSnippet: exercise.codeSnippet,
+        correctAnswer: exercise.correctAnswer,
+        explanation: exercise.explanation,
+        xpReward: exercise.xpReward,
+        orderIndex: index + 1,
+        options: exercise.options.map((option) => ({ text: option.text, isCorrect: option.isCorrect })),
+      })),
+    });
+  }
+}
 
 function requireChapterId(map: Map<string, string>, title: string): string {
   const id = map.get(title);
@@ -1028,6 +1064,8 @@ async function main() {
   await prisma.duelQuestion.createMany({
     data: duelQuestions as Prisma.DuelQuestionCreateManyInput[],
   });
+
+  await seedDailyPuzzlesAndPersonalized();
 
   await prisma.badge.createMany({
     data: [

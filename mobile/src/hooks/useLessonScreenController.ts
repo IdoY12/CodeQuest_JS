@@ -1,4 +1,4 @@
-import { useAppStore } from "@/store/useAppStore";
+import { useAppSelector } from "@/redux/hooks";
 import type { LessonScreenNavigation, LessonScreenProps } from "../types/learnNavigation.types";
 import { useLessonLoad } from "./useLessonLoad";
 import { useLessonOnAnswer } from "./useLessonOnAnswer";
@@ -11,7 +11,7 @@ export function useLessonScreenController(
   const lessonId = route.params.lessonId;
   const lessonTitle = route.params.lessonTitle;
   const personalizedLevel = route.params.personalizedLevel;
-  const accessToken = useAppStore((s) => s.accessToken);
+  const accessToken = useAppSelector((s) => s.session.accessToken);
   const load = useLessonLoad(lessonId, personalizedLevel);
   const exercise = load.exercises[load.exerciseIndex];
   useLessonPracticeTimer(accessToken, exercise, load.loading);

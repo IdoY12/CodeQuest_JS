@@ -1,44 +1,24 @@
-import { useAppSelector } from "../../store/hooks";
-import {
-  selectAccessToken,
-  selectCommitment,
-  selectDuelLosses,
-  selectDuelRating,
-  selectDuelWins,
-  selectEmail,
-  selectExperience,
-  selectGoal,
-  selectHapticsEnabled,
-  selectLessonsCompleted,
-  selectLevel,
-  selectNotificationsEnabled,
-  selectSoundsEnabled,
-  selectStreakCurrent,
-  selectStreakShieldAvailable,
-  selectUsername,
-  selectUserAvatarUrl,
-  selectXpTotal,
-} from "../../store/selectors";
+import { useAppSelector } from "@/redux/hooks";
 
 export function useProfileRedux() {
-  const username = useAppSelector(selectUsername);
-  const email = useAppSelector(selectEmail);
-  const avatarUrl = useAppSelector(selectUserAvatarUrl);
-  const level = useAppSelector(selectLevel);
-  const xp = useAppSelector(selectXpTotal);
-  const streakCurrent = useAppSelector(selectStreakCurrent);
-  const lessonsCompleted = useAppSelector(selectLessonsCompleted);
-  const duelWins = useAppSelector(selectDuelWins);
-  const duelLosses = useAppSelector(selectDuelLosses);
-  const duelRating = useAppSelector(selectDuelRating);
-  const streakShieldAvailable = useAppSelector(selectStreakShieldAvailable);
-  const goal = useAppSelector(selectGoal);
-  const experience = useAppSelector(selectExperience);
-  const commitment = useAppSelector(selectCommitment);
-  const notificationsEnabled = useAppSelector(selectNotificationsEnabled);
-  const soundsEnabled = useAppSelector(selectSoundsEnabled);
-  const hapticsEnabled = useAppSelector(selectHapticsEnabled);
-  const accessToken = useAppSelector(selectAccessToken);
+  const username = useAppSelector((s) => s.profile.username);
+  const email = useAppSelector((s) => s.profile.email);
+  const avatarUrl = useAppSelector((s) => s.profile.avatarUrl);
+  const level = useAppSelector((s) => s.xp.level);
+  const xp = useAppSelector((s) => s.xp.xpTotal);
+  const streakCurrent = useAppSelector((s) => s.streak.streakCurrent);
+  const lessonsCompleted = useAppSelector((s) => s.duel.lessonsCompleted);
+  const duelWins = useAppSelector((s) => s.duel.duelWins);
+  const duelLosses = useAppSelector((s) => s.duel.duelLosses);
+  const duelRating = useAppSelector((s) => s.duel.duelRating);
+  const streakShieldAvailable = useAppSelector((s) => s.streak.streakShieldAvailable);
+  const goal = useAppSelector((s) => s.profile.goal);
+  const experience = useAppSelector((s) => s.profile.experience);
+  const commitment = useAppSelector((s) => s.profile.commitment);
+  const notificationsEnabled = useAppSelector((s) => s.profile.notificationsEnabled);
+  const soundsEnabled = useAppSelector((s) => s.profile.soundsEnabled);
+  const hapticsEnabled = useAppSelector((s) => s.profile.hapticsEnabled);
+  const accessToken = useAppSelector((s) => s.session.accessToken);
   const duelTotal = duelWins + duelLosses;
   const duelWinRate = duelTotal > 0 ? `${Math.round((duelWins / duelTotal) * 100)}%` : "0%";
   return {

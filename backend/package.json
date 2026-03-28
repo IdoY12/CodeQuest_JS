@@ -18,12 +18,13 @@
   "license": "ISC",
   "type": "module",
   "prisma": {
-    "schema": "./prisma"
+    "schema": "../packages/db/prisma"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.922.0",
     "@aws-sdk/s3-request-presigner": "^3.922.0",
     "@prisma/client": "^6.19.0",
+    "@project/db": "file:../packages/db",
     "bcrypt": "^6.0.0",
     "config": "^4.4.1",
     "cors": "^2.8.6",

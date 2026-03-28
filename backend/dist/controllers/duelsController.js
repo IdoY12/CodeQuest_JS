@@ -1,4 +1,4 @@
-import { prisma } from "../db/prisma.js";
+import { prisma } from "@project/db";
 import { logInfo } from "../utils/logger.js";
 export async function getStats(req, res) {
     logInfo("[DUEL]", "stats:fetch", { userId: req.user?.userId });

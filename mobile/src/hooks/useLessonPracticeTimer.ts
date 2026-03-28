@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useRef } from "react";
 import { AppState, type AppStateStatus } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
-import type { ApiExercise } from "../types/learn.types";
+import type Exercise from "@/models/Exercise";
 import { drainRefInt } from "../utils/drainRefInt";
 import { postPracticeLog } from "../utils/postPracticeLog";
 
 export function useLessonPracticeTimer(
   accessToken: string | null,
-  exercise: ApiExercise | undefined,
+  exercise: Exercise | undefined,
   loading: boolean,
 ) {
   const isFocused = useIsFocused();

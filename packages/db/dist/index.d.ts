@@ -1,0 +1,6 @@
+import { PrismaClient } from "@prisma/client";
+export declare function injectDatabaseUrlFromConfig(): void;
+export declare const prisma: PrismaClient<import("@prisma/client").Prisma.PrismaClientOptions, never, import("@prisma/client/runtime/library").DefaultArgs>;
+export declare function connectDatabase(): Promise<void>;
+export { PrismaClient } from "@prisma/client";
+export * from "@prisma/client";

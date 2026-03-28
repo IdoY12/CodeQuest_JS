@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { prisma } from "../db/prisma.js";
+import { prisma } from "@project/db";
 import { logError, logInfo } from "../utils/logger.js";
 export async function getPaths(_req, res) {
     const paths = await prisma.learningPath.findMany();

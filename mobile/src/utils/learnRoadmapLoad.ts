@@ -1,11 +1,11 @@
 import { apiRequest } from "../services/api";
 import { logError, logTasks } from "../services/logger";
-import type { ApiChapter } from "../types/learn.types";
+import type Chapter from "@/models/Chapter";
 
 type PathKey = string;
 
-export async function fetchLearnChapters(path: PathKey): Promise<ApiChapter[]> {
-  return apiRequest<ApiChapter[]>(`/learning/chapters/${path}`);
+export async function fetchLearnChapters(path: PathKey): Promise<Chapter[]> {
+  return apiRequest<Chapter[]>(`/learning/chapters/${path}`);
 }
 
 export function logChaptersLoaded(path: PathKey, count: number): void {

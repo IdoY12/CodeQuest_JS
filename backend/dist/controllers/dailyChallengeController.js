@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { prisma } from "../db/prisma.js";
+import { prisma } from "@project/db";
 import { logInfo, logWarn } from "../utils/logger.js";
 export async function getDailyChallenge(_req, res) {
     logInfo("[TASKS]", "daily-challenge:fetch");

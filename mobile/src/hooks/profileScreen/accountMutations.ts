@@ -1,10 +1,15 @@
 import { Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import type { AppDispatch } from "../../store/store";
+import type { AppDispatch } from "@/redux/store";
 import { apiRequest } from "../../services/api";
 import { logError } from "../../services/logger";
-import { progressActions } from "../../store/slices/progressSlice";
-import { sessionActions } from "../../store/slices/sessionSlice";
+import { setUserIdentity } from "@/redux/profile-slice";
+import { REDUX_PERSIST_KEY } from "@/utils/hydrateStore";
+import { resetStoresAfterLogout } from "@/utils/resetStoresAfterLogout";
+import type ChangePasswordResponse from "@/models/ChangePasswordResponse";
+import type UserProfile from "@/models/UserProfile";
+
+const LEGACY_ZUSTAND_KEY = "codequest-app-store";
 
 export async function updateUsername(
   token: string,
@@ -14,12 +19,12 @@ export async function updateUsername(
   setMessage: (m: string | null) => void,
 ): Promise<void> {
   try {
-    const updated = await apiRequest<{ id: string; username: string; avatarUrl: string | null }>("/user/profile", {
+    const updated = await apiRequest<UserProfile>("/user/profile", {
       method: "PATCH",
       token,
       body: JSON.stringify({ username: name }),
     });
-    dispatch(sessionActions.setUserIdentity({ username: updated.username }));
+    dispatch(setUserIdentity({ username: updated.username }));
     onDone();
     setMessage("Username updated.");
   } catch (error) {
@@ -36,7 +41,7 @@ export async function changePasswordRequest(
   setMessage: (m: string | null) => void,
 ): Promise<void> {
   try {
-    await apiRequest<{ ok: true }>("/user/change-password", {
+    await apiRequest<ChangePasswordResponse>("/user/change-password", {
       method: "POST",
       token,
       body: JSON.stringify({ currentPassword, newPassword }),
@@ -60,9 +65,8 @@ export async function deleteAccountRequest(
       token,
       body: JSON.stringify({ confirmation: "DELETE" }),
     });
-    await AsyncStorage.removeItem("codequest-app-store");
-    dispatch(sessionActions.signOut());
-    dispatch(progressActions.resetProgress());
+    await AsyncStorage.multiRemove([REDUX_PERSIST_KEY, LEGACY_ZUSTAND_KEY]);
+    resetStoresAfterLogout(dispatch);
     onClose();
   } catch (error) {
     logError("[PROFILE]", error, { phase: "delete-account" });
@@ -71,6 +75,5 @@ export async function deleteAccountRequest(
 }
 
 export function confirmLogout(dispatch: AppDispatch): void {
-  dispatch(sessionActions.signOut());
-  dispatch(progressActions.resetProgress());
+  resetStoresAfterLogout(dispatch);
 }

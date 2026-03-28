@@ -1,4 +1,4 @@
-import { prisma } from "../db/prisma.js";
+import { prisma } from "@project/db";
 export async function listBadges(req, res) {
     const badges = await prisma.badge.findMany();
     const earned = await prisma.userBadge.findMany({ where: { userId: req.user.userId } });

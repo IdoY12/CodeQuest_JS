@@ -1,5 +1,5 @@
 import { verifyAccessToken } from "../utils/auth.js";
-import { prisma } from "../db/prisma.js";
+import { prisma } from "@project/db";
 import { logError, logInfo, logWarn } from "../utils/logger.js";
 export async function authMiddleware(req, res, next) {
     const authHeader = req.headers.authorization;

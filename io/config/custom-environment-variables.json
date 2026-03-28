@@ -1,0 +1,16 @@
+{
+  "env": "APP_ENV",
+  "app": {
+    "port": "PORT",
+    "host": "HOST",
+    "jwtAccessSecret": "JWT_ACCESS_SECRET"
+  },
+  "database": {
+    "url": "DATABASE_URL"
+  },
+  "io": {
+    "cors": {
+      "origin": "IO_CORS_ORIGIN"
+    }
+  }
+}

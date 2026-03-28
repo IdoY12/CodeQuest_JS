@@ -1,6 +1,6 @@
 import React from "react";
 import { Alert } from "react-native";
-import { useAppDispatch } from "../../store/hooks";
+import { useAppDispatcher } from "@/redux/hooks";
 import { confirmLogout, deleteAccountRequest } from "./accountMutations";
 import type { useProfileDraftState } from "./useProfileDraftState";
 import type { useProfileRedux } from "./useProfileRedux";
@@ -9,7 +9,7 @@ type R = ReturnType<typeof useProfileRedux>;
 type D = ReturnType<typeof useProfileDraftState>;
 
 export function useProfileDangerHandlers(r: R, d: D) {
-  const dispatch = useAppDispatch();
+  const dispatch = useAppDispatcher();
   const onDeleteAccount = React.useCallback(async () => {
     if (!r.accessToken || d.confirmDeleteText !== "DELETE" || d.busyAction) return;
     d.setBusyAction("delete");

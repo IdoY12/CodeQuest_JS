@@ -1,17 +1,18 @@
 import { useEffect } from "react";
 import { logNav } from "../services/logger";
-import { useAppStore } from "@/store/useAppStore";
+import { useAppDispatcher, useAppSelector } from "@/redux/hooks";
+import { incrementLessonsCompleted } from "@/redux/duel-slice";
 
 export function useLessonResultsScreen() {
-  const level = useAppStore((s) => s.level);
-  const xp = useAppStore((s) => s.xpTotal);
-  const incrementLessonsCompleted = useAppStore((s) => s.incrementLessonsCompleted);
+  const dispatch = useAppDispatcher();
+  const level = useAppSelector((s) => s.xp.level);
+  const xp = useAppSelector((s) => s.xp.xpTotal);
 
   useEffect(() => {
     logNav("screen:enter", { screen: "LessonResultsScreen" });
-    incrementLessonsCompleted();
+    dispatch(incrementLessonsCompleted());
     return () => logNav("screen:leave", { screen: "LessonResultsScreen" });
-  }, [incrementLessonsCompleted]);
+  }, [dispatch]);
 
   return { level, xp };
 }

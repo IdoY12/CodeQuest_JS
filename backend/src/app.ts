@@ -7,6 +7,7 @@ import { learningRouter } from "./routers/learning.js";
 import { duelRouter } from "./routers/duels.js";
 import { badgesRouter } from "./routers/badges.js";
 import { dailyChallengeRouter } from "./routers/dailyChallenge.js";
+import { dailyPuzzlesRouter } from "./routers/dailyPuzzles.js";
 import { requestLogger } from "./middlewares/requestLogger.js";
 import { logError } from "./utils/logger.js";
 import { resolveExpressCorsOrigin } from "./utils/runtimeConfig.js";
@@ -34,8 +35,12 @@ app.use("/api/learning", learningRouter);
 app.use("/api/duels", duelRouter);
 app.use("/api/badges", badgesRouter);
 app.use("/api/daily-challenge", dailyChallengeRouter);
+app.use("/api/daily-puzzles", dailyPuzzlesRouter);
 
 app.use((error: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  if (error instanceof SyntaxError && typeof error === "object" && error !== null && "body" in error) {
+    return res.status(400).json({ error: "Malformed JSON payload" });
+  }
   logError("[APP]", error, { phase: "express-handler" });
   return res.status(500).json({ error: "Internal server error" });
 });

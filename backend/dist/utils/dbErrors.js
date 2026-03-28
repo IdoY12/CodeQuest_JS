@@ -18,4 +18,20 @@ export function isDatabaseUnavailableError(error) {
         /getaddrinfo ENOTFOUND/i.test(msg) ||
         /Can't reach database server/i.test(msg));
 }
+export function isUniqueConstraintError(error, field) {
+    if (!(error instanceof Prisma.PrismaClientKnownRequestError)) {
+        return false;
+    }
+    if (error.code !== "P2002") {
+        return false;
+    }
+    if (!field) {
+        return true;
+    }
+    const target = error.meta?.target;
+    if (!Array.isArray(target)) {
+        return false;
+    }
+    return target.includes(field);
+}
 export const DATABASE_UNAVAILABLE_MESSAGE = "Database unavailable. Start PostgreSQL and set database.url via config (e.g. DATABASE_URL when using custom-environment-variables).";

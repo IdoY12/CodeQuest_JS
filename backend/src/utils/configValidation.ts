@@ -52,10 +52,4 @@ export function validateProductionSecuritySettings(): void {
     );
   }
 
-  const ioOrigin = config.get<string>("io.cors.origin");
-  if (!ioOrigin?.trim() || ioOrigin === "*") {
-    throw new Error(
-      "io.cors.origin must be a non-empty explicit origin or comma-separated list when app.validateSecurity is true (set IO_CORS_ORIGIN)",
-    );
-  }
 }

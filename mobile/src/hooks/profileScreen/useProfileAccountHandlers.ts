@@ -1,7 +1,7 @@
 import React from "react";
 import { Alert } from "react-native";
-import { useAppDispatch } from "../../store/hooks";
-import { sessionActions } from "../../store/slices/sessionSlice";
+import { useAppDispatcher } from "@/redux/hooks";
+import { toggleSounds, toggleHaptics } from "@/redux/profile-slice";
 import { changePasswordRequest, updateUsername } from "./accountMutations";
 import type { useProfileDraftState } from "./useProfileDraftState";
 import type { useProfileRedux } from "./useProfileRedux";
@@ -10,7 +10,7 @@ type R = ReturnType<typeof useProfileRedux>;
 type D = ReturnType<typeof useProfileDraftState>;
 
 export function useProfileAccountHandlers(r: R, d: D) {
-  const dispatch = useAppDispatch();
+  const dispatch = useAppDispatcher();
   const onSaveUsername = React.useCallback(async () => {
     if (!r.accessToken || !d.draftUsername.trim() || d.busyAction) return;
     d.setBusyAction("username");
@@ -51,14 +51,14 @@ export function useProfileAccountHandlers(r: R, d: D) {
 
   const onToggleSounds = React.useCallback(
     (value: boolean) => {
-      void dispatch(sessionActions.toggleSounds(value));
+      void dispatch(toggleSounds(value));
     },
     [dispatch],
   );
 
   const onToggleHaptics = React.useCallback(
     (value: boolean) => {
-      void dispatch(sessionActions.toggleHaptics(value));
+      void dispatch(toggleHaptics(value));
     },
     [dispatch],
   );

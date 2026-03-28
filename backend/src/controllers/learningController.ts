@@ -1,7 +1,8 @@
+import type { PersonalizedExercise } from "@prisma/client";
 import type { Request, Response } from "express";
 import { z } from "zod";
 import type { AuthenticatedRequest } from "../@types/auth.js";
-import { prisma } from "../db/prisma.js";
+import { prisma } from "@project/db";
 import { logError, logInfo } from "../utils/logger.js";
 
 export async function getPaths(_req: Request, res: Response) {
@@ -39,6 +40,39 @@ export async function getExercises(req: Request, res: Response) {
     include: { options: true },
   });
   return res.json(exercises);
+}
+
+const personalizationLevelSchema = z.enum(["BEGINNER", "BASICS", "INTERMEDIATE", "ADVANCED"]);
+
+export async function getPersonalizedExercises(req: Request, res: Response) {
+  const levelResult = personalizationLevelSchema.safeParse(req.params.level);
+  if (!levelResult.success) {
+    return res.status(400).json({ error: "Invalid personalization level" });
+  }
+  const level = levelResult.data;
+  logInfo("[TASKS]", "personalized-exercises:fetch", { level });
+  const rows = await prisma.personalizedExercise.findMany({
+    where: { level },
+    orderBy: { orderIndex: "asc" },
+  });
+  const payload = rows.map((row: PersonalizedExercise) => {
+    const rawOptions = row.options as Array<{ text: string; isCorrect: boolean }>;
+    return {
+      id: row.id,
+      type: row.type,
+      prompt: row.prompt,
+      codeSnippet: row.codeSnippet,
+      correctAnswer: row.correctAnswer,
+      explanation: row.explanation,
+      xpReward: row.xpReward,
+      options: rawOptions.map((option, index) => ({
+        id: `${row.id}-opt-${index}`,
+        text: option.text,
+        isCorrect: option.isCorrect,
+      })),
+    };
+  });
+  return res.json(payload);
 }
 
 export async function submitExercise(req: AuthenticatedRequest, res: Response) {

@@ -29,6 +29,9 @@ app.use("/api/duels", duelRouter);
 app.use("/api/badges", badgesRouter);
 app.use("/api/daily-challenge", dailyChallengeRouter);
 app.use((error, _req, res, _next) => {
+    if (error instanceof SyntaxError && typeof error === "object" && error !== null && "body" in error) {
+        return res.status(400).json({ error: "Malformed JSON payload" });
+    }
     logError("[APP]", error, { phase: "express-handler" });
     return res.status(500).json({ error: "Internal server error" });
 });

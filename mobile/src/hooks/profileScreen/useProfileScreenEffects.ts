@@ -1,7 +1,6 @@
 import React from "react";
-import type { AppDispatch } from "../../store/store";
+import type { AppDispatch } from "@/redux/store";
 import { logNav } from "../../services/logger";
-import { useAppDispatch } from "../../store/hooks";
 import { fetchAndApplyProfile } from "./loadProfileFromApi";
 import type { DraftSetters } from "./loadProfileFromApi";
 

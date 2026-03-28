@@ -1,19 +1,20 @@
 import * as Haptics from "expo-haptics";
 import { apiRequest } from "../services/api";
-import type { ApiExercise } from "../types/learn.types";
+import type Exercise from "@/models/Exercise";
+import type ExerciseSubmitResult from "@/models/ExerciseSubmitResult";
 import type { LessonScreenNavigation } from "../types/learnNavigation.types";
 
 type AddXp = (n: number) => void;
 
 export async function grantServerXp(
   token: string,
-  exercise: ApiExercise,
+  exercise: Exercise,
   answer: string,
   addXp: AddXp,
   fallbackXp: number,
 ): Promise<void> {
   try {
-    const result = await apiRequest<{ xpEarned: number }>("/learning/submit-exercise", {
+    const result = await apiRequest<ExerciseSubmitResult>("/learning/submit-exercise", {
       method: "POST",
       token,
       body: JSON.stringify({

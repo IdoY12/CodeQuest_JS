@@ -3,12 +3,15 @@
 Production-style monorepo for the CodeQuest JS mobile learning platform.
 
 - `mobile` - Expo + React Native app (TypeScript, Zustand, React Query)
-- `backend` - Express + Prisma + PostgreSQL + Socket.io API
+- `backend` - Express + Prisma + PostgreSQL REST API
+- `io` - Dedicated Socket.IO duel service
 - `infra` - local infrastructure scripts (LocalStack S3 init)
 
 ## Demo Setup (Interview-Ready)
 
 Follow these steps in order to run the full app locally.
+
+Prisma schema ownership is shared in `packages/db/prisma` and consumed by both `backend` and `io`.
 
 ## Prerequisites
 
@@ -65,10 +68,10 @@ You should see `questcode-avatars`.
 ## 3) Start Backend
 
 ```bash
+npm install
+npm run db:generate
 cd backend
 cp .env.example .env
-npm install
-npx prisma generate
 npx prisma migrate dev
 npm run prisma:seed
 npm run dev
@@ -94,7 +97,21 @@ For local avatar upload with LocalStack:
 - `AWS_SECRET_ACCESS_KEY=test`
 - `S3_BUCKET=questcode-avatars`
 
-## 4) Start Mobile
+## 4) Start IO Service
+
+In a new terminal:
+
+```bash
+cd io
+cp .env.example .env
+npm run dev
+```
+
+IO service default URL:
+
+- `http://localhost:4001`
+
+## 5) Start Mobile
 
 In a new terminal:
 
@@ -109,7 +126,7 @@ Then:
 - Press `i` to open iOS Simulator, or
 - Scan the QR code with Expo Go
 
-## 5) Quick Demo Checklist
+## 6) Quick Demo Checklist
 
 Use this checklist right before your interview demo:
 
@@ -121,10 +138,11 @@ Use this checklist right before your interview demo:
 6. Save learning preferences
 7. Verify delete-account flow (requires typing `DELETE`)
 
-## 6) Troubleshooting
+## 7) Troubleshooting
 
 - **`Network request failed` on mobile**
   - Verify backend is running on port `4000`
+  - Verify IO service is running on port `4001`
   - Restart Expo with `npx expo start --clear`
   - Make sure mobile and backend are on the same network
 
@@ -148,7 +166,7 @@ Use this checklist right before your interview demo:
   - After fixing DB: `cd backend && npx prisma migrate dev && npm run prisma:seed`, then restart `npm run dev`.
   - Step-by-step: [`backend/README.md`](backend/README.md).
 
-## 7) Useful Commands
+## 8) Useful Commands
 
 ```bash
 # Start DB quickly (if missing)
@@ -157,9 +175,15 @@ docker start codequest-db || docker run -d --name codequest-db -e POSTGRES_USER=
 # Backend type-check
 cd backend && npx tsc --noEmit
 
+# IO type-check
+cd io && npx tsc --noEmit
+
 # Mobile type-check
 cd mobile && npx tsc --noEmit
 
 # Backend health
 curl http://localhost:4000/health
+
+# IO health
+curl http://localhost:4001/health
 ```

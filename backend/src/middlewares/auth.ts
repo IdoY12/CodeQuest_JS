@@ -1,7 +1,7 @@
 import { NextFunction, Response } from "express";
 import type { AuthenticatedRequest } from "../@types/auth.js";
 import { verifyAccessToken } from "../utils/auth.js";
-import { prisma } from "../db/prisma.js";
+import { prisma } from "@project/db";
 import { logError, logInfo, logWarn } from "../utils/logger.js";
 
 export type { AuthenticatedRequest } from "../@types/auth.js";

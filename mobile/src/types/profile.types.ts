@@ -1,25 +1,5 @@
 import type { StyleProp, TextStyle } from "react-native";
 
-export interface ProfilePayload {
-  id: string;
-  email: string;
-  username: string;
-  avatarUrl: string | null;
-  progress: {
-    goal: "JOB" | "WORK" | "FUN" | "PROJECT" | null;
-    experienceLevel: "BEGINNER" | "BASICS" | "INTERMEDIATE" | "ADVANCED" | null;
-    dailyCommitmentMinutes: 10 | 15 | 30 | null;
-    notificationsEnabled: boolean;
-    onboardingCompleted: boolean;
-  } | null;
-  duelRating: {
-    rating: number;
-    wins: number;
-    losses: number;
-    draws: number;
-  } | null;
-}
-
 export type GoalKey = "JOB" | "WORK" | "FUN" | "PROJECT";
 export type LevelKey = "BEGINNER" | "BASICS" | "INTERMEDIATE" | "ADVANCED";
 export type CommitmentKey = "10" | "15" | "30";
@@ -48,4 +28,19 @@ export type StatItem = {
   icon: string;
   label: string;
   value: string;
+};
+
+export type ProfileHeroSectionProps = {
+  avatarUrl: string | null;
+  initials: string;
+  onAvatarPress: () => void;
+  username: string;
+  email: string;
+  level: number;
+  duelRating: number;
+  duelWinRate: string;
+  streakShieldAvailable: boolean;
+  uploadingAvatar: boolean;
+  uploadProgress: number;
+  stats: StatItem[];
 };

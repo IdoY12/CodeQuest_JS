@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import type { AuthenticatedRequest } from "../@types/auth.js";
-import { prisma } from "../db/prisma.js";
+import { prisma } from "@project/db";
 import { logInfo } from "../utils/logger.js";
 
 export async function getStats(req: AuthenticatedRequest, res: Response) {

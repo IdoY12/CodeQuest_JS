@@ -7,6 +7,7 @@ import { fetchLearnChapters, logChaptersError, logChaptersLoaded } from "../util
 export function useLearnRoadmapScreen() {
   const path = useAppSelector((s) => s.profile.path);
   const experience = useAppSelector((s) => s.profile.experience);
+  const accessToken = useAppSelector((s) => s.session.accessToken);
   const [chapterData, setChapterData] = useState<Chapter[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -20,7 +21,7 @@ export function useLearnRoadmapScreen() {
     const run = async () => {
       setLoading(true);
       try {
-        const chapters = await fetchLearnChapters(path);
+        const chapters = await fetchLearnChapters(path, accessToken);
         logChaptersLoaded(path, chapters.length);
         if (active) setChapterData(chapters);
       } catch (err) {
@@ -33,7 +34,7 @@ export function useLearnRoadmapScreen() {
     return () => {
       active = false;
     };
-  }, [path]);
+  }, [accessToken, path]);
 
-  return { path, experience, chapterData, loading };
+  return { path, experience, chapterData, loading, accessToken };
 }

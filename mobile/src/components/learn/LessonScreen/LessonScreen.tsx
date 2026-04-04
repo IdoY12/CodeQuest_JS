@@ -5,6 +5,7 @@ import { colors } from "@/theme/theme";
 import type { LessonScreenProps } from "@/types/learnNavigation.types";
 import { progressWidthStyle } from "@/utils/progressWidthStyle";
 import { useLessonScreenController } from "@/hooks/useLessonScreenController";
+import type { LessonExerciseCompletionContext } from "@/types/lessonExerciseCompletion.types";
 import { CodeSnippet } from "@/components/common/CodeSnippet/CodeSnippet";
 import { ExerciseRenderer } from "@/components/learn/ExerciseRenderer/ExerciseRenderer";
 import { lessonScreenStyles } from "./LessonScreen.styles";
@@ -21,7 +22,8 @@ export function LessonScreen({ navigation, route }: LessonScreenProps) {
       </SafeAreaView>
     );
   }
-  const onExerciseAnswer = (ok: boolean, xp: number, ans: string) => void c.onAnswer(ok, xp, ans);
+  const onLessonExerciseComplete = (answer: string, context: LessonExerciseCompletionContext) =>
+    void c.onLessonExerciseComplete(answer, context);
   return (
     <SafeAreaView style={lessonScreenStyles.container} edges={["top", "bottom"]}>
       <ScrollView style={lessonScreenStyles.container} contentContainerStyle={lessonScreenStyles.content}>
@@ -34,7 +36,12 @@ export function LessonScreen({ navigation, route }: LessonScreenProps) {
         </Text>
         <Text style={lessonScreenStyles.prompt}>{c.exercise.prompt}</Text>
         <CodeSnippet code={c.exercise.codeSnippet} />
-        <ExerciseRenderer exercise={c.exercise} onAnswer={onExerciseAnswer} />
+        <ExerciseRenderer
+          exercise={c.exercise}
+          lessonSource={c.lessonSource}
+          accessToken={c.accessToken}
+          onLessonExerciseComplete={onLessonExerciseComplete}
+        />
       </ScrollView>
     </SafeAreaView>
   );

@@ -8,6 +8,7 @@ import { hydrateLesson } from "@/redux/lesson-slice";
 import { hydrateStats } from "@/redux/duel-slice";
 import { hydratePuzzle } from "@/redux/puzzle-slice";
 import { logAuth, logError } from "@/services/logger";
+import { mergeHydratedSessionTokens } from "@/utils/mergeHydratedSessionTokens";
 
 export const REDUX_PERSIST_KEY = "codequest-redux-store";
 
@@ -29,7 +30,8 @@ export async function hydrateStoreFromStorage(dispatch: AppDispatch): Promise<vo
       puzzle?: Record<string, unknown>;
     };
     if (parsed.profile && parsed.session) {
-      dispatch(hydrateSession(parsed.session as never));
+      const sessionWithTokens = await mergeHydratedSessionTokens(parsed.session as Record<string, unknown>);
+      dispatch(hydrateSession(sessionWithTokens as never));
       dispatch(hydrateProfile(parsed.profile as never));
       if (parsed.xp) dispatch(hydrateXp(parsed.xp as never));
       if (parsed.streak) dispatch(hydrateStreak(parsed.streak as never));
@@ -51,7 +53,8 @@ export async function hydrateStoreFromStorage(dispatch: AppDispatch): Promise<vo
       };
       if (s.isAuthenticated && s.accessToken) (sessionOnly as { isGuest: boolean }).isGuest = false;
       else if (typeof s.isGuest !== "boolean") (sessionOnly as { isGuest: boolean }).isGuest = !s.isAuthenticated;
-      dispatch(hydrateSession(sessionOnly as never));
+      const legacySessionWithTokens = await mergeHydratedSessionTokens(sessionOnly as Record<string, unknown>);
+      dispatch(hydrateSession(legacySessionWithTokens as never));
       dispatch(
         hydrateProfile({
           username: s.username,

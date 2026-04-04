@@ -16,6 +16,7 @@ import type {
   DuelStackParamList,
   MatchmakingScreenProps,
 } from "@/types/duelNavigation.types";
+import { DUEL_ACTIVE_ROUND_SECONDS } from "@/constants/duelUiConstants";
 import { styles } from "./DuelNavigator.styles";
 
 const Stack = createNativeStackNavigator<DuelStackParamList>();
@@ -144,7 +145,7 @@ function ActiveDuelScreen({ navigation }: ActiveDuelScreenProps) {
   const opponentName = opponent?.username ?? "Opponent";
   const [roundNumber, setRoundNumber] = useState(1);
   const [selected, setSelected] = useState<string | null>(null);
-  const [timeLeft, setTimeLeft] = useState(15);
+  const [timeLeft, setTimeLeft] = useState(DUEL_ACTIVE_ROUND_SECONDS);
   const [myScore, setMyScore] = useState(0);
   const [oppScore, setOppScore] = useState(0);
   const [overlayVisible, setOverlayVisible] = useState(false);
@@ -193,7 +194,7 @@ function ActiveDuelScreen({ navigation }: ActiveDuelScreenProps) {
   }, [dispatch, duelEnd, myScore, navigation, oppScore]);
 
   useEffect(() => {
-    setTimeLeft(15);
+    setTimeLeft(DUEL_ACTIVE_ROUND_SECONDS);
     const interval = setInterval(() => setTimeLeft((v) => Math.max(0, v - 1)), 1000);
     return () => clearInterval(interval);
   }, [currentRound]);
@@ -212,7 +213,7 @@ function ActiveDuelScreen({ navigation }: ActiveDuelScreenProps) {
       sessionId,
       roundNumber,
       answer,
-      timeTakenMs: (15 - timeLeft) * 1000,
+      timeTakenMs: (DUEL_ACTIVE_ROUND_SECONDS - timeLeft) * 1000,
     });
     setSelected(answer);
   };
@@ -222,7 +223,7 @@ function ActiveDuelScreen({ navigation }: ActiveDuelScreenProps) {
       return round.codeSnippet.split("\n").map((line, idx) => (
         <Pressable
           key={`${line}-${idx}`}
-          style={[styles.option, selected === String(idx + 1) && styles.correct]}
+          style={[styles.option, selected === String(idx + 1) && styles.optionSelected]}
           onPress={() => submit(String(idx + 1))}
         >
           <Text style={styles.optionLabel} numberOfLines={3} adjustsFontSizeToFit minimumFontScale={0.9}>
@@ -235,11 +236,7 @@ function ActiveDuelScreen({ navigation }: ActiveDuelScreenProps) {
     return round.options.map((option) => (
       <Pressable
         key={option}
-        style={[
-          styles.option,
-          selected === option && option === round.correctAnswer && styles.correct,
-          selected === option && option !== round.correctAnswer && styles.wrong,
-        ]}
+        style={[styles.option, selected === option && styles.optionSelected]}
         onPress={() => submit(option)}
       >
         <Text style={styles.optionLabel} numberOfLines={4} adjustsFontSizeToFit minimumFontScale={0.9}>
@@ -253,7 +250,9 @@ function ActiveDuelScreen({ navigation }: ActiveDuelScreenProps) {
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <ScrollView style={styles.container} contentContainerStyle={styles.duelContent} showsVerticalScrollIndicator={false}>
         <View style={styles.progressBar}>
-          <View style={[styles.progressInner, { width: `${(timeLeft / 15) * 100}%` }]} />
+          <View
+            style={[styles.progressInner, { width: `${(timeLeft / DUEL_ACTIVE_ROUND_SECONDS) * 100}%` }]}
+          />
         </View>
         <View style={styles.scoreRow}>
           <Text style={styles.score}>{username} {myScore}</Text>

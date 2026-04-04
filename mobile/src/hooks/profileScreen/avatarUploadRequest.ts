@@ -1,4 +1,5 @@
 import { Alert } from "react-native";
+import axios from "axios";
 import type { AppDispatch } from "@/redux/store";
 import { apiRequest } from "../../services/api";
 import { logError } from "../../services/logger";
@@ -14,12 +15,11 @@ import {
 } from "./avatarPickerHelpers";
 
 export async function putBlobToSignedUrl(uploadUrl: string, blob: Blob): Promise<boolean> {
-  const uploadResult = await fetch(uploadUrl, {
-    method: "PUT",
+  const response = await axios.put(uploadUrl, blob, {
     headers: { "Content-Type": "image/jpeg" },
-    body: blob,
+    validateStatus: () => true,
   });
-  return uploadResult.ok;
+  return response.status >= 200 && response.status < 300;
 }
 
 export async function persistAvatarUrl(token: string, publicUrl: string, dispatch: AppDispatch): Promise<void> {

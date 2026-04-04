@@ -1,4 +1,5 @@
 import { Alert } from "react-native";
+import axios from "axios";
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
 
@@ -34,8 +35,8 @@ export async function resizeToJpeg(uri: string): Promise<string> {
 }
 
 export async function blobFromUri(uri: string): Promise<Blob> {
-  const fileResponse = await fetch(uri);
-  return fileResponse.blob();
+  const response = await axios.get<Blob>(uri, { responseType: "blob" });
+  return response.data;
 }
 
 export function alertIfBlobTooLarge(blob: Blob): boolean {

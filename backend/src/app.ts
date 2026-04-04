@@ -1,19 +1,34 @@
+/**
+ * Composes the Express application: security headers, CORS, JSON, routers, errors.
+ *
+ * Responsibility: wire global middleware and mount versioned API routers.
+ * Layer: backend HTTP entry (imported by index.ts)
+ * Depends on: express, helmet, cors, @project/server-kit/cors, routers
+ * Consumers: index.ts, tests
+ */
+
 import config from "config";
 import cors from "cors";
 import express from "express";
+import helmet from "helmet";
+import { resolveExpressCorsOrigin } from "@project/server-kit/cors";
 import { authRouter } from "./routers/auth.js";
-import { userRouter } from "./routers/user.js";
-import { learningRouter } from "./routers/learning.js";
-import { duelRouter } from "./routers/duels.js";
 import { badgesRouter } from "./routers/badges.js";
 import { dailyChallengeRouter } from "./routers/dailyChallenge.js";
 import { dailyPuzzlesRouter } from "./routers/dailyPuzzles.js";
+import { duelRouter } from "./routers/duels.js";
+import { learningRouter } from "./routers/learning.js";
+import { userRouter } from "./routers/user.js";
 import { requestLogger } from "./middlewares/requestLogger.js";
 import { logError } from "./utils/logger.js";
-import { resolveExpressCorsOrigin } from "./utils/runtimeConfig.js";
 
 const app = express();
 app.disable("x-powered-by");
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+  }),
+);
 
 if (config.get<boolean>("app.trustProxy")) {
   app.set("trust proxy", 1);

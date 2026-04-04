@@ -1,9 +1,10 @@
 import { useCallback } from "react";
-import { useAppDispatcher, useAppSelector } from "@/redux/hooks";
+import { useAppDispatcher } from "@/redux/hooks";
 import { addXp as addXpAction } from "@/redux/xp-slice";
 import type Exercise from "@/models/Exercise";
 import type { LessonScreenNavigation } from "../types/learnNavigation.types";
 import type { PersonalizationLevel } from "../data/personalizedExercisePool";
+import type { LessonExerciseCompletionContext } from "../types/lessonExerciseCompletion.types";
 import { orchestrateLessonAnswer } from "../utils/lessonAnswerOrchestrator";
 
 export function useLessonOnAnswer(
@@ -19,16 +20,12 @@ export function useLessonOnAnswer(
   personalizedLevel: PersonalizationLevel | undefined,
 ) {
   const dispatch = useAppDispatcher();
-  const accessToken = useAppSelector((s) => s.session.accessToken);
   const addXp = useCallback((n: number) => dispatch(addXpAction(n)), [dispatch]);
 
   return useCallback(
-    async (isCorrect: boolean, xp: number, answer: string) => {
+    async (answer: string, completion: LessonExerciseCompletionContext) => {
       await orchestrateLessonAnswer({
-        isCorrect,
-        xp,
-        answer,
-        accessToken,
+        completion,
         personalizedLevel,
         addXp,
         exercises,
@@ -43,7 +40,6 @@ export function useLessonOnAnswer(
       });
     },
     [
-      accessToken,
       addXp,
       attemptedCount,
       correctCount,

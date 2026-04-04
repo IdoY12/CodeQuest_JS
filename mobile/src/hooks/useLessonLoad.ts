@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import { logError, logNav, logTasks } from "../services/logger";
 import { apiRequest } from "../services/api";
-import { getExercisePoolForLevel } from "../data/personalizedExercisePool";
 import type Exercise from "@/models/Exercise";
 import type { PersonalizationLevel } from "../data/personalizedExercisePool";
 import { applyLessonExercisePayload } from "../utils/lessonExerciseReset";
 
-export function useLessonLoad(lessonId: string, personalizedLevel: PersonalizationLevel | undefined) {
+export function useLessonLoad(
+  lessonId: string,
+  personalizedLevel: PersonalizationLevel | undefined,
+  accessToken: string | null,
+) {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [exerciseIndex, setExerciseIndex] = useState(0);
@@ -24,6 +27,7 @@ export function useLessonLoad(lessonId: string, personalizedLevel: Personalizati
       setLoading(true);
       try {
         if (personalizedLevel) {
+          const { getExercisePoolForLevel } = await import("../data/personalizedExercisePool");
           const payload = getExercisePoolForLevel(personalizedLevel);
           logTasks("lesson:loaded-personalized", { level: personalizedLevel, count: payload.length });
           if (active) {
@@ -34,7 +38,11 @@ export function useLessonLoad(lessonId: string, personalizedLevel: Personalizati
           }
           return;
         }
-        const payload = await apiRequest<Exercise[]>(`/learning/exercises/${lessonId}`);
+        if (!accessToken) {
+          logTasks("lesson:skip-api-no-token", { lessonId });
+          return;
+        }
+        const payload = await apiRequest<Exercise[]>(`/learning/exercises/${lessonId}`, { token: accessToken });
         logTasks("lesson:loaded-api", { lessonId, count: payload.length });
         if (active) {
           applyLessonExercisePayload(
@@ -52,7 +60,7 @@ export function useLessonLoad(lessonId: string, personalizedLevel: Personalizati
     return () => {
       active = false;
     };
-  }, [lessonId, personalizedLevel]);
+  }, [lessonId, personalizedLevel, accessToken]);
 
   return {
     exercises,

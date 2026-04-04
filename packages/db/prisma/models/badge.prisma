@@ -16,4 +16,5 @@ model UserBadge {
   badge    Badge    @relation(fields: [badgeId], references: [id], onDelete: Cascade)
 
   @@id([userId, badgeId])
+  @@index([userId])
 }

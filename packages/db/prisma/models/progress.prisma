@@ -34,6 +34,7 @@ model DailyPracticeLog {
   user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, dateKey])
+  @@index([userId])
 }
 
 model UserExerciseHistory {
@@ -46,4 +47,7 @@ model UserExerciseHistory {
   completedAt DateTime @default(now())
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   exercise    Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([exerciseId])
 }

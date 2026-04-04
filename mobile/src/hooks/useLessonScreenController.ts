@@ -12,10 +12,11 @@ export function useLessonScreenController(
   const lessonTitle = route.params.lessonTitle;
   const personalizedLevel = route.params.personalizedLevel;
   const accessToken = useAppSelector((s) => s.session.accessToken);
-  const load = useLessonLoad(lessonId, personalizedLevel);
+  const lessonSource: "personalized" | "curriculum" = personalizedLevel ? "personalized" : "curriculum";
+  const load = useLessonLoad(lessonId, personalizedLevel, accessToken);
   const exercise = load.exercises[load.exerciseIndex];
   useLessonPracticeTimer(accessToken, exercise, load.loading);
-  const onAnswer = useLessonOnAnswer(
+  const onLessonExerciseComplete = useLessonOnAnswer(
     navigation,
     load.exercises,
     load.exerciseIndex,
@@ -28,5 +29,5 @@ export function useLessonScreenController(
     personalizedLevel,
   );
   const progress = load.exercises.length > 0 ? ((load.exerciseIndex + 1) / load.exercises.length) * 100 : 0;
-  return { ...load, exercise, progress, onAnswer, lessonTitle };
+  return { ...load, exercise, progress, onLessonExerciseComplete, lessonTitle, lessonSource, accessToken };
 }

@@ -1,9 +1,10 @@
 import { Router } from "express";
+import { dailyChallengeGetHandler } from "../controllers/dailyChallenge/dailyChallengeGetHandler.js";
+import { dailyChallengeSubmitHandler } from "../controllers/dailyChallenge/dailyChallengeSubmitHandler.js";
 import { authMiddleware } from "../middlewares/auth.js";
-import { getDailyChallenge, submitDailyChallenge } from "../controllers/dailyChallengeController.js";
 
 export const dailyChallengeRouter = Router();
 
-dailyChallengeRouter.get("/", getDailyChallenge);
+dailyChallengeRouter.get("/", dailyChallengeGetHandler);
 dailyChallengeRouter.use(authMiddleware);
-dailyChallengeRouter.post("/submit", submitDailyChallenge);
+dailyChallengeRouter.post("/submit", dailyChallengeSubmitHandler);

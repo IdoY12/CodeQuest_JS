@@ -9,8 +9,6 @@ import { resetStoresAfterLogout } from "@/utils/resetStoresAfterLogout";
 import type ChangePasswordResponse from "@/models/ChangePasswordResponse";
 import type UserProfile from "@/models/UserProfile";
 
-const LEGACY_ZUSTAND_KEY = "codequest-app-store";
-
 export async function updateUsername(
   token: string,
   name: string,
@@ -65,7 +63,7 @@ export async function deleteAccountRequest(
       token,
       body: JSON.stringify({ confirmation: "DELETE" }),
     });
-    await AsyncStorage.multiRemove([REDUX_PERSIST_KEY, LEGACY_ZUSTAND_KEY]);
+    await AsyncStorage.removeItem(REDUX_PERSIST_KEY);
     resetStoresAfterLogout(dispatch);
     onClose();
   } catch (error) {
@@ -74,6 +72,20 @@ export async function deleteAccountRequest(
   }
 }
 
-export function confirmLogout(dispatch: AppDispatch): void {
-  resetStoresAfterLogout(dispatch);
+export async function confirmLogout(
+  dispatch: AppDispatch,
+  accessToken: string | null,
+  refreshToken: string | null,
+): Promise<void> {
+  try {
+    await apiRequest<{ ok: boolean }>("/auth/logout", {
+      method: "POST",
+      ...(accessToken ? { token: accessToken } : {}),
+      body: JSON.stringify({ refreshToken: refreshToken ?? "" }),
+    });
+  } catch {
+    // Still clear local session if the network call fails.
+  } finally {
+    resetStoresAfterLogout(dispatch);
+  }
 }

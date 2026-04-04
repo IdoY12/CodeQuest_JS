@@ -2,6 +2,7 @@ import React from "react";
 import { View } from "react-native";
 import type Exercise from "@/models/Exercise";
 import { exerciseLineList } from "@/utils/exerciseLineList";
+import type { LessonExerciseCompletionContext } from "@/types/lessonExerciseCompletion.types";
 import { ExerciseCodeFillView } from "../ExerciseCodeFillView/ExerciseCodeFillView";
 import { ExerciseConceptView } from "../ExerciseConceptView/ExerciseConceptView";
 import { ExerciseDragDropView } from "../ExerciseDragDropView/ExerciseDragDropView";
@@ -12,23 +13,31 @@ import { exerciseRendererStyles } from "./ExerciseRenderer.styles";
 
 type Props = {
   exercise: Exercise;
-  onAnswer: (isCorrect: boolean, xp: number, answer: string) => void;
+  lessonSource: "personalized" | "curriculum";
+  accessToken: string | null;
+  onLessonExerciseComplete: (answer: string, context: LessonExerciseCompletionContext) => void;
 };
 
-export function ExerciseRenderer({ exercise, onAnswer }: Props) {
+export function ExerciseRenderer({
+  exercise,
+  lessonSource,
+  accessToken,
+  onLessonExerciseComplete,
+}: Props) {
+  const shared = { exercise, lessonSource, accessToken, onLessonExerciseComplete };
   const node =
     exercise.type === "CONCEPT_CARD" ? (
-      <ExerciseConceptView exercise={exercise} onAnswer={onAnswer} />
+      <ExerciseConceptView {...shared} />
     ) : exercise.type === "MULTIPLE_CHOICE" ? (
-      <ExerciseMcqView exercise={exercise} onAnswer={onAnswer} />
+      <ExerciseMcqView {...shared} />
     ) : exercise.type === "FIND_THE_BUG" ? (
-      <ExerciseFindBugView exercise={exercise} lineList={exerciseLineList(exercise.codeSnippet)} onAnswer={onAnswer} />
+      <ExerciseFindBugView {...shared} lineList={exerciseLineList(exercise.codeSnippet)} />
     ) : exercise.type === "DRAG_DROP" ? (
-      <ExerciseDragDropView exercise={exercise} onAnswer={onAnswer} />
+      <ExerciseDragDropView {...shared} />
     ) : exercise.type === "CODE_FILL" ? (
-      <ExerciseCodeFillView exercise={exercise} onAnswer={onAnswer} />
+      <ExerciseCodeFillView {...shared} />
     ) : (
-      <ExerciseTapTokenView exercise={exercise} onAnswer={onAnswer} />
+      <ExerciseTapTokenView {...shared} />
     );
   return <View style={exerciseRendererStyles.root}>{node}</View>;
 }

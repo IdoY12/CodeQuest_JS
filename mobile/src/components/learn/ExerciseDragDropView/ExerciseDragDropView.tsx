@@ -1,18 +1,65 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import type Exercise from "@/models/Exercise";
+import type ExerciseSubmitResult from "@/models/ExerciseSubmitResult";
 import { useExerciseDragDrop } from "@/hooks/useExerciseDragDrop";
+import type { LessonExerciseCompletionContext } from "@/types/lessonExerciseCompletion.types";
+import { submitCurriculumExerciseAnswer } from "@/utils/submitCurriculumExerciseAnswer";
 import { exerciseDragDropStyles } from "./ExerciseDragDropView.styles";
 
 type Props = {
   exercise: Exercise;
-  onAnswer: (isCorrect: boolean, xp: number, answer: string) => void;
+  lessonSource: "personalized" | "curriculum";
+  accessToken: string | null;
+  onLessonExerciseComplete: (answer: string, context: LessonExerciseCompletionContext) => void;
 };
 
-export function ExerciseDragDropView({ exercise, onAnswer }: Props) {
-  const dd = useExerciseDragDrop(exercise.id, exercise.codeSnippet);
-  const canCheck = dd.orderedSelection.length === dd.lineList.length && !dd.hasChecked;
-  const next = () => onAnswer(Boolean(dd.isCorrect), exercise.xpReward, dd.normalizedAnswer);
+export function ExerciseDragDropView({ exercise, lessonSource, accessToken, onLessonExerciseComplete }: Props) {
+  const dragDrop = useExerciseDragDrop(exercise.id, exercise.codeSnippet);
+  const [serverResult, setServerResult] = useState<ExerciseSubmitResult | null>(null);
+  const [curriculumChecked, setCurriculumChecked] = useState(false);
+  const [curriculumCorrect, setCurriculumCorrect] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    setServerResult(null);
+    setCurriculumChecked(false);
+    setCurriculumCorrect(null);
+  }, [exercise.id]);
+
+  const canCheckPersonalized =
+    dragDrop.orderedSelection.length === dragDrop.lineList.length && !dragDrop.hasChecked;
+  const canCheckCurriculum =
+    dragDrop.orderedSelection.length === dragDrop.lineList.length && !curriculumChecked;
+  const canCheck = lessonSource === "personalized" ? canCheckPersonalized : canCheckCurriculum;
+
+  const runCheck = async () => {
+    if (lessonSource === "personalized") {
+      dragDrop.runCheck(exercise.correctAnswer ?? "");
+      return;
+    }
+    if (!accessToken) return;
+    const result = await submitCurriculumExerciseAnswer(accessToken, exercise, dragDrop.normalizedAnswer);
+    setServerResult(result);
+    setCurriculumCorrect(result.isCorrect);
+    setCurriculumChecked(true);
+  };
+
+  const goNext = () => {
+    if (lessonSource === "personalized") {
+      onLessonExerciseComplete(dragDrop.normalizedAnswer, {
+        source: "personalized",
+        isCorrect: Boolean(dragDrop.isCorrect),
+        xpReward: exercise.xpReward,
+      });
+      return;
+    }
+    if (!serverResult) return;
+    onLessonExerciseComplete(dragDrop.normalizedAnswer, { source: "curriculum", submitResult: serverResult });
+  };
+
+  const showResults = lessonSource === "personalized" ? dragDrop.hasChecked : curriculumChecked;
+  const isCorrectNow = lessonSource === "personalized" ? dragDrop.isCorrect : curriculumCorrect;
+
   return (
     <View style={exerciseDragDropStyles.exerciseCard}>
       <Text style={exerciseDragDropStyles.explanation}>
@@ -20,16 +67,16 @@ export function ExerciseDragDropView({ exercise, onAnswer }: Props) {
       </Text>
       <View style={exerciseDragDropStyles.answerZone}>
         <Text style={exerciseDragDropStyles.answerZoneTitle}>
-          Answer Zone ({dd.orderedSelection.length}/{dd.lineList.length})
+          Answer Zone ({dragDrop.orderedSelection.length}/{dragDrop.lineList.length})
         </Text>
-        {dd.orderedSelection.length === 0 ? (
+        {dragDrop.orderedSelection.length === 0 ? (
           <Text style={exerciseDragDropStyles.answerPreview}>No lines selected yet.</Text>
         ) : (
-          dd.orderedSelection.map((line, idx) => (
+          dragDrop.orderedSelection.map((line, idx) => (
             <Pressable
               key={`${line}-${idx}`}
               style={exerciseDragDropStyles.selectedLine}
-              onPress={() => dd.removeLine(idx, line)}
+              onPress={() => dragDrop.removeLine(idx, line)}
             >
               <Text style={exerciseDragDropStyles.lineText}>{line}</Text>
               <Text style={exerciseDragDropStyles.removeIcon}>×</Text>
@@ -38,36 +85,39 @@ export function ExerciseDragDropView({ exercise, onAnswer }: Props) {
         )}
       </View>
       <Text style={exerciseDragDropStyles.answerZoneTitle}>Line Pool</Text>
-      {dd.poolLines.map((line, idx) => (
-        <Pressable key={`${line}-${idx}`} style={exerciseDragDropStyles.option} onPress={() => dd.addLine(line, idx)}>
+      {dragDrop.poolLines.map((line, idx) => (
+        <Pressable key={`${line}-${idx}`} style={exerciseDragDropStyles.option} onPress={() => dragDrop.addLine(line, idx)}>
           <Text style={exerciseDragDropStyles.optionLabel}>{line}</Text>
         </Pressable>
       ))}
       <Pressable
-        style={[exerciseDragDropStyles.secondaryAction, dd.orderedSelection.length === 0 && exerciseDragDropStyles.disabled]}
-        disabled={dd.orderedSelection.length === 0}
-        onPress={dd.resetOrder}
+        style={[exerciseDragDropStyles.secondaryAction, dragDrop.orderedSelection.length === 0 && exerciseDragDropStyles.disabled]}
+        disabled={dragDrop.orderedSelection.length === 0}
+        onPress={dragDrop.resetOrder}
       >
         <Text style={exerciseDragDropStyles.secondaryActionLabel}>Reset</Text>
       </Pressable>
       <Pressable
         style={[exerciseDragDropStyles.lessonButton, !canCheck && exerciseDragDropStyles.disabled]}
         disabled={!canCheck}
-        onPress={() => dd.runCheck(exercise.correctAnswer)}
+        onPress={() => void runCheck()}
       >
         <Text style={exerciseDragDropStyles.lessonButtonLabel}>Check</Text>
       </Pressable>
-      {dd.hasChecked ? (
+      {showResults ? (
         <>
           <Text
             style={[
               exerciseDragDropStyles.feedback,
-              dd.isCorrect ? exerciseDragDropStyles.feedbackGood : exerciseDragDropStyles.feedbackBad,
+              isCorrectNow ? exerciseDragDropStyles.feedbackGood : exerciseDragDropStyles.feedbackBad,
             ]}
           >
-            {dd.isCorrect ? "Perfect order." : "Order is incorrect. Reset and try again, or continue."}
+            {isCorrectNow ? "Perfect order." : "Order is incorrect. Reset and try again, or continue."}
           </Text>
-          <Pressable style={exerciseDragDropStyles.lessonButton} onPress={next}>
+          {isCorrectNow && serverResult?.explanation ? (
+            <Text style={exerciseDragDropStyles.feedback}>{serverResult.explanation}</Text>
+          ) : null}
+          <Pressable style={exerciseDragDropStyles.lessonButton} onPress={goNext}>
             <Text style={exerciseDragDropStyles.lessonButtonLabel}>Next</Text>
           </Pressable>
         </>

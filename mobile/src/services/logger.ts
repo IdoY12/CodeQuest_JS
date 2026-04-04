@@ -10,6 +10,7 @@ function formatMeta(meta?: LogMeta) {
 }
 
 function write(prefix: string, message: string, meta?: LogMeta) {
+  if (!__DEV__) return;
   const timestamp = new Date().toISOString();
   console.log(`[${timestamp}] ${prefix} ${message}${formatMeta(meta)}`);
 }
@@ -43,6 +44,7 @@ export function logTasks(message: string, meta?: LogMeta) {
 }
 
 export function logError(prefix: string, error: unknown, meta?: LogMeta) {
+  if (!__DEV__) return;
   const payload = {
     ...(meta ?? {}),
     error:

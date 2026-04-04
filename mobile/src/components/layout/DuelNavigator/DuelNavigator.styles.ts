@@ -19,6 +19,7 @@ export const styles = StyleSheet.create({
   scoreRow: { flexDirection: "row", justifyContent: "space-between", marginBottom: spacing.sm },
   score: { color: colors.textPrimary, fontWeight: "800" },
   option: { padding: spacing.md, borderRadius: radius.button, borderWidth: 1, borderColor: colors.border, marginTop: spacing.sm },
+  optionSelected: { borderColor: colors.duel, backgroundColor: "rgba(138,43,226,0.12)" },
   optionLabel: { color: colors.textPrimary, flexShrink: 1, lineHeight: 20 },
   correct: { borderColor: colors.success, backgroundColor: "rgba(78,205,196,0.2)" },
   wrong: { borderColor: colors.danger, backgroundColor: "rgba(255,107,107,0.2)" },

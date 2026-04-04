@@ -1,4 +1,5 @@
 import type { AppDispatch } from "@/redux/store";
+import { clearSecureSessionTokens } from "@/utils/secureSessionTokens";
 import { signOut } from "@/redux/session-slice";
 import { resetProfile } from "@/redux/profile-slice";
 import { resetXp } from "@/redux/xp-slice";
@@ -8,6 +9,7 @@ import { resetStats } from "@/redux/duel-slice";
 import { hydratePuzzle } from "@/redux/puzzle-slice";
 
 export function resetStoresAfterLogout(dispatch: AppDispatch): void {
+  void clearSecureSessionTokens();
   dispatch(signOut());
   dispatch(resetProfile());
   dispatch(resetXp());

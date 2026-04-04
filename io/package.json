@@ -18,14 +18,14 @@
     "schema": "../packages/db/prisma"
   },
   "dependencies": {
+    "@project/auth-jwt": "file:../packages/auth-jwt",
     "@project/db": "file:../packages/db",
+    "@project/server-kit": "file:../packages/server-kit",
     "config": "^4.4.1",
-    "jsonwebtoken": "^9.0.3",
     "socket.io": "^4.8.3"
   },
   "devDependencies": {
     "@types/config": "^3.3.5",
-    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^25.3.3",
     "prisma": "^6.19.0",
     "tsx": "^4.21.0",

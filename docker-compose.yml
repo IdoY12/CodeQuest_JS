@@ -45,7 +45,13 @@ services:
     ports:
       - "4000:4000"
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://localhost:4000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "require('http').get('http://127.0.0.1:4000/health',(r)=>{r.resume();process.exit(r.statusCode===200?0:1);}).on('error',()=>process.exit(1))",
+        ]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -66,7 +72,13 @@ services:
     ports:
       - "4001:4001"
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://localhost:4001/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "require('http').get('http://127.0.0.1:4001/health',(r)=>{r.resume();process.exit(r.statusCode===200?0:1);}).on('error',()=>process.exit(1))",
+        ]
       interval: 10s
       timeout: 5s
       retries: 10

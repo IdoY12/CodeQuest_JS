@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AppState, AppStateStatus, Platform } from "react-native";
 import * as Notifications from "expo-notifications";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { subscribeStoreToHybridStorage } from "@/utils/subscribeReduxPersistToHybridStorage";
+import { clearSecureSessionTokens } from "@/utils/secureSessionTokens";
 import NetInfo from "@react-native-community/netinfo";
 import { QueryClient } from "@tanstack/react-query";
 import store from "@/redux/store";
@@ -91,23 +93,7 @@ export function useAppShell() {
 
   useEffect(() => {
     if (!hasHydrated) return;
-    let previousSerialized = "";
-    const unsubscribe = store.subscribe(() => {
-      const st = store.getState();
-      const serialized = JSON.stringify({
-        session: st.session,
-        profile: st.profile,
-        xp: st.xp,
-        streak: st.streak,
-        lesson: st.lesson,
-        duel: st.duel,
-        puzzle: st.puzzle,
-      });
-      if (serialized === previousSerialized) return;
-      previousSerialized = serialized;
-      void AsyncStorage.setItem(REDUX_PERSIST_KEY, serialized);
-    });
-    return unsubscribe;
+    return subscribeStoreToHybridStorage(store);
   }, [hasHydrated]);
 
   useEffect(() => {
@@ -191,6 +177,7 @@ export function useAppShell() {
             )
             .catch(async () => {
               await AsyncStorage.removeItem(REDUX_PERSIST_KEY);
+              await clearSecureSessionTokens();
               resetStoresAfterLogout(dispatch);
             });
         }

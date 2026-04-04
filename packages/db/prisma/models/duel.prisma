@@ -10,6 +10,8 @@ model DuelQuestion {
   explanation   String       @default("")
   timesUsed     Int          @default(0)
   correctRate   Float        @default(1)
+
+  @@index([category])
 }
 
 model DuelSession {
@@ -27,6 +29,9 @@ model DuelSession {
   player1          User      @relation("Player1Sessions", fields: [player1Id], references: [id], onDelete: Cascade)
   player2          User      @relation("Player2Sessions", fields: [player2Id], references: [id], onDelete: Cascade)
   winner           User?     @relation("WinnerSessions", fields: [winnerId], references: [id], onDelete: SetNull)
+
+  @@index([player1Id])
+  @@index([player2Id])
 }
 
 model DuelRating {

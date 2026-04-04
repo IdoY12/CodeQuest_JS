@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { io, Socket } from "socket.io-client";
+import { io, type Socket } from "socket.io-client";
+import { useAppSelector } from "@/redux/hooks";
 import { logDuel, logError } from "../services/logger";
 import { DUEL_SOCKET_URL } from "../config/network";
 
@@ -8,7 +9,7 @@ interface DuelRound {
   prompt: string;
   codeSnippet: string;
   options: string[];
-  correctAnswer: string;
+  correctAnswer?: string;
   type: "MULTIPLE_CHOICE" | "FIND_THE_BUG" | "TAP_TOKEN" | "CODE_FILL";
 }
 
@@ -36,6 +37,7 @@ interface DuelState {
 
 const listeners = new Set<(state: DuelState) => void>();
 let sharedSocket: Socket | null = null;
+let lastAuthTokenKey = "__init__";
 let currentUserId: string | null = null;
 let sharedState: DuelState = {
   playersOnline: 0,
@@ -51,9 +53,7 @@ function publish(nextState: Partial<DuelState>) {
   listeners.forEach((listener) => listener(sharedState));
 }
 
-function ensureSocket(url: string) {
-  if (sharedSocket) return sharedSocket;
-  const socket = io(url, { transports: ["websocket"] });
+function bindDuelSocketEvents(socket: Socket) {
   socket.on("connect", () => {
     logDuel("socket:connected", { socketId: socket.id });
   });
@@ -62,6 +62,9 @@ function ensureSocket(url: string) {
   });
   socket.on("connect_error", (error) => {
     logError("[DUEL]", error, { phase: "socket-connect" });
+  });
+  socket.on("queue_rejected", (payload: { reason?: string }) => {
+    logDuel("queue:rejected", { reason: payload?.reason });
   });
   socket.on("queue_status", (payload) => {
     publish({ playersOnline: payload.players_online ?? 0 });
@@ -76,14 +79,15 @@ function ensureSocket(url: string) {
     });
   });
   socket.on("round_start", (payload) => {
+    const question = payload.question ?? {};
     publish({
       round: {
         roundNumber: payload.round_number,
-        prompt: payload.question.prompt,
-        codeSnippet: payload.question.code_snippet,
-        options: payload.question.options ?? [],
-        correctAnswer: payload.question.correct_answer ?? "",
-        type: payload.question.type ?? "MULTIPLE_CHOICE",
+        prompt: question.prompt,
+        codeSnippet: question.code_snippet,
+        options: question.options ?? [],
+        correctAnswer: question.correct_answer,
+        type: question.type ?? "MULTIPLE_CHOICE",
       },
     });
   });
@@ -139,6 +143,22 @@ function ensureSocket(url: string) {
       duelEnd: { won: true, ratingDelta: 25, xpEarned: 80, roundReplay: [] },
     });
   });
+}
+
+export function connectDuelSocket(url: string, authToken: string | null): Socket {
+  const tokenKey = authToken ?? "";
+  if (sharedSocket && lastAuthTokenKey === tokenKey) return sharedSocket;
+  if (sharedSocket) {
+    sharedSocket.removeAllListeners();
+    sharedSocket.disconnect();
+    sharedSocket = null;
+  }
+  lastAuthTokenKey = tokenKey;
+  const socket = io(url, {
+    transports: ["websocket"],
+    auth: { token: tokenKey },
+  });
+  bindDuelSocketEvents(socket);
   sharedSocket = socket;
   return socket;
 }
@@ -146,17 +166,17 @@ function ensureSocket(url: string) {
 export function useDuelSocket() {
   const [state, setState] = useState<DuelState>(sharedState);
   const mockTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
+  const accessToken = useAppSelector((s) => s.session.accessToken);
   const url = useMemo(() => DUEL_SOCKET_URL, []);
 
   useEffect(() => {
-    ensureSocket(url);
+    connectDuelSocket(url, accessToken);
     const listener = (nextState: DuelState) => setState(nextState);
     listeners.add(listener);
     return () => {
       listeners.delete(listener);
     };
-  }, [url]);
+  }, [accessToken, url]);
 
   useEffect(() => {
     return () => {
@@ -190,9 +210,9 @@ export function useDuelSocket() {
 
   const joinQueue = useCallback(
     (payload: { userId: string; username: string; rating: number; token?: string | null }) => {
-      const socket = ensureSocket(url);
+      const socket = connectDuelSocket(url, payload.token ?? null);
       currentUserId = payload.userId;
-      socket.emit("join_queue", payload);
+      socket.emit("join_queue", { rating: payload.rating, username: payload.username });
     },
     [url],
   );
@@ -202,13 +222,10 @@ export function useDuelSocket() {
     sharedSocket.emit("leave_queue");
   }, []);
 
-  const playerReady = useCallback(
-    (sessionId: string) => {
-      if (!sharedSocket) return;
-      sharedSocket.emit("player_ready", { session_id: sessionId });
-    },
-    [],
-  );
+  const playerReady = useCallback((sessionId: string) => {
+    if (!sharedSocket) return;
+    sharedSocket.emit("player_ready", { session_id: sessionId });
+  }, []);
 
   const submitAnswer = useCallback(
     (payload: {

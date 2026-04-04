@@ -1,11 +1,20 @@
+/**
+ * Boots the CodeQuest Socket.IO duel server with health checks and CORS.
+ *
+ * Responsibility: HTTP health server, Socket.IO setup, DB connect, duel namespace.
+ * Layer: io service entry
+ * Depends on: config, @project/db, @project/server-kit, duel namespace
+ * Consumers: node dist/index.js in production
+ */
+
 import config from "config";
 import http from "http";
 import { Server } from "socket.io";
 import { connectDatabase } from "@project/db";
+import { resolveSocketIoCors } from "@project/server-kit/cors";
+import { logError, logInfo } from "@project/server-kit/logger";
+import { validateIoProductionSecuritySettings } from "@project/server-kit/validateIoSecurity";
 import { attachDuelNamespace } from "./socket/duel/index.js";
-import { validateProductionSecuritySettings } from "./utils/configValidation.js";
-import { logError, logInfo } from "./utils/logger.js";
-import { resolveSocketIoCors } from "./utils/runtimeConfig.js";
 
 process.on("unhandledRejection", (reason) => {
   logError("[IO]", reason, { type: "unhandledRejection" });
@@ -14,7 +23,7 @@ process.on("uncaughtException", (error) => {
   logError("[IO]", error, { type: "uncaughtException" });
 });
 
-validateProductionSecuritySettings();
+validateIoProductionSecuritySettings();
 await connectDatabase();
 
 const server = http.createServer((req, res) => {

@@ -1,5 +1,13 @@
+/**
+ * Authenticated user profile, progress, onboarding, and account management routes.
+ *
+ * Responsibility: mount user handlers behind authMiddleware.
+ * Layer: backend HTTP
+ * Depends on: controllers/user/index.js, authMiddleware
+ * Consumers: app.ts
+ */
+
 import { Router } from "express";
-import { authMiddleware } from "../middlewares/auth.js";
 import {
   deleteAccount,
   getAvatarPresignedUrl,
@@ -15,7 +23,8 @@ import {
   postDailyGoalStatusMarkNotified,
   postOnboarding,
   postPracticeLog,
-} from "../controllers/userController.js";
+} from "../controllers/user/index.js";
+import { authMiddleware } from "../middlewares/auth.js";
 
 export const userRouter = Router();
 userRouter.use(authMiddleware);

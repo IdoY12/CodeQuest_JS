@@ -1,0 +1,36 @@
+{
+  "name": "@project/server-kit",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./logger": {
+      "types": "./dist/logger/index.d.ts",
+      "import": "./dist/logger/index.js"
+    },
+    "./cors": {
+      "types": "./dist/cors/index.d.ts",
+      "import": "./dist/cors/index.js"
+    },
+    "./validateBackendSecurity": {
+      "types": "./dist/validate/validateBackendSecurity.d.ts",
+      "import": "./dist/validate/validateBackendSecurity.js"
+    },
+    "./validateIoSecurity": {
+      "types": "./dist/validate/validateIoSecurity.d.ts",
+      "import": "./dist/validate/validateIoSecurity.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "config": "^4.4.1"
+  },
+  "devDependencies": {
+    "@types/config": "^3.3.5",
+    "@types/node": "^25.3.3",
+    "typescript": "^5.9.3"
+  }
+}

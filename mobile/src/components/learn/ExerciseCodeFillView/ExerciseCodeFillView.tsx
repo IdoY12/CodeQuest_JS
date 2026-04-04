@@ -1,23 +1,62 @@
-import React from "react";
+import React, { useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import { colors } from "@/theme/theme";
 import type Exercise from "@/models/Exercise";
+import type ExerciseSubmitResult from "@/models/ExerciseSubmitResult";
 import { CODE_FILL_DEFAULT_TOKENS } from "@/constants/codeFillDefaults";
 import { useExerciseCodeFill } from "@/hooks/useExerciseCodeFill";
+import type { LessonExerciseCompletionContext } from "@/types/lessonExerciseCompletion.types";
+import { submitCurriculumExerciseAnswer } from "@/utils/submitCurriculumExerciseAnswer";
 import { exerciseCodeFillStyles } from "./ExerciseCodeFillView.styles";
 
 type Props = {
   exercise: Exercise;
-  onAnswer: (isCorrect: boolean, xp: number, answer: string) => void;
+  lessonSource: "personalized" | "curriculum";
+  accessToken: string | null;
+  onLessonExerciseComplete: (answer: string, context: LessonExerciseCompletionContext) => void;
 };
 
-export function ExerciseCodeFillView({ exercise, onAnswer }: Props) {
-  const cf = useExerciseCodeFill(exercise.id, exercise.correctAnswer);
+export function ExerciseCodeFillView({ exercise, lessonSource, accessToken, onLessonExerciseComplete }: Props) {
+  const cf = useExerciseCodeFill(exercise.id, exercise.correctAnswer ?? "");
+  const [serverResult, setServerResult] = useState<ExerciseSubmitResult | null>(null);
+  const [curriculumChecked, setCurriculumChecked] = useState(false);
+  const [curriculumCorrect, setCurriculumCorrect] = useState<boolean | null>(null);
   const tokens =
-    exercise.options.length > 0 ? exercise.options.map((o) => o.text) : [...CODE_FILL_DEFAULT_TOKENS];
-  const canCheck = cf.input.trim().length > 0 && !cf.hasChecked;
-  const next = () => onAnswer(Boolean(cf.isCorrect), exercise.xpReward, cf.input);
-  const append = (t: string) => cf.setInput((v) => `${v}${t}`);
+    exercise.options.length > 0 ? exercise.options.map((option) => option.text) : [...CODE_FILL_DEFAULT_TOKENS];
+  const canCheckPersonalized = cf.input.trim().length > 0 && !cf.hasChecked;
+  const canCheckCurriculum = cf.input.trim().length > 0 && !curriculumChecked;
+  const canCheck = lessonSource === "personalized" ? canCheckPersonalized : canCheckCurriculum;
+
+  const runCheck = async () => {
+    if (lessonSource === "personalized") {
+      cf.runCheck();
+      return;
+    }
+    if (!accessToken) return;
+    const result = await submitCurriculumExerciseAnswer(accessToken, exercise, cf.input.trim());
+    setServerResult(result);
+    setCurriculumCorrect(result.isCorrect);
+    setCurriculumChecked(true);
+  };
+
+  const goNext = () => {
+    if (lessonSource === "personalized") {
+      onLessonExerciseComplete(cf.input, {
+        source: "personalized",
+        isCorrect: Boolean(cf.isCorrect),
+        xpReward: exercise.xpReward,
+      });
+      return;
+    }
+    if (!serverResult) return;
+    onLessonExerciseComplete(cf.input.trim(), { source: "curriculum", submitResult: serverResult });
+  };
+
+  const showResults = lessonSource === "personalized" ? cf.hasChecked : curriculumChecked;
+  const isCorrectNow = lessonSource === "personalized" ? cf.isCorrect : curriculumCorrect;
+
+  const append = (token: string) => cf.setInput((previous) => `${previous}${token}`);
+
   return (
     <View style={exerciseCodeFillStyles.exerciseCard}>
       <TextInput
@@ -38,21 +77,24 @@ export function ExerciseCodeFillView({ exercise, onAnswer }: Props) {
       <Pressable
         style={[exerciseCodeFillStyles.lessonButton, !canCheck && exerciseCodeFillStyles.disabled]}
         disabled={!canCheck}
-        onPress={cf.runCheck}
+        onPress={() => void runCheck()}
       >
         <Text style={exerciseCodeFillStyles.lessonButtonLabel}>Submit</Text>
       </Pressable>
-      {cf.hasChecked ? (
+      {showResults ? (
         <>
           <Text
             style={[
               exerciseCodeFillStyles.feedback,
-              cf.isCorrect ? exerciseCodeFillStyles.feedbackGood : exerciseCodeFillStyles.feedbackBad,
+              isCorrectNow ? exerciseCodeFillStyles.feedbackGood : exerciseCodeFillStyles.feedbackBad,
             ]}
           >
-            {cf.isCorrect ? "Nice work." : "Try another token combination next time."}
+            {isCorrectNow ? "Nice work." : "Try another token combination next time."}
           </Text>
-          <Pressable style={exerciseCodeFillStyles.lessonButton} onPress={next}>
+          {isCorrectNow && serverResult?.explanation ? (
+            <Text style={exerciseCodeFillStyles.feedback}>{serverResult.explanation}</Text>
+          ) : null}
+          <Pressable style={exerciseCodeFillStyles.lessonButton} onPress={goNext}>
             <Text style={exerciseCodeFillStyles.lessonButtonLabel}>Next</Text>
           </Pressable>
         </>

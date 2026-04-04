@@ -8,11 +8,16 @@
     "packages/*"
   ],
   "scripts": {
+    "postinstall": "patch-package",
     "db:generate": "npm --prefix packages/db run prisma:generate",
     "backend:dev": "npm --prefix backend run dev",
     "backend:build": "npm --prefix backend run build",
     "io:dev": "npm --prefix io run dev",
     "io:build": "npm --prefix io run build",
-    "mobile:start": "npm --prefix mobile run start"
+    "mobile:start": "npm --prefix mobile run start",
+    "typecheck:all": "npm --prefix backend run typecheck && npm --prefix io run typecheck && npm --prefix mobile run typecheck && npm --prefix packages/auth-jwt run typecheck && npm --prefix packages/daily-puzzles run typecheck && npm --prefix packages/personalized-exercises run typecheck && npm --prefix packages/server-kit run typecheck && npm --prefix packages/db run typecheck"
+  },
+  "devDependencies": {
+    "patch-package": "^8.0.1"
   }
 }

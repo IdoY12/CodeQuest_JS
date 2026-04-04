@@ -17,8 +17,10 @@ export function navigateToPersonalizedLesson(
 export async function navigateToChapterLesson(
   navigation: LearnRoadmapNavigation,
   chapterId: string,
+  accessToken: string | null,
 ): Promise<void> {
-  const lessons = await apiRequest<Lesson[]>(`/learning/lessons/${chapterId}`);
+  if (!accessToken) return;
+  const lessons = await apiRequest<Lesson[]>(`/learning/lessons/${chapterId}`, { token: accessToken });
   if (lessons.length === 0) return;
   navigation.navigate("Lesson", { lessonId: lessons[0].id, lessonTitle: lessons[0].title });
 }

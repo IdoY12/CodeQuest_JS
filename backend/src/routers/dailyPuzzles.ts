@@ -1,7 +1,8 @@
 import { Router } from "express";
-import { getDailyPuzzleToday, validateDailyPuzzleAnswer } from "../controllers/dailyPuzzleContentController.js";
+import { dailyPuzzleTodayHandler } from "../controllers/dailyPuzzle/dailyPuzzleTodayHandler.js";
+import { dailyPuzzleValidateHandler } from "../controllers/dailyPuzzle/dailyPuzzleValidateHandler.js";
 
 export const dailyPuzzlesRouter = Router();
 
-dailyPuzzlesRouter.get("/today", getDailyPuzzleToday);
-dailyPuzzlesRouter.post("/validate", validateDailyPuzzleAnswer);
+dailyPuzzlesRouter.get("/today", dailyPuzzleTodayHandler);
+dailyPuzzlesRouter.post("/validate", dailyPuzzleValidateHandler);

@@ -1,0 +1,277 @@
+diff --git a/node_modules/react-native/Libraries/Components/ActivityIndicator/ActivityIndicator.d.ts b/node_modules/react-native/Libraries/Components/ActivityIndicator/ActivityIndicator.d.ts
+index f1a4b24..5abe2d8 100644
+--- a/node_modules/react-native/Libraries/Components/ActivityIndicator/ActivityIndicator.d.ts
++++ b/node_modules/react-native/Libraries/Components/ActivityIndicator/ActivityIndicator.d.ts
+@@ -8,8 +8,6 @@
+  */
+ 
+ import type * as React from 'react';
+-import {Constructor} from '../../../types/private/Utilities';
+-import {NativeMethods} from '../../../types/public/ReactNativeTypes';
+ import {ColorValue, StyleProp} from '../../StyleSheet/StyleSheet';
+ import {ViewStyle} from '../../StyleSheet/StyleSheetTypes';
+ import {LayoutChangeEvent} from '../../Types/CoreEventTypes';
+@@ -46,9 +44,7 @@ export interface ActivityIndicatorProps extends ViewProps {
+ }
+ 
+ declare class ActivityIndicatorComponent extends React.Component<ActivityIndicatorProps> {}
+-declare const ActivityIndicatorBase: Constructor<NativeMethods> &
+-  typeof ActivityIndicatorComponent;
+-export class ActivityIndicator extends ActivityIndicatorBase {}
++export class ActivityIndicator extends ActivityIndicatorComponent {}
+ 
+ /**
+  * @see https://reactnative.dev/docs/activityindicatorios#props
+diff --git a/node_modules/react-native/Libraries/Components/DrawerAndroid/DrawerLayoutAndroid.d.ts b/node_modules/react-native/Libraries/Components/DrawerAndroid/DrawerLayoutAndroid.d.ts
+index e6756ff..3972093 100644
+--- a/node_modules/react-native/Libraries/Components/DrawerAndroid/DrawerLayoutAndroid.d.ts
++++ b/node_modules/react-native/Libraries/Components/DrawerAndroid/DrawerLayoutAndroid.d.ts
+@@ -8,8 +8,6 @@
+  */
+ 
+ import type * as React from 'react';
+-import {Constructor} from '../../../types/private/Utilities';
+-import {NativeMethods} from '../../../types/public/ReactNativeTypes';
+ import {ColorValue} from '../../StyleSheet/StyleSheet';
+ import {
+   NativeSyntheticEvent,
+@@ -121,9 +119,7 @@ interface DrawerPosition {
+ }
+ 
+ declare class DrawerLayoutAndroidComponent extends React.Component<DrawerLayoutAndroidProps> {}
+-declare const DrawerLayoutAndroidBase: Constructor<NativeMethods> &
+-  typeof DrawerLayoutAndroidComponent;
+-export class DrawerLayoutAndroid extends DrawerLayoutAndroidBase {
++export class DrawerLayoutAndroid extends DrawerLayoutAndroidComponent {
+   /**
+    * drawer's positions.
+    */
+diff --git a/node_modules/react-native/Libraries/Components/ProgressBarAndroid/ProgressBarAndroid.d.ts b/node_modules/react-native/Libraries/Components/ProgressBarAndroid/ProgressBarAndroid.d.ts
+index a368adf..375ebbd 100644
+--- a/node_modules/react-native/Libraries/Components/ProgressBarAndroid/ProgressBarAndroid.d.ts
++++ b/node_modules/react-native/Libraries/Components/ProgressBarAndroid/ProgressBarAndroid.d.ts
+@@ -8,8 +8,6 @@
+  */
+ 
+ import type * as React from 'react';
+-import {Constructor} from '../../../types/private/Utilities';
+-import {NativeMethods} from '../../../types/public/ReactNativeTypes';
+ import {ColorValue} from '../../StyleSheet/StyleSheet';
+ import {ViewProps} from '../View/ViewPropTypes';
+ 
+@@ -72,12 +70,10 @@ export interface ProgressBarAndroidProps extends ViewProps {
+  * that the app is loading or there is some activity in the app.
+  */
+ declare class ProgressBarAndroidComponent extends React.Component<ProgressBarAndroidProps> {}
+-declare const ProgressBarAndroidBase: Constructor<NativeMethods> &
+-  typeof ProgressBarAndroidComponent;
+ /**
+  * ProgressBarAndroid has been extracted from react-native core and will be removed in a future release.
+  * It can now be installed and imported from `@react-native-community/progress-bar-android` instead of 'react-native'.
+  * @see https://github.com/react-native-progress-view/progress-bar-android
+  * @deprecated
+  */
+-export class ProgressBarAndroid extends ProgressBarAndroidBase {}
++export class ProgressBarAndroid extends ProgressBarAndroidComponent {}
+diff --git a/node_modules/react-native/Libraries/Components/RefreshControl/RefreshControl.d.ts b/node_modules/react-native/Libraries/Components/RefreshControl/RefreshControl.d.ts
+index 81eba74..6da97f5 100644
+--- a/node_modules/react-native/Libraries/Components/RefreshControl/RefreshControl.d.ts
++++ b/node_modules/react-native/Libraries/Components/RefreshControl/RefreshControl.d.ts
+@@ -8,8 +8,6 @@
+  */
+ 
+ import type * as React from 'react';
+-import {Constructor} from '../../../types/private/Utilities';
+-import {NativeMethods} from '../../../types/public/ReactNativeTypes';
+ import {ColorValue} from '../../StyleSheet/StyleSheet';
+ import {ViewProps} from '../View/ViewPropTypes';
+ 
+@@ -80,8 +78,6 @@ export interface RefreshControlProps
+  * in the `onRefresh` function otherwise the refresh indicator will stop immediately.
+  */
+ declare class RefreshControlComponent extends React.Component<RefreshControlProps> {}
+-declare const RefreshControlBase: Constructor<NativeMethods> &
+-  typeof RefreshControlComponent;
+-export class RefreshControl extends RefreshControlBase {
++export class RefreshControl extends RefreshControlComponent {
+   static SIZE: Object; // Undocumented
+ }
+diff --git a/node_modules/react-native/Libraries/Components/SafeAreaView/SafeAreaView.d.ts b/node_modules/react-native/Libraries/Components/SafeAreaView/SafeAreaView.d.ts
+index 6fa77f5..e5e537b 100644
+--- a/node_modules/react-native/Libraries/Components/SafeAreaView/SafeAreaView.d.ts
++++ b/node_modules/react-native/Libraries/Components/SafeAreaView/SafeAreaView.d.ts
+@@ -8,8 +8,6 @@
+  */
+ 
+ import type * as React from 'react';
+-import {Constructor} from '../../../types/private/Utilities';
+-import {NativeMethods} from '../../../types/public/ReactNativeTypes';
+ import {ViewProps} from '../View/ViewPropTypes';
+ 
+ /**
+@@ -23,11 +21,8 @@ import {ViewProps} from '../View/ViewPropTypes';
+  */
+ declare class SafeAreaViewComponent extends React.Component<ViewProps> {}
+ 
+-declare const SafeAreaViewBase: Constructor<NativeMethods> &
+-  typeof SafeAreaViewComponent;
+-
+ /**
+  * @deprecated
+  * Use `react-native-safe-area-context` instead. This component is deprecated and will be removed in a future release.
+  */
+-export class SafeAreaView extends SafeAreaViewBase {}
++export class SafeAreaView extends SafeAreaViewComponent {}
+diff --git a/node_modules/react-native/Libraries/Components/ScrollView/ScrollView.d.ts b/node_modules/react-native/Libraries/Components/ScrollView/ScrollView.d.ts
+index b6e538d..3f31fee 100644
+--- a/node_modules/react-native/Libraries/Components/ScrollView/ScrollView.d.ts
++++ b/node_modules/react-native/Libraries/Components/ScrollView/ScrollView.d.ts
+@@ -8,7 +8,6 @@
+  */
+ 
+ import type * as React from 'react';
+-import {Constructor} from '../../../types/private/Utilities';
+ import {Insets} from '../../../types/public/Insets';
+ import {HostInstance} from '../../../types/public/ReactNativeTypes';
+ import {ColorValue, StyleProp} from '../../StyleSheet/StyleSheet';
+@@ -828,9 +827,7 @@ export interface ScrollViewProps
+ }
+ 
+ declare class ScrollViewComponent extends React.Component<ScrollViewProps> {}
+-export declare const ScrollViewBase: Constructor<ScrollResponderMixin> &
+-  typeof ScrollViewComponent;
+-export class ScrollView extends ScrollViewBase {
++export class ScrollView extends ScrollViewComponent {
+   /**
+    * Scrolls to a given x, y offset, either immediately or with a smooth animation.
+    * Syntax:
+diff --git a/node_modules/react-native/Libraries/Components/Switch/Switch.d.ts b/node_modules/react-native/Libraries/Components/Switch/Switch.d.ts
+index c875390..220597b 100644
+--- a/node_modules/react-native/Libraries/Components/Switch/Switch.d.ts
++++ b/node_modules/react-native/Libraries/Components/Switch/Switch.d.ts
+@@ -8,8 +8,6 @@
+  */
+ 
+ import type * as React from 'react';
+-import {Constructor} from '../../../types/private/Utilities';
+-import {NativeMethods} from '../../../types/public/ReactNativeTypes';
+ import {ColorValue, StyleProp} from '../../StyleSheet/StyleSheet';
+ import {ViewStyle} from '../../StyleSheet/StyleSheetTypes';
+ import {ViewProps} from '../View/ViewPropTypes';
+@@ -114,5 +112,4 @@ export interface SwitchProps extends SwitchPropsIOS {
+  * the supplied `value` prop instead of the expected result of any user actions.
+  */
+ declare class SwitchComponent extends React.Component<SwitchProps> {}
+-declare const SwitchBase: Constructor<NativeMethods> & typeof SwitchComponent;
+-export class Switch extends SwitchBase {}
++export class Switch extends SwitchComponent {}
+diff --git a/node_modules/react-native/Libraries/Components/TextInput/TextInput.d.ts b/node_modules/react-native/Libraries/Components/TextInput/TextInput.d.ts
+index b3ca156..22cf62e 100644
+--- a/node_modules/react-native/Libraries/Components/TextInput/TextInput.d.ts
++++ b/node_modules/react-native/Libraries/Components/TextInput/TextInput.d.ts
+@@ -8,12 +8,7 @@
+  */
+ 
+ import type * as React from 'react';
+-import {Constructor} from '../../../types/private/Utilities';
+-import {TimerMixin} from '../../../types/private/TimerMixin';
+-import {
+-  HostInstance,
+-  NativeMethods,
+-} from '../../../types/public/ReactNativeTypes';
++import {HostInstance} from '../../../types/public/ReactNativeTypes';
+ import {ColorValue, StyleProp} from '../../StyleSheet/StyleSheet';
+ import {TextStyle} from '../../StyleSheet/StyleSheetTypes';
+ import {
+@@ -1029,10 +1024,7 @@ interface TextInputState {
+  * @see https://reactnative.dev/docs/textinput#methods
+  */
+ declare class TextInputComponent extends React.Component<TextInputProps> {}
+-declare const TextInputBase: Constructor<NativeMethods> &
+-  Constructor<TimerMixin> &
+-  typeof TextInputComponent;
+-export class TextInput extends TextInputBase {
++export class TextInput extends TextInputComponent {
+   /**
+    * Access the current focus state.
+    */
+diff --git a/node_modules/react-native/Libraries/Components/View/View.d.ts b/node_modules/react-native/Libraries/Components/View/View.d.ts
+index 5fbb529..96a088e 100644
+--- a/node_modules/react-native/Libraries/Components/View/View.d.ts
++++ b/node_modules/react-native/Libraries/Components/View/View.d.ts
+@@ -8,9 +8,7 @@
+  */
+ 
+ import type * as React from 'react';
+-import {Constructor} from '../../../types/private/Utilities';
+ import {ViewProps} from './ViewPropTypes';
+-import {NativeMethods} from '../../../types/public/ReactNativeTypes';
+ 
+ /**
+  * The most fundamental component for building UI, View is a container that supports layout with flexbox, style, some touch handling,
+@@ -19,8 +17,7 @@ import {NativeMethods} from '../../../types/public/ReactNativeTypes';
+  * whether that is a UIView, <div>, android.view, etc.
+  */
+ declare class ViewComponent extends React.Component<ViewProps> {}
+-declare const ViewBase: Constructor<NativeMethods> & typeof ViewComponent;
+-export class View extends ViewBase {
++export class View extends ViewComponent {
+   /**
+    * Is 3D Touch / Force Touch available (i.e. will touch events include `force`)
+    * @platform ios
+diff --git a/node_modules/react-native/Libraries/Image/Image.d.ts b/node_modules/react-native/Libraries/Image/Image.d.ts
+index 4ebf9eb..66b5d5c 100644
+--- a/node_modules/react-native/Libraries/Image/Image.d.ts
++++ b/node_modules/react-native/Libraries/Image/Image.d.ts
+@@ -8,10 +8,8 @@
+  */
+ 
+ import * as React from 'react';
+-import {Constructor} from '../../types/private/Utilities';
+ import {AccessibilityProps} from '../Components/View/ViewAccessibility';
+ import {Insets} from '../../types/public/Insets';
+-import {NativeMethods} from '../../types/public/ReactNativeTypes';
+ import {ColorValue, StyleProp} from '../StyleSheet/StyleSheet';
+ import {ImageStyle, ViewStyle} from '../StyleSheet/StyleSheetTypes';
+ import {LayoutChangeEvent, NativeSyntheticEvent} from '../Types/CoreEventTypes';
+@@ -338,8 +336,7 @@ export interface ImageSize {
+ }
+ 
+ declare class ImageComponent extends React.Component<ImageProps> {}
+-declare const ImageBase: Constructor<NativeMethods> & typeof ImageComponent;
+-export class Image extends ImageBase {
++export class Image extends ImageComponent {
+   static getSize(uri: string): Promise<ImageSize>;
+   static getSize(
+     uri: string,
+@@ -384,6 +381,4 @@ export interface ImageBackgroundProps extends ImagePropsBase {
+ }
+ 
+ declare class ImageBackgroundComponent extends React.Component<ImageBackgroundProps> {}
+-declare const ImageBackgroundBase: Constructor<NativeMethods> &
+-  typeof ImageBackgroundComponent;
+-export class ImageBackground extends ImageBackgroundBase {}
++export class ImageBackground extends ImageBackgroundComponent {}
+diff --git a/node_modules/react-native/Libraries/Text/Text.d.ts b/node_modules/react-native/Libraries/Text/Text.d.ts
+index 9133cec..80aeb50 100644
+--- a/node_modules/react-native/Libraries/Text/Text.d.ts
++++ b/node_modules/react-native/Libraries/Text/Text.d.ts
+@@ -8,9 +8,7 @@
+  */
+ 
+ import type * as React from 'react';
+-import {Constructor} from '../../types/private/Utilities';
+ import {AccessibilityProps} from '../Components/View/ViewAccessibility';
+-import {NativeMethods} from '../../types/public/ReactNativeTypes';
+ import {ColorValue, StyleProp} from '../StyleSheet/StyleSheet';
+ import {TextStyle, ViewStyle} from '../StyleSheet/StyleSheetTypes';
+ import {
+@@ -224,7 +222,6 @@ export interface TextProps
+  * A React component for displaying text which supports nesting, styling, and touch handling.
+  */
+ declare class TextComponent extends React.Component<TextProps> {}
+-declare const TextBase: Constructor<NativeMethods> & typeof TextComponent;
+-export class Text extends TextBase {}
++export class Text extends TextComponent {}
+ 
+ export const unstable_TextAncestorContext: React.Context<boolean>;

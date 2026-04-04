@@ -1,0 +1,50 @@
+{
+  "name": "@project/auth-jwt",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/authTokenPayload.js",
+  "types": "dist/authTokenPayload.d.ts",
+  "exports": {
+    "./authTokenPayload": {
+      "types": "./dist/authTokenPayload.d.ts",
+      "import": "./dist/authTokenPayload.js"
+    },
+    "./signAccessToken": {
+      "types": "./dist/signAccessToken.d.ts",
+      "import": "./dist/signAccessToken.js"
+    },
+    "./signRefreshToken": {
+      "types": "./dist/signRefreshToken.d.ts",
+      "import": "./dist/signRefreshToken.js"
+    },
+    "./verifyAccessToken": {
+      "types": "./dist/verifyAccessToken.d.ts",
+      "import": "./dist/verifyAccessToken.js"
+    },
+    "./verifyRefreshToken": {
+      "types": "./dist/verifyRefreshToken.d.ts",
+      "import": "./dist/verifyRefreshToken.js"
+    },
+    "./accessTokenJwtExpiry": {
+      "types": "./dist/accessTokenJwtExpiry.d.ts",
+      "import": "./dist/accessTokenJwtExpiry.js"
+    },
+    "./refreshTokenJwtExpiry": {
+      "types": "./dist/refreshTokenJwtExpiry.d.ts",
+      "import": "./dist/refreshTokenJwtExpiry.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "jsonwebtoken": "^9.0.3"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^25.3.3",
+    "typescript": "^5.9.3"
+  }
+}

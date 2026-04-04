@@ -19,6 +19,7 @@ export function useProfileRedux() {
   const soundsEnabled = useAppSelector((s) => s.profile.soundsEnabled);
   const hapticsEnabled = useAppSelector((s) => s.profile.hapticsEnabled);
   const accessToken = useAppSelector((s) => s.session.accessToken);
+  const refreshToken = useAppSelector((s) => s.session.refreshToken);
   const duelTotal = duelWins + duelLosses;
   const duelWinRate = duelTotal > 0 ? `${Math.round((duelWins / duelTotal) * 100)}%` : "0%";
   return {
@@ -40,6 +41,7 @@ export function useProfileRedux() {
     soundsEnabled,
     hapticsEnabled,
     accessToken,
+    refreshToken,
     duelWinRate,
   };
 }

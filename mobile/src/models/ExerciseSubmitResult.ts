@@ -1,3 +1,6 @@
 export default interface ExerciseSubmitResult {
-    xpEarned: number
+  isCorrect: boolean;
+  xpEarned: number;
+  correctAnswer?: string;
+  explanation?: string;
 }

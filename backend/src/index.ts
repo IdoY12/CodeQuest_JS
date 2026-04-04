@@ -1,8 +1,17 @@
+/**
+ * HTTP server bootstrap: env validation, DB connect, listen on configured host/port.
+ *
+ * Responsibility: process-level error hooks and start listening for the REST API.
+ * Layer: backend process entry
+ * Depends on: config, @project/db, @project/server-kit, ./app.js
+ * Consumers: node dist/index.js
+ */
+
 import config from "config";
 import http from "http";
 import { connectDatabase } from "@project/db";
+import { validateBackendProductionSecuritySettings } from "@project/server-kit/validateBackendSecurity";
 import { app } from "./app.js";
-import { validateProductionSecuritySettings } from "./utils/configValidation.js";
 import { logError, logInfo } from "./utils/logger.js";
 
 process.on("unhandledRejection", (reason) => {
@@ -12,7 +21,7 @@ process.on("uncaughtException", (error) => {
   logError("[APP]", error, { type: "uncaughtException" });
 });
 
-validateProductionSecuritySettings();
+validateBackendProductionSecuritySettings();
 
 await connectDatabase();
 

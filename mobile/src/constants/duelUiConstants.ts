@@ -1,0 +1,1 @@
+export const DUEL_ACTIVE_ROUND_SECONDS = 15;

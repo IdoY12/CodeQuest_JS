@@ -3,7 +3,13 @@ import { colors, fontSize, radius, spacing } from "@/theme/theme";
 
 export const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  content: { flexGrow: 1, justifyContent: "center", padding: spacing.xxl, paddingTop: spacing.huge, paddingBottom: spacing.xl },
+  content: {
+    flexGrow: 1,
+    justifyContent: "center",
+    padding: spacing.xxl,
+    paddingTop: spacing.huge,
+    paddingBottom: spacing.xl,
+  },
   secondaryButton: {
     marginTop: spacing.md,
     backgroundColor: colors.surface,

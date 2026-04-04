@@ -1,21 +1,35 @@
-import { useEffect, useState } from "react";
-import { logError, logNav, logTasks } from "../services/logger";
-import { apiRequest } from "../services/api";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { AppState, type AppStateStatus } from "react-native";
+import { useIsFocused } from "@react-navigation/native";
+import { logNav } from "@/services/logger";
 import type Exercise from "@/models/Exercise";
-import type { PersonalizationLevel } from "../data/personalizedExercisePool";
-import { applyLessonExercisePayload } from "../utils/lessonExerciseReset";
+import type { PersonalizationLevel } from "@/data/personalizedExercisePool";
+import { useService } from "@/hooks/useService";
+import LearningService from "@/services/LearningService";
+import UserService from "@/services/UserService";
+import { drainRefInt } from "@/utils/formatHelpers";
 
 export function useLessonLoad(
   lessonId: string,
   personalizedLevel: PersonalizationLevel | undefined,
   accessToken: string | null,
 ) {
+  const learning = useService(LearningService);
+  const user = useService(UserService);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [exerciseIndex, setExerciseIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [attemptedCount, setAttemptedCount] = useState(0);
-
+  const isFocused = useIsFocused();
+  const appStateRef = useRef<AppStateStatus>(AppState.currentState);
+  const trackedRef = useRef(0);
+  const flushPractice = useCallback(async () => {
+    if (!accessToken || trackedRef.current <= 0) return;
+    const seconds = drainRefInt(trackedRef);
+    const ok = await user.tryPostPracticeLog(seconds);
+    if (!ok) trackedRef.current += seconds;
+  }, [accessToken, user]);
   useEffect(() => {
     logNav("screen:enter", { screen: "LessonScreen", lessonId });
     return () => logNav("screen:leave", { screen: "LessonScreen", lessonId });
@@ -23,53 +37,36 @@ export function useLessonLoad(
 
   useEffect(() => {
     let active = true;
-    const run = async () => {
-      setLoading(true);
-      try {
-        if (personalizedLevel) {
-          const { getExercisePoolForLevel } = await import("../data/personalizedExercisePool");
-          const payload = getExercisePoolForLevel(personalizedLevel);
-          logTasks("lesson:loaded-personalized", { level: personalizedLevel, count: payload.length });
-          if (active) {
-            applyLessonExercisePayload(
-              { setExercises, setExerciseIndex, setCorrectCount, setAttemptedCount },
-              payload,
-            );
-          }
-          return;
-        }
-        if (!accessToken) {
-          logTasks("lesson:skip-api-no-token", { lessonId });
-          return;
-        }
-        const payload = await apiRequest<Exercise[]>(`/learning/exercises/${lessonId}`, { token: accessToken });
-        logTasks("lesson:loaded-api", { lessonId, count: payload.length });
-        if (active) {
-          applyLessonExercisePayload(
-            { setExercises, setExerciseIndex, setCorrectCount, setAttemptedCount },
-            payload,
-          );
-        }
-      } catch (error) {
-        logError("[TASKS]", error, { phase: "load-exercises", lessonId });
-      } finally {
-        if (active) setLoading(false);
-      }
-    };
-    void run();
+    void learning.runLessonLoadWithLoading(
+      lessonId,
+      personalizedLevel,
+      () => active,
+      setLoading,
+      { setExercises, setExerciseIndex, setCorrectCount, setAttemptedCount },
+    );
     return () => {
       active = false;
     };
-  }, [lessonId, personalizedLevel, accessToken]);
+  }, [lessonId, personalizedLevel, learning]);
 
-  return {
-    exercises,
-    loading,
-    exerciseIndex,
-    setExerciseIndex,
-    correctCount,
-    setCorrectCount,
-    attemptedCount,
-    setAttemptedCount,
-  };
+  useEffect(() => {
+    const sub = AppState.addEventListener("change", (next) => {
+      if (appStateRef.current === "active" && next !== "active") void flushPractice();
+      appStateRef.current = next;
+    });
+    return () => sub.remove();
+  }, [flushPractice]);
+
+  useEffect(() => {
+    if (!isFocused || loading || !exercises[exerciseIndex]) return;
+    const t = setInterval(() => {
+      if (appStateRef.current === "active") trackedRef.current += 1;
+    }, 1000);
+    return () => {
+      clearInterval(t);
+      void flushPractice();
+    };
+  }, [exerciseIndex, exercises, flushPractice, isFocused, loading]);
+
+  return { exercises, loading, exerciseIndex, setExerciseIndex, correctCount, setCorrectCount, attemptedCount, setAttemptedCount };
 }

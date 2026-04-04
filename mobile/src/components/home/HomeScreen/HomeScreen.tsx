@@ -1,84 +1,44 @@
 import React from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useAppDispatcher, useAppSelector } from "@/redux/hooks";
-import { setXpMultiplier } from "@/redux/xp-slice";
-import { logNav } from "@/services/logger";
+import { useHomeScreen } from "@/hooks/useHomeScreen";
 import type { HomeMainScreenProps } from "@/types/homeNavigation.types";
 import { styles } from "./HomeScreen.styles";
 
 export function HomeScreen({ navigation }: HomeMainScreenProps) {
-  const dispatch = useAppDispatcher();
-  React.useEffect(() => {
-    logNav("screen:enter", { screen: "HomeScreen" });
-    return () => logNav("screen:leave", { screen: "HomeScreen" });
-  }, []);
-
-  const username = useAppSelector((s) => s.profile.username);
-  const level = useAppSelector((s) => s.xp.level);
-  const xp = useAppSelector((s) => s.xp.xpTotal);
-  const streak = useAppSelector((s) => s.streak.streakCurrent);
-  const streakDays = useAppSelector((s) => s.streak.streakDays);
-  const streakShieldAvailable = useAppSelector((s) => s.streak.streakShieldAvailable);
-  const multiplierFactor = useAppSelector((s) => s.xp.xpMultiplierFactor);
-  const multiplierEndsAt = useAppSelector((s) => s.xp.xpMultiplierEndsAt);
-
-  React.useEffect(() => {
-    const now = Date.now();
-    if (multiplierEndsAt && multiplierEndsAt > now) return;
-    const shouldSpawnWindow = new Date().getDay() === 0 || Math.random() < 0.35;
-    if (!shouldSpawnWindow) {
-      dispatch(setXpMultiplier({ factor: 1, endsAt: null }));
-      return;
-    }
-    dispatch(setXpMultiplier({ factor: 2, endsAt: now + 30 * 60 * 1000 }));
-  }, [dispatch, multiplierEndsAt]);
-
-  const levelFloorXp = (level - 1) * 250;
-  const nextLevelXp = level * 250;
-  const currentLevelProgress = Math.min(100, ((xp - levelFloorXp) / 250) * 100);
-  const remainingMultiplierMs = multiplierEndsAt ? Math.max(0, multiplierEndsAt - Date.now()) : 0;
-  const multiplierMinutes = Math.floor(remainingMultiplierMs / 60000);
-  const multiplierSeconds = Math.floor((remainingMultiplierMs % 60000) / 1000);
-
+  const h = useHomeScreen();
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-        <Text style={styles.greeting}>Good morning, {username} 👋</Text>
+        <Text style={styles.greeting}>Good morning, {h.username} 👋</Text>
         <Text style={styles.date}>{new Date().toDateString()}</Text>
-
-        {multiplierEndsAt && remainingMultiplierMs > 0 ? (
+        {h.multiplierEndsAt && h.remainingMultiplierMs > 0 ? (
           <View style={styles.multiplierCard}>
-            <Text style={styles.cardTitle}>
-              ⚡ {multiplierFactor.toFixed(0)}x XP Window
-            </Text>
+            <Text style={styles.cardTitle}>⚡ {h.multiplierFactor.toFixed(0)}x XP Window</Text>
             <Text style={styles.timer}>
-              Ends in {String(multiplierMinutes).padStart(2, "0")}:{String(multiplierSeconds).padStart(2, "0")}
+              Ends in {String(h.multiplierMinutes).padStart(2, "0")}:{String(h.multiplierSeconds).padStart(2, "0")}
             </Text>
           </View>
         ) : null}
-
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>🔥 {streak}-day streak!</Text>
+          <Text style={styles.cardTitle}>🔥 {h.streak}-day streak!</Text>
           <Text style={styles.subText}>
-            {streakShieldAvailable ? "🛡️ Streak Shield ready (one miss protected)" : "Reach 7 days to unlock a Streak Shield"}
+            {h.streakShieldAvailable ? "🛡️ Streak Shield ready (one miss protected)" : "Reach 7 days to unlock a Streak Shield"}
           </Text>
           <View style={styles.row}>
-            {streakDays.map((done, idx) => (
+            {h.streakDays.map((done, idx) => (
               <View key={idx} style={[styles.dot, done && styles.dotDone, idx === 6 && styles.dotToday]} />
             ))}
           </View>
         </View>
-
         <View style={styles.card}>
           <Text style={styles.cardTitle}>
-            Level {level} · {xp} / {nextLevelXp} XP
+            Level {h.level} · {h.xp} / {h.nextLevelXp} XP
           </Text>
           <View style={styles.progressTrack}>
-            <View style={[styles.progressFill, { width: `${currentLevelProgress}%` }]} />
+            <View style={[styles.progressFill, { width: `${h.currentLevelProgress}%` }]} />
           </View>
         </View>
-
         <View style={styles.heroCard}>
           <Text style={styles.cardTitle}>Continue Learning</Text>
           <Text style={styles.subText}>Jump back into your roadmap and keep your streak alive.</Text>
@@ -86,13 +46,11 @@ export function HomeScreen({ navigation }: HomeMainScreenProps) {
             <Text style={styles.primaryText}>Continue</Text>
           </Pressable>
         </View>
-
         <View style={styles.dailyCard}>
           <Text style={styles.cardTitle}>👑 Daily Challenge</Text>
           <Text style={styles.subText}>Find the bug in a loop boundary and earn +80 XP bonus.</Text>
           <Text style={styles.timer}>Resets daily</Text>
         </View>
-
         <View style={styles.card}>
           <Text style={styles.cardTitle}>🧩 Daily Code Puzzle</Text>
           <Text style={styles.subText}>Solve one expression puzzle each day for a bonus badge.</Text>
@@ -100,7 +58,6 @@ export function HomeScreen({ navigation }: HomeMainScreenProps) {
             <Text style={styles.secondaryText}>Open Puzzle</Text>
           </Pressable>
         </View>
-
         <View style={styles.card}>
           <Text style={styles.cardTitle}>⚔️ Duel Mode</Text>
           <Text style={styles.subText}>Challenge players worldwide.</Text>

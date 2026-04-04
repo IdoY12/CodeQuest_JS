@@ -1,23 +1,19 @@
 import { StyleSheet } from "react-native";
 import { colors, fontSize, radius, spacing } from "@/theme/theme";
 
-export const styles = StyleSheet.create({
+export const o = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   step: { flex: 1, paddingTop: spacing.huge, paddingHorizontal: spacing.xxl, justifyContent: "space-between" },
   mainContent: { flex: 1 },
-  title: { color: colors.textPrimary, fontSize: fontSize.xl, fontWeight: "800", marginBottom: spacing.xl, lineHeight: 40 },
-  content: { gap: spacing.md, flexGrow: 1, paddingBottom: spacing.md },
-  footer: { paddingTop: spacing.lg, paddingBottom: spacing.md },
-  choiceCard: {
-    backgroundColor: colors.card,
-    borderColor: colors.border,
-    borderWidth: 1,
-    borderRadius: radius.card,
-    padding: spacing.lg,
+  stepTitle: {
+    color: colors.textPrimary,
+    fontSize: fontSize.xl,
+    fontWeight: "800",
+    marginBottom: spacing.xl,
+    lineHeight: 40,
   },
-  choiceCardSelected: { borderColor: colors.accent, shadowColor: colors.accent, shadowOpacity: 0.3, shadowRadius: 12 },
-  choiceTitle: { color: colors.textPrimary, fontSize: fontSize.md, fontWeight: "700" },
-  choiceSubtitle: { color: colors.textSecondary, marginTop: spacing.sm },
+  scrollContent: { gap: spacing.md, flexGrow: 1, paddingBottom: spacing.md },
+  stepFooter: { paddingTop: spacing.lg, paddingBottom: spacing.md },
   cta: {
     backgroundColor: colors.accent,
     borderRadius: radius.button,
@@ -25,9 +21,22 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
   ctaLabel: { color: "#111", fontWeight: "800", fontSize: fontSize.base },
-  disabled: { opacity: 0.5 },
-  row: { flexDirection: "row", gap: spacing.md, justifyContent: "space-between" },
-  circleCard: {
+  ctaDisabled: { opacity: 0.5 },
+  choiceCard: {
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+    borderWidth: 1,
+    borderRadius: radius.card,
+    padding: spacing.lg,
+  },
+  choiceCardOn: { borderColor: colors.accent, shadowColor: colors.accent, shadowOpacity: 0.3, shadowRadius: 12 },
+  choiceTitle: { color: colors.textPrimary, fontSize: fontSize.md, fontWeight: "700" },
+  choiceSub: { color: colors.textSecondary, marginTop: spacing.sm },
+  node: { alignItems: "center", gap: spacing.sm },
+  nodeDot: { width: 14, height: 14, borderRadius: 7, backgroundColor: colors.accent },
+  nodeLabel: { color: colors.textSecondary, fontSize: fontSize.xs },
+  ringRow: { flexDirection: "row", gap: spacing.md, justifyContent: "space-between" },
+  ring: {
     width: "31%",
     aspectRatio: 1,
     borderRadius: radius.pill,
@@ -38,13 +47,10 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
     padding: spacing.md,
   },
-  circleCardSelected: { borderColor: colors.accent },
-  circleTitle: { color: colors.textPrimary, fontWeight: "800" },
-  circleSubtitle: { color: colors.textSecondary, fontSize: fontSize.xs, textAlign: "center", marginTop: spacing.xs },
+  ringOn: { borderColor: colors.accent },
+  ringTitle: { color: colors.textPrimary, fontWeight: "800" },
+  ringSub: { color: colors.textSecondary, fontSize: fontSize.xs, textAlign: "center", marginTop: spacing.xs },
   pathText: { color: colors.textSecondary, fontSize: fontSize.base, lineHeight: 24 },
   previewRow: { marginTop: spacing.xxl, flexDirection: "row", justifyContent: "space-between" },
-  node: { alignItems: "center", gap: spacing.sm },
-  nodeDot: { width: 14, height: 14, borderRadius: 7, backgroundColor: colors.accent },
-  nodeLabel: { color: colors.textSecondary, fontSize: fontSize.xs },
-  errorText: { marginTop: spacing.md, color: colors.danger, textAlign: "center" },
+  err: { marginTop: spacing.md, color: colors.danger, textAlign: "center" },
 });

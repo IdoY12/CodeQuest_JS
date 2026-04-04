@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { AppDispatch } from "@/redux/store";
 import store from "@/redux/store";
-import { apiRequest } from "@/services/api";
+import { servicesForSession } from "@/services/servicesForSession";
 import { logError } from "@/services/logger";
 import { enterGuestMode, setAuthChecked, setOnboardingCompleted } from "@/redux/session-slice";
 import { setUserIdentity, updatePreferences, type Commitment } from "@/redux/profile-slice";
@@ -10,9 +10,6 @@ import { hydrateStreak } from "@/redux/streak-slice";
 import { hydrateStats } from "@/redux/duel-slice";
 import { REDUX_PERSIST_KEY } from "@/utils/hydrateStore";
 import { resetStoresAfterLogout } from "@/utils/resetStoresAfterLogout";
-import type AuthMeResponse from "@/models/AuthMeResponse";
-import type ProgressSummary from "@/models/ProgressSummary";
-import type UserPreferencesGet from "@/models/UserPreferencesGet";
 
 export async function bootstrapSession(dispatch: AppDispatch): Promise<void> {
   dispatch(setAuthChecked(false));
@@ -23,14 +20,11 @@ export async function bootstrapSession(dispatch: AppDispatch): Promise<void> {
     dispatch(setAuthChecked(true));
     return;
   }
-
+  const { auth, user } = servicesForSession(() => token);
   try {
-    const me = await apiRequest<AuthMeResponse>("/auth/me", {
-      token,
-    });
+    const me = await auth.getMe();
     dispatch(setUserIdentity({ email: me.email, username: me.username, avatarUrl: me.avatarUrl ?? null }));
-
-    const prefs = await apiRequest<UserPreferencesGet>("/user/preferences", { token });
+    const prefs = await user.getPreferencesGet();
     dispatch(setOnboardingCompleted(prefs.hasCompletedOnboarding));
     if (prefs.userGoal && prefs.userLevel && prefs.dailyGoalMinutes) {
       dispatch(
@@ -43,8 +37,7 @@ export async function bootstrapSession(dispatch: AppDispatch): Promise<void> {
         }),
       );
     }
-
-    const progress = await apiRequest<ProgressSummary>("/user/progress-summary", { token });
+    const progress = await user.getProgressSummary();
     dispatch(hydrateXp({ xpTotal: progress.xpTotal, level: progress.level }));
     dispatch(
       hydrateStreak({

@@ -11,6 +11,7 @@ export function AppShell() {
   const { isConnected } = useAppShell();
 
   return (
+    // react-native-safe-area-context: exposes notch / status bar / home-indicator insets to descendants (e.g. useSafeAreaInsets). Must wrap the app near the root.
     <SafeAreaProvider>
       <QueryClientProvider client={appQueryClient}>
         <View style={styles.container}>

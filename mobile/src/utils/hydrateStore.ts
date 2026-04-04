@@ -8,14 +8,22 @@ import { hydrateLesson } from "@/redux/lesson-slice";
 import { hydrateStats } from "@/redux/duel-slice";
 import { hydratePuzzle } from "@/redux/puzzle-slice";
 import { logAuth, logError } from "@/services/logger";
-import { mergeHydratedSessionTokens } from "@/utils/mergeHydratedSessionTokens";
+import { readSecureSessionTokens, writeSecureSessionTokens } from "@/utils/secureSessionTokens";
+import { hydrateLegacySessionProgress } from "@/utils/hydrateLegacyPersist";
 
 export const REDUX_PERSIST_KEY = "codequest-redux-store";
 
-type OldPersist = {
-  session?: Record<string, unknown>;
-  progress?: Record<string, unknown>;
-};
+type OldPersist = { session?: Record<string, unknown>; progress?: Record<string, unknown> };
+
+async function mergeHydratedSessionTokens<T extends Record<string, unknown>>(
+  session: T,
+): Promise<T & { accessToken: string | null; refreshToken: string | null }> {
+  const secure = await readSecureSessionTokens();
+  const accessToken = secure.accessToken ?? (session.accessToken as string | null | undefined) ?? null;
+  const refreshToken = secure.refreshToken ?? (session.refreshToken as string | null | undefined) ?? null;
+  await writeSecureSessionTokens(accessToken, refreshToken);
+  return { ...session, accessToken, refreshToken };
+}
 
 export async function hydrateStoreFromStorage(dispatch: AppDispatch): Promise<void> {
   try {
@@ -38,67 +46,8 @@ export async function hydrateStoreFromStorage(dispatch: AppDispatch): Promise<vo
       if (parsed.lesson) dispatch(hydrateLesson(parsed.lesson as never));
       if (parsed.duel) dispatch(hydrateStats(parsed.duel as never));
       if (parsed.puzzle) dispatch(hydratePuzzle(parsed.puzzle as never));
-    } else if (parsed.session && parsed.progress) {
-      const s = parsed.session as Record<string, unknown>;
-      const p = parsed.progress as Record<string, unknown>;
-      const sessionOnly = {
-        hasHydrated: s.hasHydrated,
-        authChecked: s.authChecked,
-        isAuthenticated: s.isAuthenticated,
-        isGuest: s.isGuest,
-        hasCompletedOnboarding: s.hasCompletedOnboarding,
-        accessToken: s.accessToken,
-        refreshToken: s.refreshToken,
-        userId: s.userId,
-      };
-      if (s.isAuthenticated && s.accessToken) (sessionOnly as { isGuest: boolean }).isGuest = false;
-      else if (typeof s.isGuest !== "boolean") (sessionOnly as { isGuest: boolean }).isGuest = !s.isAuthenticated;
-      const legacySessionWithTokens = await mergeHydratedSessionTokens(sessionOnly as Record<string, unknown>);
-      dispatch(hydrateSession(legacySessionWithTokens as never));
-      dispatch(
-        hydrateProfile({
-          username: s.username,
-          email: s.email,
-          avatarUrl: s.avatarUrl,
-          goal: s.goal,
-          experience: s.experience,
-          commitment: s.commitment,
-          path: s.path,
-          notificationsEnabled: s.notificationsEnabled,
-          soundsEnabled: s.soundsEnabled,
-          hapticsEnabled: s.hapticsEnabled,
-        } as never),
-      );
-      dispatch(
-        hydrateXp({
-          level: p.level,
-          xpTotal: p.xpTotal,
-          xpMultiplierFactor: p.xpMultiplierFactor,
-          xpMultiplierEndsAt: p.xpMultiplierEndsAt,
-        } as never),
-      );
-      dispatch(
-        hydrateStreak({
-          streakCurrent: p.streakCurrent,
-          streakDays: p.streakDays,
-          streakShieldAvailable: p.streakShieldAvailable,
-        } as never),
-      );
-      dispatch(
-        hydrateStats({
-          duelWins: p.duelWins,
-          duelLosses: p.duelLosses,
-          duelDraws: p.duelDraws,
-          duelRating: p.duelRating,
-          lessonsCompleted: p.lessonsCompleted,
-        } as never),
-      );
-      dispatch(
-        hydratePuzzle({
-          lastDailyPuzzleSolvedDate: p.lastDailyPuzzleSolvedDate,
-          puzzleSolvedIdByDate: p.puzzleSolvedIdByDate,
-        } as never),
-      );
+    } else {
+      await hydrateLegacySessionProgress(dispatch, parsed, mergeHydratedSessionTokens);
     }
   } catch (error) {
     logError("[APP]", error, { phase: "hydrate-redux" });

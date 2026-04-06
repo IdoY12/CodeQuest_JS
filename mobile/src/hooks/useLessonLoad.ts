@@ -1,21 +1,21 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AppState, type AppStateStatus } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
-import { logNav } from "@/services/logger";
+import { logNav } from "@/utils/logger";
 import type Exercise from "@/models/Exercise";
 import type { PersonalizationLevel } from "@/data/personalizedExercisePool";
-import { useService } from "@/hooks/useService";
-import LearningService from "@/services/LearningService";
+import { useAuthenticatedService } from "@/hooks/useAuthenticatedService";
 import UserService from "@/services/UserService";
 import { drainRefInt } from "@/utils/formatHelpers";
+import { runLessonExerciseLoad } from "@/utils/runLessonExerciseLoad";
+import { tryPostPracticeLog } from "@/utils/tryPostPracticeLog";
 
 export function useLessonLoad(
   lessonId: string,
   personalizedLevel: PersonalizationLevel | undefined,
   accessToken: string | null,
 ) {
-  const learning = useService(LearningService);
-  const user = useService(UserService);
+  const user = useAuthenticatedService(UserService);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [exerciseIndex, setExerciseIndex] = useState(0);
@@ -25,9 +25,9 @@ export function useLessonLoad(
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
   const trackedRef = useRef(0);
   const flushPractice = useCallback(async () => {
-    if (!accessToken || trackedRef.current <= 0) return;
+    if (!accessToken || trackedRef.current <= 0 || !user) return;
     const seconds = drainRefInt(trackedRef);
-    const ok = await user.tryPostPracticeLog(seconds);
+    const ok = await tryPostPracticeLog(user, seconds);
     if (!ok) trackedRef.current += seconds;
   }, [accessToken, user]);
   useEffect(() => {
@@ -37,9 +37,10 @@ export function useLessonLoad(
 
   useEffect(() => {
     let active = true;
-    void learning.runLessonLoadWithLoading(
+    void runLessonExerciseLoad(
       lessonId,
       personalizedLevel,
+      accessToken,
       () => active,
       setLoading,
       { setExercises, setExerciseIndex, setCorrectCount, setAttemptedCount },
@@ -47,7 +48,7 @@ export function useLessonLoad(
     return () => {
       active = false;
     };
-  }, [lessonId, personalizedLevel, learning]);
+  }, [lessonId, personalizedLevel, accessToken]);
 
   useEffect(() => {
     const sub = AppState.addEventListener("change", (next) => {

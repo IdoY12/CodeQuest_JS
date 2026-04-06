@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import type Exercise from "@/models/Exercise";
 import type { LessonExerciseCompletionContext } from "@/types/lessonExerciseCompletion.types";
-import { useService } from "@/hooks/useService";
+import { useAuthenticatedService } from "@/hooks/useAuthenticatedService";
 import LearningService from "@/services/LearningService";
 import { v } from "./ExerciseView.styles";
 
@@ -16,12 +16,12 @@ type Base = {
 };
 
 export function EvConcept({ exercise, lessonSource, accessToken, onLessonExerciseComplete }: Base) {
-  const learning = useService(LearningService);
+  const learning = useAuthenticatedService(LearningService);
   const [busy, setBusy] = useState(false);
   const submitPersonalized = () =>
     onLessonExerciseComplete(CONCEPT_SENTINEL, { source: "personalized", isCorrect: true, xpReward: exercise.xpReward });
   const submitCurriculum = async () => {
-    if (!accessToken) return;
+    if (!accessToken || !learning) return;
     setBusy(true);
     try {
       const result = await learning.submitExercise(exercise.id, CONCEPT_SENTINEL);

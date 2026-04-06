@@ -5,27 +5,27 @@ import { toggleHaptics, toggleSounds } from "@/redux/profile-slice";
 import type UserService from "@/services/UserService";
 import { changePasswordRequest, deleteAccountRequest, updateUsername } from "@/utils/profileAccountMutations";
 import { patchUserPreferences } from "@/utils/profileUiAndPreferences";
-import { confirmLogout } from "@/services/confirmLogout";
+import { confirmLogout } from "@/utils/confirmLogout";
 import type { ProfileDraftState } from "./useProfileDraftState";
 import type { ProfileReduxState } from "./useProfileRedux";
 
-export function useProfileAccountHandlers(r: ProfileReduxState, d: ProfileDraftState, user: UserService) {
+export function useProfileAccountHandlers(r: ProfileReduxState, d: ProfileDraftState, user: UserService | null) {
   const dispatch = useAppDispatcher();
   const onSavePreferences = React.useCallback(async () => {
-    if (!r.accessToken || d.saving) return;
+    if (!r.accessToken || !user || d.saving) return;
     d.setSaving(true);
     d.setSaveMessage(null);
     await patchUserPreferences(user, d.draftGoal, d.draftLevel, d.draftCommitment, d.draftNotifications, dispatch, d.setSaveMessage);
     d.setSaving(false);
   }, [r.accessToken, d.saving, d.draftGoal, d.draftLevel, d.draftCommitment, d.draftNotifications, dispatch, d.setSaving, d.setSaveMessage, user]);
   const onSaveUsername = React.useCallback(async () => {
-    if (!r.accessToken || !d.draftUsername.trim() || d.busyAction) return;
+    if (!r.accessToken || !user || !d.draftUsername.trim() || d.busyAction) return;
     d.setBusyAction("username");
     await updateUsername(user, d.draftUsername.trim(), dispatch, () => d.setUsernameModalVisible(false), d.setSaveMessage);
     d.setBusyAction(null);
   }, [r.accessToken, d.draftUsername, d.busyAction, dispatch, d.setBusyAction, d.setUsernameModalVisible, d.setSaveMessage, user]);
   const onChangePassword = React.useCallback(async () => {
-    if (!r.accessToken || d.busyAction) return;
+    if (!r.accessToken || !user || d.busyAction) return;
     if (d.newPassword.length < 6) {
       Alert.alert("Invalid password", "New password should be at least 6 characters.");
       return;
@@ -41,7 +41,7 @@ export function useProfileAccountHandlers(r: ProfileReduxState, d: ProfileDraftS
   const onToggleSounds = React.useCallback((v: boolean) => void dispatch(toggleSounds(v)), [dispatch]);
   const onToggleHaptics = React.useCallback((v: boolean) => void dispatch(toggleHaptics(v)), [dispatch]);
   const onDeleteAccount = React.useCallback(async () => {
-    if (!r.accessToken || d.confirmDeleteText !== "DELETE" || d.busyAction) return;
+    if (!r.accessToken || !user || d.confirmDeleteText !== "DELETE" || d.busyAction) return;
     d.setBusyAction("delete");
     await deleteAccountRequest(user, dispatch, () => {
       d.setDeleteModalVisible(false);

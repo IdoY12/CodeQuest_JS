@@ -1,13 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { AppDispatch } from "@/redux/store";
 import { dispatchSignInSuccess } from "@/utils/dispatchSignInSuccess";
-import { logAuth, logError, logNav } from "@/services/logger";
+import { logAuth, logError, logNav } from "@/utils/logger";
 import { API_BASE_URL } from "@/config/network";
-import { useService } from "@/hooks/useService";
-import AuthService from "@/services/AuthService";
+import authService from "@/services/AuthService";
 
 export function useAuthScreen(dispatch: AppDispatch) {
-  const auth = useService(AuthService);
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -31,8 +29,8 @@ export function useAuthScreen(dispatch: AppDispatch) {
     setError(null);
     try {
       const response = isLogin
-        ? await auth.login(email, password)
-        : await auth.register(email, username, password);
+        ? await authService.login(email, password)
+        : await authService.register(email, username, password);
       if (__DEV__) console.log("[AUTH] submit:response", { mode: isLogin ? "login" : "register", userId: response.user.id });
       dispatchSignInSuccess(dispatch, response.user, response.accessToken, response.refreshToken);
       logAuth("submit:success", { mode: isLogin ? "login" : "register", userId: response.user.id, onboardingCompleted: response.user.onboardingCompleted });
@@ -43,7 +41,7 @@ export function useAuthScreen(dispatch: AppDispatch) {
     } finally {
       setLoading(false);
     }
-  }, [auth, canSubmit, dispatch, email, isLogin, loading, password, username]);
+  }, [canSubmit, dispatch, email, isLogin, loading, password, username]);
   return {
     email,
     setEmail,

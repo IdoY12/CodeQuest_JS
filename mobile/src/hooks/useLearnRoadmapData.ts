@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
 import { useAppSelector } from "@/redux/hooks";
-import { logNav } from "@/services/logger";
+import { logNav } from "@/utils/logger";
 import type Chapter from "@/models/Chapter";
-import { useService } from "@/hooks/useService";
 import LearningService from "@/services/LearningService";
 import { logChaptersError, logChaptersLoaded, logChaptersSkipNoToken } from "@/utils/learnRoadmap";
 
 export function useLearnRoadmapData() {
-  const learning = useService(LearningService);
   const path = useAppSelector((s) => s.profile.path);
   const experience = useAppSelector((s) => s.profile.experience);
   const accessToken = useAppSelector((s) => s.session.accessToken);
@@ -26,7 +24,8 @@ export function useLearnRoadmapData() {
           logChaptersSkipNoToken(path);
           if (active) setChapterData([]);
         } else {
-          const chapters = await learning.fetchChapters(path);
+          const learning = new LearningService(accessToken);
+          const chapters = await learning.getChapters(path);
           logChaptersLoaded(path, chapters.length);
           if (active) setChapterData(chapters);
         }
@@ -40,6 +39,6 @@ export function useLearnRoadmapData() {
     return () => {
       active = false;
     };
-  }, [accessToken, path, learning]);
+  }, [accessToken, path]);
   return { path, experience, accessToken, chapterData, loading };
 }

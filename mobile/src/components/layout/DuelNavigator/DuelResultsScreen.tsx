@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { logNav } from "@/services/logger";
+import { logNav } from "@/utils/logger";
 import type { DuelResultsScreenProps } from "@/types/duelNavigation.types";
 import { styles } from "./DuelNavigator.styles";
 

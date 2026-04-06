@@ -1,18 +1,18 @@
 import { useEffect, useRef } from "react";
 import { useAppDispatcher } from "@/redux/hooks";
 import type { AppDispatch } from "@/redux/store";
-import { logNav } from "@/services/logger";
+import { logNav } from "@/utils/logger";
 import type UserService from "@/services/UserService";
 import { fetchAndApplyProfile, type DraftSetters } from "@/utils/profileLoadFromApi";
 import { useProfileAccountHandlers } from "./useProfileAccountHandlers";
 import { useProfileAvatarHandlers } from "./useProfileAvatarHandlers";
 import { useProfileDraftState } from "./useProfileDraftState";
 import { useProfileRedux } from "./useProfileRedux";
-import { useService } from "@/hooks/useService";
+import { useAuthenticatedService } from "@/hooks/useAuthenticatedService";
 import UserServiceClass from "@/services/UserService";
 
 function useProfileLifecycle(
-  user: UserService,
+  user: UserService | null,
   accessToken: string | null,
   dispatch: AppDispatch,
   username: string,
@@ -28,7 +28,7 @@ function useProfileLifecycle(
   const draftsRef = useRef(drafts);
   draftsRef.current = drafts;
   useEffect(() => {
-    if (!accessToken) {
+    if (!accessToken || !user) {
       setScreenLoading(false);
       return;
     }
@@ -47,7 +47,7 @@ function useProfileLifecycle(
 
 export function useProfileScreen() {
   const dispatch = useAppDispatcher();
-  const user = useService(UserServiceClass);
+  const user = useAuthenticatedService(UserServiceClass);
   const r = useProfileRedux();
   const d = useProfileDraftState(r);
   useProfileLifecycle(user, r.accessToken, dispatch, r.username, d.setDraftUsername, d.setScreenLoading, {

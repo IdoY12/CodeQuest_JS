@@ -8,6 +8,9 @@ import { styles } from "./AppShell.styles";
 import { appQueryClient, useAppShell } from "@/hooks/useAppShell";
 
 export function AppShell() {
+  // Power on the "Control Center": Fires up startup services (Logging, Errors, Notifications) 
+  // and connects the User's session & profile to the app. 
+  // It also tracks real-time internet status for the offline banner.
   const { isConnected } = useAppShell();
 
   return (

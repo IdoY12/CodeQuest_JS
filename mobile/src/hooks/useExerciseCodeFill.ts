@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import type Exercise from "@/models/Exercise";
 import type ExerciseSubmitResult from "@/models/ExerciseSubmitResult";
 import type { LessonExerciseCompletionContext } from "@/types/lessonExerciseCompletion.types";
-import { useService } from "@/hooks/useService";
+import { useAuthenticatedService } from "@/hooks/useAuthenticatedService";
 import LearningService from "@/services/LearningService";
 
 export function useExerciseCodeFill(
@@ -11,7 +11,7 @@ export function useExerciseCodeFill(
   accessToken: string | null,
   onLessonExerciseComplete: (a: string, c: LessonExerciseCompletionContext) => void,
 ) {
-  const learning = useService(LearningService);
+  const learning = useAuthenticatedService(LearningService);
   const [input, setInput] = useState("");
   const [hasChecked, setHasChecked] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
@@ -36,7 +36,7 @@ export function useExerciseCodeFill(
       setHasChecked(true);
       return;
     }
-    if (!accessToken) return;
+    if (!accessToken || !learning) return;
     const result = await learning.submitExercise(exercise.id, input.trim());
     setServerResult(result);
     setCurriculumCorrect(result.isCorrect);

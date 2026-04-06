@@ -7,7 +7,7 @@ import { resetStreak } from "@/redux/streak-slice";
 import { resetLesson } from "@/redux/lesson-slice";
 import { resetStats } from "@/redux/duel-slice";
 import { hydratePuzzle } from "@/redux/puzzle-slice";
-import { logAuth } from "@/services/logger";
+import { logAuth } from "@/utils/logger";
 import type User from "@/models/User";
 
 export function dispatchSignInSuccess(

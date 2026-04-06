@@ -1,7 +1,7 @@
 import React from "react";
 import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import { OnboardingFlow } from "@/components/auth/onboarding-flow/OnboardingFlow";
-import { logNav } from "@/services/logger";
+import { logNav } from "@/utils/logger";
 import { useAppSelector } from "@/redux/hooks";
 import { HydrationLoadingScreen } from "@/components/layout/HydrationLoadingScreen/HydrationLoadingScreen";
 import { MainNavigator } from "@/components/layout/MainNavigator/MainNavigator";

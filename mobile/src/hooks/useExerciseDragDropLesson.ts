@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import type Exercise from "@/models/Exercise";
 import type ExerciseSubmitResult from "@/models/ExerciseSubmitResult";
 import type { LessonExerciseCompletionContext } from "@/types/lessonExerciseCompletion.types";
-import { useService } from "@/hooks/useService";
+import { useAuthenticatedService } from "@/hooks/useAuthenticatedService";
 import LearningService from "@/services/LearningService";
 import { useExerciseDragDrop } from "./useLessonExerciseInteractions";
 
@@ -12,7 +12,7 @@ export function useExerciseDragDropLesson(
   accessToken: string | null,
   onLessonExerciseComplete: (a: string, c: LessonExerciseCompletionContext) => void,
 ) {
-  const learning = useService(LearningService);
+  const learning = useAuthenticatedService(LearningService);
   const d = useExerciseDragDrop(exercise.id, exercise.codeSnippet);
   const [serverResult, setServerResult] = useState<ExerciseSubmitResult | null>(null);
   const [curriculumChecked, setCurriculumChecked] = useState(false);
@@ -30,7 +30,7 @@ export function useExerciseDragDropLesson(
       d.runCheck(exercise.correctAnswer ?? "");
       return;
     }
-    if (!accessToken) return;
+    if (!accessToken || !learning) return;
     const result = await learning.submitExercise(exercise.id, d.normalizedAnswer);
     setServerResult(result);
     setCurriculumCorrect(result.isCorrect);

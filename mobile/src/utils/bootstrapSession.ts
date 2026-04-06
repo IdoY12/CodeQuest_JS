@@ -1,8 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { AppDispatch } from "@/redux/store";
 import store from "@/redux/store";
-import { servicesForSession } from "@/services/servicesForSession";
-import { logError } from "@/services/logger";
+import UserService from "@/services/UserService";
+import { logError } from "@/utils/logger";
 import { enterGuestMode, setAuthChecked, setOnboardingCompleted } from "@/redux/session-slice";
 import { setUserIdentity, updatePreferences, type Commitment } from "@/redux/profile-slice";
 import { hydrateXp } from "@/redux/xp-slice";
@@ -20,24 +20,24 @@ export async function bootstrapSession(dispatch: AppDispatch): Promise<void> {
     dispatch(setAuthChecked(true));
     return;
   }
-  const { auth, user } = servicesForSession(() => token);
+  const userService = new UserService(token);
   try {
-    const me = await auth.getMe();
+    const me = await userService.getMe();
     dispatch(setUserIdentity({ email: me.email, username: me.username, avatarUrl: me.avatarUrl ?? null }));
-    const prefs = await user.getPreferencesGet();
-    dispatch(setOnboardingCompleted(prefs.hasCompletedOnboarding));
-    if (prefs.userGoal && prefs.userLevel && prefs.dailyGoalMinutes) {
+    const userPreferences = await userService.getPreferencesGet();
+    dispatch(setOnboardingCompleted(userPreferences.hasCompletedOnboarding));
+    if (userPreferences.userGoal && userPreferences.userLevel && userPreferences.dailyGoalMinutes) {
       dispatch(
         updatePreferences({
-          goal: prefs.userGoal,
-          experience: prefs.userLevel,
-          commitment: String(prefs.dailyGoalMinutes) as Commitment,
-          notificationsEnabled: prefs.notificationsEnabled,
-          path: prefs.pathKey,
+          goal: userPreferences.userGoal,
+          experience: userPreferences.userLevel,
+          commitment: String(userPreferences.dailyGoalMinutes) as Commitment,
+          notificationsEnabled: userPreferences.notificationsEnabled,
+          path: userPreferences.pathKey,
         }),
       );
     }
-    const progress = await user.getProgressSummary();
+    const progress = await userService.getProgressSummary();
     dispatch(hydrateXp({ xpTotal: progress.xpTotal, level: progress.level }));
     dispatch(
       hydrateStreak({

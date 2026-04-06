@@ -1,6 +1,6 @@
 import type { AppDispatch } from "@/redux/store";
 import type UserService from "@/services/UserService";
-import { logError } from "@/services/logger";
+import { logError } from "@/utils/logger";
 import { setUserIdentity, updatePreferences, type Commitment } from "@/redux/profile-slice";
 import type { CommitmentKey, GoalKey, LevelKey } from "@/types/profile.types";
 

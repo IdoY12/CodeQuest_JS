@@ -7,7 +7,7 @@ export type LessonExerciseSetters = {
   setAttemptedCount: (n: number) => void;
 };
 
-export function applyLessonExercisePayload(s: LessonExerciseSetters, payload: Exercise[]) {
+export function applyLessonExercisePayload(s: LessonExerciseSetters, payload: Exercise[]): void {
   s.setExercises(payload);
   s.setExerciseIndex(0);
   s.setCorrectCount(0);

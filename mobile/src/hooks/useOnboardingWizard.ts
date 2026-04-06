@@ -1,15 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
-import { logError, logNav, logOnboarding } from "@/services/logger";
+import { logError, logNav, logOnboarding } from "@/utils/logger";
 import { useAppDispatcher, useAppSelector } from "@/redux/hooks";
 import type { Commitment, Experience, Goal } from "@/redux/profile-slice";
 import { completeOnboarding, setOnboarding } from "@/redux/profile-slice";
 import { setOnboardingCompleted } from "@/redux/session-slice";
-import { useService } from "@/hooks/useService";
+import { useAuthenticatedService } from "@/hooks/useAuthenticatedService";
 import UserService from "@/services/UserService";
 
 export function useOnboardingWizard() {
   const dispatch = useAppDispatcher();
-  const user = useService(UserService);
+  const user = useAuthenticatedService(UserService);
   const accessToken = useAppSelector((s) => s.session.accessToken);
   const [step, setStep] = useState(1);
   const [goal, setGoal] = useState<Goal | undefined>(undefined);
@@ -32,7 +32,7 @@ export function useOnboardingWizard() {
     [level],
   );
   const submitOnboarding = async () => {
-    if (!goal || !level || !accessToken || submitting) return;
+    if (!goal || !level || !accessToken || !user || submitting) return;
     logOnboarding("submit:start", { step, hasToken: Boolean(accessToken), goal, level, commitment });
     setSubmitting(true);
     setError(null);

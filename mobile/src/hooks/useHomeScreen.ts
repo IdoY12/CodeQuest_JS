@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react";
 import { useAppDispatcher, useAppSelector } from "@/redux/hooks";
 import { setXpMultiplier } from "@/redux/xp-slice";
-import { logNav } from "@/services/logger";
+import { logNav } from "@/utils/logger";
 
 export function useHomeScreen() {
   const dispatch = useAppDispatcher();

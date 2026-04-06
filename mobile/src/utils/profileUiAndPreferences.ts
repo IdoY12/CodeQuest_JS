@@ -1,7 +1,7 @@
 import { Alert, Linking } from "react-native";
 import type { AppDispatch } from "@/redux/store";
 import type UserService from "@/services/UserService";
-import { logError } from "@/services/logger";
+import { logError } from "@/utils/logger";
 import { setNotificationsEnabled, updatePreferences } from "@/redux/profile-slice";
 import type { CommitmentKey, GoalKey, LevelKey, StatItem, SupportRowItem } from "@/types/profile.types";
 

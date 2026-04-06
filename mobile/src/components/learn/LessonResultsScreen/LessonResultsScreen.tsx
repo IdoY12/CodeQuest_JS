@@ -3,7 +3,7 @@ import { Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppDispatcher, useAppSelector } from "@/redux/hooks";
 import { incrementLessonsCompleted } from "@/redux/duel-slice";
-import { logNav } from "@/services/logger";
+import { logNav } from "@/utils/logger";
 import type { LessonResultsNavigation } from "@/types/learnNavigation.types";
 import { lessonResultsStyles } from "./LessonResultsScreen.styles";
 

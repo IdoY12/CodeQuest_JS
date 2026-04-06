@@ -1,5 +1,5 @@
 import { io, type Socket } from "socket.io-client";
-import { logDuel, logError } from "@/services/logger";
+import { logDuel, logError } from "@/utils/logger";
 import { duelRefs, publishDuel, normalizeDuelReplayEntry } from "@/utils/duelSocketState";
 
 export function bindDuelSocketEvents(socket: Socket) {

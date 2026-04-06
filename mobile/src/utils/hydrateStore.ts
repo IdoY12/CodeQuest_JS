@@ -7,7 +7,7 @@ import { hydrateStreak } from "@/redux/streak-slice";
 import { hydrateLesson } from "@/redux/lesson-slice";
 import { hydrateStats } from "@/redux/duel-slice";
 import { hydratePuzzle } from "@/redux/puzzle-slice";
-import { logAuth, logError } from "@/services/logger";
+import { logAuth, logError } from "@/utils/logger";
 import { readSecureSessionTokens, writeSecureSessionTokens } from "@/utils/secureSessionTokens";
 import { hydrateLegacySessionProgress } from "@/utils/hydrateLegacyPersist";
 
@@ -15,13 +15,22 @@ export const REDUX_PERSIST_KEY = "codequest-redux-store";
 
 type OldPersist = { session?: Record<string, unknown>; progress?: Record<string, unknown> };
 
-async function mergeHydratedSessionTokens<T extends Record<string, unknown>>(
-  session: T,
-): Promise<T & { accessToken: string | null; refreshToken: string | null }> {
+async function mergeHydratedSessionTokens<T extends Record<string, unknown>>(session: T) {
+  // 1. Get the tokens from the "Vault" (The most reliable source for security).
   const secure = await readSecureSessionTokens();
-  const accessToken = secure.accessToken ?? (session.accessToken as string | null | undefined) ?? null;
-  const refreshToken = secure.refreshToken ?? (session.refreshToken as string | null | undefined) ?? null;
+
+  // 2. The Logic: "Which token is better?"
+  // Priority 1: Use the one from the Secure Vault.
+  // Priority 2: If vault is empty, maybe there's one in the Redux backup (session.accessToken).
+  // Priority 3: Fallback to null.
+  const accessToken = secure.accessToken ?? (session.accessToken as string | null) ?? null;
+  const refreshToken = secure.refreshToken ?? (session.refreshToken as string | null) ?? null;
+
+  // 3. Sync: Now that we found the best token, save it back to the vault 
+  // to make sure BOTH sources are now identical.
   await writeSecureSessionTokens(accessToken, refreshToken);
+
+  // 4. Return: We combine the original session data with the verified tokens.
   return { ...session, accessToken, refreshToken };
 }
 

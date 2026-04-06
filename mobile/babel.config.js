@@ -9,7 +9,6 @@ module.exports = function (api) {
           root: ["./src"],
           alias: {
             "@": "./src",
-            "@project/personalized-exercises": "../packages/personalized-exercises/src/index.ts",
             "@project/daily-puzzles": "../packages/daily-puzzles/src/index.ts",
           },
           extensions: [".ts", ".tsx", ".js", ".jsx", ".json"],

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import type Exercise from "@/models/Exercise";
 import type ExerciseSubmitResult from "@/models/ExerciseSubmitResult";
 import type { LessonExerciseCompletionContext } from "@/types/lessonExerciseCompletion.types";
-import { useService } from "@/hooks/useService";
+import { useAuthenticatedService } from "@/hooks/useAuthenticatedService";
 import LearningService from "@/services/LearningService";
 
 export function useExerciseFindBug(
@@ -11,7 +11,7 @@ export function useExerciseFindBug(
   accessToken: string | null,
   onLessonExerciseComplete: (a: string, c: LessonExerciseCompletionContext) => void,
 ) {
-  const learning = useService(LearningService);
+  const learning = useAuthenticatedService(LearningService);
   const [selected, setSelected] = useState<string | null>(null);
   const [attemptsLeft, setAttemptsLeft] = useState(3);
   const [hasChecked, setHasChecked] = useState(false);
@@ -44,7 +44,7 @@ export function useExerciseFindBug(
       runCheckPersonalized();
       return;
     }
-    if (!accessToken) return;
+    if (!accessToken || !learning) return;
     const result = await learning.submitExercise(exercise.id, selected);
     setServerResult(result);
     setCurriculumCorrect(result.isCorrect);

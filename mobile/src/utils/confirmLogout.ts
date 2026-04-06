@@ -1,5 +1,5 @@
 import type { AppDispatch } from "@/redux/store";
-import AuthService from "@/services/AuthService";
+import UserService from "@/services/UserService";
 import { resetStoresAfterLogout } from "@/utils/resetStoresAfterLogout";
 
 export async function confirmLogout(
@@ -8,7 +8,9 @@ export async function confirmLogout(
   refreshToken: string | null,
 ): Promise<void> {
   try {
-    await new AuthService(() => accessToken).logout(accessToken, refreshToken);
+    if (accessToken) {
+      await new UserService(accessToken).logout(refreshToken ?? "");
+    }
   } catch {
     // Still clear local session if the network call fails.
   } finally {

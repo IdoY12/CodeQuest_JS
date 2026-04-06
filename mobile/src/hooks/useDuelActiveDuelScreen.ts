@@ -3,7 +3,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useAppDispatcher, useAppSelector } from "@/redux/hooks";
 import { addXp } from "@/redux/xp-slice";
 import { applyDuelResult } from "@/redux/duel-slice";
-import { logDuel, logNav } from "@/services/logger";
+import { logDuel, logNav } from "@/utils/logger";
 import { useDuelSocket } from "@/hooks/useDuelSocket";
 import type { DuelStackParamList } from "@/types/duelNavigation.types";
 import { DUEL_ACTIVE_ROUND_SECONDS } from "@/constants/duelUiConstants";

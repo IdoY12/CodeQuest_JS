@@ -1,4 +1,5 @@
-import { AuthAware } from "@/services/AuthAware";
+import axios from "axios";
+import AuthAware from "@/services/AuthAware";
 import type AvatarPatchResponse from "@/models/AvatarPatchResponse";
 import type AvatarPresignedUrl from "@/models/AvatarPresignedUrl";
 import type ChangePasswordResponse from "@/models/ChangePasswordResponse";
@@ -8,67 +9,116 @@ import type PracticeLogResponse from "@/models/PracticeLogResponse";
 import type ProgressSummary from "@/models/ProgressSummary";
 import type UserPreferences from "@/models/UserPreferences";
 import type UserPreferencesGet from "@/models/UserPreferencesGet";
+import type AuthMeResponse from "@/models/AuthMeResponse";
 import type UserProfile from "@/models/UserProfile";
 
 export default class UserService extends AuthAware {
-  getProfile() {
-    return this.getJson<UserProfile>("/user/profile");
+  constructor(jwt: string) {
+    super(jwt);
   }
-  patchUsername(username: string) {
-    return this.patchJson<UserProfile>("/user/profile", { username });
+
+  async getMe(): Promise<AuthMeResponse> {
+    const { data } = await this.axiosInstance.get<AuthMeResponse>("/auth/me");
+    return data;
   }
-  patchPreferences(body: {
+
+  async logout(refreshToken: string): Promise<{ ok: boolean }> {
+    const { data } = await this.axiosInstance.post<{ ok: boolean }>("/auth/logout", { refreshToken });
+    return data;
+  }
+
+  async getProfile(): Promise<UserProfile> {
+    const { data } = await this.axiosInstance.get<UserProfile>("/user/profile");
+    return data;
+  }
+
+  async patchUsername(username: string): Promise<UserProfile> {
+    const { data } = await this.axiosInstance.patch<UserProfile>("/user/profile", { username });
+    return data;
+  }
+
+  async patchPreferences(body: {
     goal: string;
     experienceLevel: string;
     dailyCommitmentMinutes: number;
     notificationsEnabled: boolean;
-  }) {
-    return this.patchJson<UserPreferences>("/user/preferences", body);
+  }): Promise<UserPreferences> {
+    const { data } = await this.axiosInstance.patch<UserPreferences>("/user/preferences", body);
+    return data;
   }
-  getPreferencesGet() {
-    return this.getJson<UserPreferencesGet>("/user/preferences");
+
+  async getPreferencesGet(): Promise<UserPreferencesGet> {
+    const { data } = await this.axiosInstance.get<UserPreferencesGet>("/user/preferences");
+    return data;
   }
-  getProgressSummary() {
-    return this.getJson<ProgressSummary>("/user/progress-summary");
+
+  async getProgressSummary(): Promise<ProgressSummary> {
+    const { data } = await this.axiosInstance.get<ProgressSummary>("/user/progress-summary");
+    return data;
   }
-  changePassword(currentPassword: string, newPassword: string) {
-    return this.postJson<ChangePasswordResponse>("/user/change-password", { currentPassword, newPassword });
+
+  async changePassword(currentPassword: string, newPassword: string): Promise<ChangePasswordResponse> {
+    const { data } = await this.axiosInstance.post<ChangePasswordResponse>("/user/change-password", {
+      currentPassword,
+      newPassword,
+    });
+    return data;
   }
-  deleteAccount() {
-    return this.deleteJson<void>("/user/account", { confirmation: "DELETE" });
+
+  async deleteAccount(): Promise<void> {
+    await this.axiosInstance.delete("/user/account", { data: { confirmation: "DELETE" } });
   }
-  patchAvatar(avatarUrl: string) {
-    return this.patchJson<AvatarPatchResponse>("/user/avatar", { avatarUrl });
+
+  async patchAvatar(avatarUrl: string): Promise<AvatarPatchResponse> {
+    const { data } = await this.axiosInstance.patch<AvatarPatchResponse>("/user/avatar", { avatarUrl });
+    return data;
   }
-  presignAvatarUpload(contentType: string, fileSize: number) {
-    return this.getJson<AvatarPresignedUrl>(
+
+  async presignAvatarUpload(contentType: string, fileSize: number): Promise<AvatarPresignedUrl> {
+    const { data } = await this.axiosInstance.get<AvatarPresignedUrl>(
       `/user/avatar/presigned-url?contentType=${encodeURIComponent(contentType)}&fileSize=${fileSize}`,
     );
+    return data;
   }
-  postOnboarding(goal: string, experienceLevel: string, dailyCommitmentMinutes: number) {
-    return this.postJson<OnboardingResponse>("/user/onboarding", { goal, experienceLevel, dailyCommitmentMinutes });
+
+  async postOnboarding(
+    goal: string,
+    experienceLevel: string,
+    dailyCommitmentMinutes: number,
+  ): Promise<OnboardingResponse> {
+    const { data } = await this.axiosInstance.post<OnboardingResponse>("/user/onboarding", {
+      goal,
+      experienceLevel,
+      dailyCommitmentMinutes,
+    });
+    return data;
   }
-  postPracticeLog(dateKey: string, practicedSeconds: number) {
-    return this.postJson<PracticeLogResponse>("/user/practice-log", { dateKey, practicedSeconds });
+
+  async postPracticeLog(dateKey: string, practicedSeconds: number): Promise<PracticeLogResponse> {
+    const { data } = await this.axiosInstance.post<PracticeLogResponse>("/user/practice-log", {
+      dateKey,
+      practicedSeconds,
+    });
+    return data;
   }
-  async tryPostPracticeLog(seconds: number): Promise<boolean> {
-    try {
-      await this.postPracticeLog(new Date().toLocaleDateString("en-CA"), seconds);
-      return true;
-    } catch {
-      return false;
-    }
+
+  async readBlobFromUri(uri: string): Promise<Blob> {
+    const { data } = await axios.get<Blob>(uri, { responseType: "blob" });
+    return data;
   }
-  readBlobFromUri(uri: string) {
-    return this.getBlobFromUri(uri);
+
+  async putPresignedAvatarBlob(uploadUrl: string, blob: Blob): Promise<void> {
+    await axios.put(uploadUrl, blob, {
+      headers: { "Content-Type": "image/jpeg" },
+    });
   }
-  putPresignedAvatarBlob(uploadUrl: string, blob: Blob) {
-    return this.putBinaryToUrl(uploadUrl, blob, "image/jpeg");
+
+  async getDailyGoalStatus(dateKey: string): Promise<DailyGoalStatus> {
+    const { data } = await this.axiosInstance.get<DailyGoalStatus>(`/user/daily-goal-status/${dateKey}`);
+    return data;
   }
-  getDailyGoalStatus(dateKey: string) {
-    return this.getJson<DailyGoalStatus>(`/user/daily-goal-status/${dateKey}`);
-  }
-  markDailyGoalNotified(dateKey: string, type: "COMPLETE" | "INCOMPLETE") {
-    return this.postJson<unknown>(`/user/daily-goal-status/${dateKey}/mark-notified`, { type });
+
+  async markDailyGoalNotified(dateKey: string, type: "COMPLETE" | "INCOMPLETE"): Promise<void> {
+    await this.axiosInstance.post(`/user/daily-goal-status/${dateKey}/mark-notified`, { type });
   }
 }

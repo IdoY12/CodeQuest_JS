@@ -3,7 +3,7 @@ import { Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { useAppSelector } from "@/redux/hooks";
-import { logNav } from "@/services/logger";
+import { logNav } from "@/utils/logger";
 import { AuthenticatedProfileScreen } from "../authenticated-profile-screen/AuthenticatedProfileScreen";
 import { styles } from "./ProfileScreen.styles";
 

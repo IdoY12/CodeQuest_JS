@@ -1,7 +1,7 @@
 import { Alert } from "react-native";
 import type { AppDispatch } from "@/redux/store";
 import type UserService from "@/services/UserService";
-import { logError } from "@/services/logger";
+import { logError } from "@/utils/logger";
 import { setUserIdentity } from "@/redux/profile-slice";
 import {
   alertIfBlobTooLarge,
@@ -36,8 +36,7 @@ export async function runAvatarUpload(
   if (alertIfBlobTooLarge(blob)) return;
   const signed = await user.presignAvatarUpload("image/jpeg", blob.size);
   setProgress(62);
-  const ok = await user.putPresignedAvatarBlob(signed.uploadUrl, blob);
-  if (!ok) throw new Error("Upload failed");
+  await user.putPresignedAvatarBlob(signed.uploadUrl, blob);
   setProgress(85);
   await persistAvatarUrl(user, signed.publicUrl, dispatch);
   setProgress(100);

@@ -5,24 +5,22 @@ import type Chapter from "@/models/Chapter";
 import { colors } from "@/theme/theme";
 import type { PersonalizationLevel } from "@/data/personalizedExercisePool";
 import { useLearnRoadmapData } from "@/hooks/useLearnRoadmapData";
-import { useService } from "@/hooks/useService";
-import LearningService from "@/services/LearningService";
 import type { LearnRoadmapNavigation } from "@/types/learnNavigation.types";
-import { navigateToPersonalizedLesson } from "@/utils/learnRoadmap";
+import { navigateToPersonalizedLesson, openFirstLessonInChapter } from "@/utils/learnRoadmap";
 import { learnRoadmapStyles as s } from "./LearnRoadmapScreen.styles";
 
 type Props = { navigation: LearnRoadmapNavigation };
 
 export function LearnRoadmapScreen({ navigation }: Props) {
-  const learning = useService(LearningService);
-  const { path, experience, chapterData, loading } = useLearnRoadmapData();
+  const { path, experience, accessToken, chapterData, loading } = useLearnRoadmapData();
   const onEnter = (index: number, chapterId: string) => {
     if (index > 0) return;
     if (experience) {
       navigateToPersonalizedLesson(navigation, experience as PersonalizationLevel);
       return;
     }
-    void learning.openFirstLesson(navigation, chapterId);
+    if (!accessToken) return;
+    void openFirstLessonInChapter(navigation, chapterId, accessToken);
   };
   return (
     <SafeAreaView style={s.container} edges={["top", "bottom"]}>

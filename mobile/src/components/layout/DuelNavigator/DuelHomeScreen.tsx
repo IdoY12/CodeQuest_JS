@@ -3,7 +3,7 @@ import { Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppSelector } from "@/redux/hooks";
 import { useDuelSocket } from "@/hooks/useDuelSocket";
-import { logDuel, logNav } from "@/services/logger";
+import { logDuel, logNav } from "@/utils/logger";
 import type { DuelHomeScreenProps } from "@/types/duelNavigation.types";
 import { styles } from "./DuelNavigator.styles";
 

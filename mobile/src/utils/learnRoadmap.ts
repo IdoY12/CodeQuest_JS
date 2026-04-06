@@ -1,4 +1,5 @@
-import { logError, logTasks } from "@/services/logger";
+import { logError, logTasks } from "@/utils/logger";
+import LearningService from "@/services/LearningService";
 import type { LearnRoadmapNavigation } from "@/types/learnNavigation.types";
 import type { PersonalizationLevel } from "@/data/personalizedExercisePool";
 
@@ -25,4 +26,15 @@ export function navigateToPersonalizedLesson(
     lessonTitle: `${experience} Personalized Practice`,
     personalizedLevel: experience,
   });
+}
+
+export async function openFirstLessonInChapter(
+  navigation: LearnRoadmapNavigation,
+  chapterId: string,
+  jwt: string,
+): Promise<void> {
+  const learning = new LearningService(jwt);
+  const lessons = await learning.getLessons(chapterId);
+  if (lessons.length === 0) return;
+  navigation.navigate("Lesson", { lessonId: lessons[0].id, lessonTitle: lessons[0].title });
 }

@@ -1,6 +1,6 @@
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useOnboardingWizard } from "@/hooks/useOnboardingWizard";
-import { logOnboarding } from "@/services/logger";
+import { logOnboarding } from "@/utils/logger";
 import { ONBOARDING_GOALS, ONBOARDING_LEVELS } from "@/utils/onboardingCatalog";
 import { ObChoice, ObStep } from "./OnboardingFlow.wA";
 import { ObPath, ObRings } from "./OnboardingFlow.wB";

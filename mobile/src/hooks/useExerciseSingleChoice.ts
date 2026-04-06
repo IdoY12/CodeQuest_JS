@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type Exercise from "@/models/Exercise";
 import type ExerciseSubmitResult from "@/models/ExerciseSubmitResult";
 import type { LessonExerciseCompletionContext } from "@/types/lessonExerciseCompletion.types";
-import { useService } from "@/hooks/useService";
+import { useAuthenticatedService } from "@/hooks/useAuthenticatedService";
 import LearningService from "@/services/LearningService";
 
 export function useExerciseSingleChoice(
@@ -12,7 +12,7 @@ export function useExerciseSingleChoice(
   accessToken: string | null,
   onLessonExerciseComplete: (a: string, c: LessonExerciseCompletionContext) => void,
 ) {
-  const learning = useService(LearningService);
+  const learning = useAuthenticatedService(LearningService);
   const [selected, setSelected] = useState<string | null>(null);
   const [hasChecked, setHasChecked] = useState(false);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
@@ -35,7 +35,7 @@ export function useExerciseSingleChoice(
       runLocalCheck();
       return;
     }
-    if (!accessToken) return;
+    if (!accessToken || !learning) return;
     const result = await learning.submitExercise(exercise.id, selected);
     setServerResult(result);
     setIsCorrect(result.isCorrect);

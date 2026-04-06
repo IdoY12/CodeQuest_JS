@@ -41,3 +41,7 @@ export async function readSecureSessionTokens(): Promise<{
   ]);
   return { accessToken, refreshToken };
 }
+
+export async function clearSecureSessionTokens(): Promise<void> {
+  await writeSecureSessionTokens(null, null);
+}

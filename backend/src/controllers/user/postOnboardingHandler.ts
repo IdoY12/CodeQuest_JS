@@ -19,7 +19,7 @@ export async function postOnboarding(req: AuthenticatedRequest, res: Response) {
   const parsed = z
     .object({
       goal: z.enum(["JOB", "WORK", "FUN", "PROJECT"]),
-      experienceLevel: z.enum(["BEGINNER", "BASICS", "INTERMEDIATE", "ADVANCED"]),
+      experienceLevel: z.enum(["JUNIOR", "MID", "SENIOR"]),
       dailyCommitmentMinutes: z.number().int().min(10).max(60),
     })
     .safeParse(req.body);

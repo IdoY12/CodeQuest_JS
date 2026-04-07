@@ -6,7 +6,7 @@ export default interface User {
     onboardingCompleted: boolean
     pathKey: "BEGINNER" | "ADVANCED"
     goal: "JOB" | "WORK" | "FUN" | "PROJECT" | null
-    experienceLevel: "BEGINNER" | "BASICS" | "INTERMEDIATE" | "ADVANCED" | null
+    experienceLevel: "JUNIOR" | "MID" | "SENIOR" | null
     dailyCommitmentMinutes: number | null
     notificationsEnabled: boolean | null
 }

@@ -1,8 +1,8 @@
 import type { StyleProp, TextStyle } from "react-native";
 
 export type GoalKey = "JOB" | "WORK" | "FUN" | "PROJECT";
-export type LevelKey = "BEGINNER" | "BASICS" | "INTERMEDIATE" | "ADVANCED";
-export type CommitmentKey = "10" | "15" | "30";
+export type LevelKey = "JUNIOR" | "MID" | "SENIOR";
+export type CommitmentKey = "10" | "15" | "25";
 
 export type OptionRowProps = {
   values: Array<{ key: string; label: string }>;

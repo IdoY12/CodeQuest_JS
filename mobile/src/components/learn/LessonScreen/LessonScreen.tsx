@@ -20,7 +20,7 @@ export function LessonScreen({ navigation, route }: LessonScreenProps) {
   const lessonSource: "personalized" | "curriculum" = personalizedLevel ? "personalized" : "curriculum";
   const load = useLessonLoad(lessonId, personalizedLevel, accessToken);
   const exercise = load.exercises[load.exerciseIndex];
-  const onLessonExerciseComplete = useLessonExerciseCompleteHandler(navigation, personalizedLevel, lessonTitle, load);
+  const onLessonExerciseComplete = useLessonExerciseCompleteHandler(navigation, personalizedLevel, lessonId, lessonTitle, load);
   const progress = load.exercises.length > 0 ? ((load.exerciseIndex + 1) / load.exercises.length) * 100 : 0;
   if (load.loading || !exercise) {
     return (

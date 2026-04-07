@@ -12,15 +12,14 @@ export type DraftSetters = {
 };
 
 export function pathFromExperience(level: LevelKey): "BEGINNER" | "ADVANCED" {
-  const beginner = level === "BEGINNER" || level === "BASICS";
-  return beginner ? "BEGINNER" : "ADVANCED";
+  return level === "SENIOR" ? "ADVANCED" : "BEGINNER";
 }
 
 export function applyProgressToStore(
   dispatch: AppDispatch,
   goal: GoalKey,
   exp: LevelKey,
-  minutes: 10 | 15 | 30,
+  minutes: 10 | 15 | 25,
   notificationsEnabled: boolean,
 ): void {
   dispatch(
@@ -38,7 +37,7 @@ export function syncDraftsFromProgress(
   setters: DraftSetters,
   goal: GoalKey,
   exp: LevelKey,
-  minutes: 10 | 15 | 30,
+  minutes: 10 | 15 | 25,
   notificationsEnabled: boolean,
 ): void {
   setters.setDraftGoal(goal);

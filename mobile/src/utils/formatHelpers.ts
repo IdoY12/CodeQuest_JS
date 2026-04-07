@@ -1,5 +1,5 @@
 import type { MutableRefObject } from "react";
-import type { ViewStyle } from "react-native";
+import { Alert, type ViewStyle } from "react-native";
 
 export function shuffleLines(lines: string[]): string[] {
   return [...lines].sort(() => Math.random() - 0.5);
@@ -18,4 +18,16 @@ export function exerciseLineList(codeSnippet: string): string[] {
 export function progressWidthStyle(percent: number): ViewStyle {
   const p = Math.min(100, Math.max(0, percent));
   return { width: `${p}%` };
+}
+
+export function guardDuelAccess(isGuest: boolean, onAuth: () => void, onAllowed: () => void): void {
+  if (!isGuest) {
+    onAllowed();
+    return;
+  }
+  Alert.alert(
+    "Account Required",
+    "To play ranked 1v1 Duels, you need a free account. Your XP, rating, and match history are tied to your account and cannot be saved as a guest.",
+    [{ text: "Cancel", style: "cancel" }, { text: "Sign In / Register", onPress: onAuth }],
+  );
 }

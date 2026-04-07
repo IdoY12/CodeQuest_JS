@@ -2,16 +2,34 @@ import React from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useHomeScreen } from "@/hooks/useHomeScreen";
+import { useAppSelector } from "@/redux/hooks";
 import type { HomeMainScreenProps } from "@/types/homeNavigation.types";
+import { guardDuelAccess } from "@/utils/formatHelpers";
 import { styles } from "./HomeScreen.styles";
 
 export function HomeScreen({ navigation }: HomeMainScreenProps) {
   const h = useHomeScreen();
+  const isGuest = useAppSelector((s) => s.session.isGuest);
+  const onDuelPress = () =>
+    guardDuelAccess(
+      isGuest,
+      () => navigation.getParent()?.getParent()?.navigate("Auth" as never),
+      () => navigation.navigate("DuelTab"),
+    );
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
         <Text style={styles.greeting}>Good morning, {h.username} 👋</Text>
         <Text style={styles.date}>{new Date().toDateString()}</Text>
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Practice time today</Text>
+          <Text style={styles.subText}>
+            {h.practiceMinutesToday} / {h.dailyGoalMinutes} min
+          </Text>
+          <View style={styles.progressTrack}>
+            <View style={[styles.progressFill, { width: `${h.dailyGoalProgressPct}%` }]} />
+          </View>
+        </View>
         {h.multiplierEndsAt && h.remainingMultiplierMs > 0 ? (
           <View style={styles.multiplierCard}>
             <Text style={styles.cardTitle}>⚡ {h.multiplierFactor.toFixed(0)}x XP Window</Text>
@@ -61,7 +79,7 @@ export function HomeScreen({ navigation }: HomeMainScreenProps) {
         <View style={styles.card}>
           <Text style={styles.cardTitle}>⚔️ Duel Mode</Text>
           <Text style={styles.subText}>Challenge players worldwide.</Text>
-          <Pressable style={styles.secondary} onPress={() => navigation.navigate("DuelTab")}>
+          <Pressable style={styles.secondary} onPress={onDuelPress}>
             <Text style={styles.secondaryText}>Find a Match</Text>
           </Pressable>
         </View>

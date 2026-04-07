@@ -3,6 +3,7 @@ import { Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppSelector } from "@/redux/hooks";
 import { useDuelSocket } from "@/hooks/useDuelSocket";
+import { guardDuelAccess } from "@/utils/formatHelpers";
 import { logDuel, logNav } from "@/utils/logger";
 import type { DuelHomeScreenProps } from "@/types/duelNavigation.types";
 import { styles } from "./DuelNavigator.styles";
@@ -13,6 +14,7 @@ export function DuelHomeScreen({ navigation }: DuelHomeScreenProps) {
   const duelWins = useAppSelector((s) => s.duel.duelWins);
   const duelLosses = useAppSelector((s) => s.duel.duelLosses);
   const duelDraws = useAppSelector((s) => s.duel.duelDraws);
+  const isGuest = useAppSelector((s) => s.session.isGuest);
   useEffect(() => {
     logNav("screen:enter", { screen: "DuelHomeScreen" });
     return () => logNav("screen:leave", { screen: "DuelHomeScreen" });
@@ -31,9 +33,15 @@ export function DuelHomeScreen({ navigation }: DuelHomeScreenProps) {
       <Pressable
         style={styles.matchBtn}
         onPress={() => {
-          logDuel("matchmaking:start");
-          resetDuel();
-          navigation.navigate("Matchmaking");
+          guardDuelAccess(
+            isGuest,
+            () => navigation.getParent()?.getParent()?.navigate("Auth" as never),
+            () => {
+              logDuel("matchmaking:start");
+              resetDuel();
+              navigation.navigate("Matchmaking");
+            },
+          );
         }}
       >
         <Text style={styles.matchLabel}>Find a Match</Text>

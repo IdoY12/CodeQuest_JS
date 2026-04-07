@@ -3,7 +3,9 @@ import { AppState, type AppStateStatus } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
 import { logNav } from "@/utils/logger";
 import type Exercise from "@/models/Exercise";
-import type { PersonalizationLevel } from "@/data/personalizedExercisePool";
+import type { Experience } from "@/redux/profile-slice";
+import { useAppDispatcher } from "@/redux/hooks";
+import { addStudySeconds } from "@/redux/session-slice";
 import { useAuthenticatedService } from "@/hooks/useAuthenticatedService";
 import UserService from "@/services/UserService";
 import { drainRefInt } from "@/utils/formatHelpers";
@@ -12,9 +14,10 @@ import { tryPostPracticeLog } from "@/utils/tryPostPracticeLog";
 
 export function useLessonLoad(
   lessonId: string,
-  personalizedLevel: PersonalizationLevel | undefined,
+  personalizedLevel: Experience | undefined,
   accessToken: string | null,
 ) {
+  const dispatch = useAppDispatcher();
   const user = useAuthenticatedService(UserService);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,13 +64,16 @@ export function useLessonLoad(
   useEffect(() => {
     if (!isFocused || loading || !exercises[exerciseIndex]) return;
     const t = setInterval(() => {
-      if (appStateRef.current === "active") trackedRef.current += 1;
+      if (appStateRef.current === "active") {
+        trackedRef.current += 1;
+        dispatch(addStudySeconds(1));
+      }
     }, 1000);
     return () => {
       clearInterval(t);
       void flushPractice();
     };
-  }, [exerciseIndex, exercises, flushPractice, isFocused, loading]);
+  }, [dispatch, exerciseIndex, exercises, flushPractice, isFocused, loading]);
 
   return { exercises, loading, exerciseIndex, setExerciseIndex, correctCount, setCorrectCount, attemptedCount, setAttemptedCount };
 }

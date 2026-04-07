@@ -2,22 +2,50 @@ import React from "react";
 import { Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
-import { useAppSelector } from "@/redux/hooks";
+import { commitmentOptions, levels } from "@/constants/profilePreferences";
+import { useAppDispatcher, useAppSelector } from "@/redux/hooks";
+import { updatePreferences } from "@/redux/profile-slice";
 import { logNav } from "@/utils/logger";
 import { AuthenticatedProfileScreen } from "../authenticated-profile-screen/AuthenticatedProfileScreen";
 import { styles } from "./ProfileScreen.styles";
 
 function GuestProfileBody() {
+  const dispatch = useAppDispatcher();
   const navigation = useNavigation();
   const xp = useAppSelector((s) => s.xp.xpTotal);
   const level = useAppSelector((s) => s.xp.level);
+  const experience = useAppSelector((s) => s.profile.experience) ?? "JUNIOR";
+  const commitment = useAppSelector((s) => s.profile.commitment);
+  const goal = useAppSelector((s) => s.profile.goal) ?? "FUN";
+  const notificationsEnabled = useAppSelector((s) => s.profile.notificationsEnabled);
   React.useEffect(() => {
     logNav("screen:enter", { screen: "GuestProfileScreen" });
     return () => logNav("screen:leave", { screen: "GuestProfileScreen" });
   }, []);
   const onSignIn = () => {
-    const root = navigation.getParent()?.getParent();
-    root?.navigate("Auth" as never);
+    navigation.getParent()?.navigate("Auth" as never);
+  };
+  const onSelectExperience = (nextExperience: "JUNIOR" | "MID" | "SENIOR") => {
+    dispatch(
+      updatePreferences({
+        goal,
+        experience: nextExperience,
+        commitment,
+        notificationsEnabled,
+        path: nextExperience === "SENIOR" ? "ADVANCED" : "BEGINNER",
+      }),
+    );
+  };
+  const onSelectCommitment = (nextCommitment: "10" | "15" | "25") => {
+    dispatch(
+      updatePreferences({
+        goal,
+        experience,
+        commitment: nextCommitment,
+        notificationsEnabled,
+        path: experience === "SENIOR" ? "ADVANCED" : "BEGINNER",
+      }),
+    );
   };
   return (
     <SafeAreaView style={styles.guestContainer} edges={["top", "bottom"]}>
@@ -37,6 +65,33 @@ function GuestProfileBody() {
           <Pressable style={styles.guestBtn} onPress={onSignIn} accessibilityLabel="Sign in or create account">
             <Text style={styles.guestBtnLbl}>Sign in or create account</Text>
           </Pressable>
+        </View>
+        <View style={styles.guestCard}>
+          <Text style={styles.guestSection}>Learning Preferences</Text>
+          <Text style={styles.guestField}>My JavaScript Level</Text>
+          <View style={styles.guestRow}>
+            {levels.map((item) => (
+              <Pressable
+                key={item.key}
+                onPress={() => onSelectExperience(item.key)}
+                style={[styles.guestChip, experience === item.key && styles.guestChipOn]}
+              >
+                <Text style={[styles.guestChipText, experience === item.key && styles.guestChipTextOn]}>{item.label}</Text>
+              </Pressable>
+            ))}
+          </View>
+          <Text style={styles.guestField}>Daily Practice Goal</Text>
+          <View style={styles.guestRow}>
+            {commitmentOptions.map((item) => (
+              <Pressable
+                key={item.key}
+                onPress={() => onSelectCommitment(item.key)}
+                style={[styles.guestChip, commitment === item.key && styles.guestChipOn]}
+              >
+                <Text style={[styles.guestChipText, commitment === item.key && styles.guestChipTextOn]}>{item.label}</Text>
+              </Pressable>
+            ))}
+          </View>
         </View>
       </View>
     </SafeAreaView>

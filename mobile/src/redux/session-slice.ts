@@ -9,6 +9,8 @@ export interface SessionState {
   accessToken: string | null;
   refreshToken: string | null;
   userId: string | null;
+  studyDateKey: string;
+  studySecondsToday: number;
 }
 
 const initialState: SessionState = {
@@ -20,6 +22,8 @@ const initialState: SessionState = {
   accessToken: null,
   refreshToken: null,
   userId: null,
+  studyDateKey: new Date().toLocaleDateString("en-CA"),
+  studySecondsToday: 0,
 };
 
 type SignInPayload = {
@@ -45,6 +49,14 @@ const sessionSlice = createSlice({
     setOnboardingCompleted: (state, a: PayloadAction<boolean>) => {
       state.hasCompletedOnboarding = a.payload;
     },
+    addStudySeconds: (state, a: PayloadAction<number>) => {
+      const dateKey = new Date().toLocaleDateString("en-CA");
+      if (state.studyDateKey !== dateKey) {
+        state.studyDateKey = dateKey;
+        state.studySecondsToday = 0;
+      }
+      state.studySecondsToday += a.payload;
+    },
     enterGuestMode: (state) => {
       state.isAuthenticated = false;
       state.isGuest = true;
@@ -67,6 +79,6 @@ const sessionSlice = createSlice({
   },
 });
 
-export const { hydrateSession, setHasHydrated, setAuthChecked, setOnboardingCompleted, enterGuestMode, signIn, signOut } =
+export const { hydrateSession, setHasHydrated, setAuthChecked, setOnboardingCompleted, addStudySeconds, enterGuestMode, signIn, signOut } =
   sessionSlice.actions;
 export default sessionSlice.reducer;

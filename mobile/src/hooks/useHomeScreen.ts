@@ -13,6 +13,8 @@ export function useHomeScreen() {
   const streakShieldAvailable = useAppSelector((s) => s.streak.streakShieldAvailable);
   const multiplierFactor = useAppSelector((s) => s.xp.xpMultiplierFactor);
   const multiplierEndsAt = useAppSelector((s) => s.xp.xpMultiplierEndsAt);
+  const studySecondsToday = useAppSelector((s) => s.session.studySecondsToday);
+  const commitment = useAppSelector((s) => s.profile.commitment);
   useEffect(() => {
     logNav("screen:enter", { screen: "HomeScreen" });
     return () => logNav("screen:leave", { screen: "HomeScreen" });
@@ -35,6 +37,9 @@ export function useHomeScreen() {
   const remainingMultiplierMs = multiplierEndsAt ? Math.max(0, multiplierEndsAt - Date.now()) : 0;
   const multiplierMinutes = Math.floor(remainingMultiplierMs / 60000);
   const multiplierSeconds = Math.floor((remainingMultiplierMs % 60000) / 1000);
+  const practiceMinutesToday = Math.floor(studySecondsToday / 60);
+  const dailyGoalMinutes = Number(commitment);
+  const dailyGoalProgressPct = dailyGoalMinutes > 0 ? Math.min(100, (practiceMinutesToday / dailyGoalMinutes) * 100) : 0;
   return {
     username,
     level,
@@ -49,5 +54,8 @@ export function useHomeScreen() {
     remainingMultiplierMs,
     multiplierMinutes,
     multiplierSeconds,
+    practiceMinutesToday,
+    dailyGoalMinutes,
+    dailyGoalProgressPct,
   };
 }

@@ -17,15 +17,15 @@ export function AppNavigator() {
 
   React.useEffect(() => {
     if (!hasHydrated) return;
-    const route = isAuthenticated && !hasCompletedOnboarding ? "Onboarding" : "MainStack";
+    const route = !hasCompletedOnboarding ? "Onboarding" : "MainStack";
     logNav("root:route-selected", { route });
-  }, [hasCompletedOnboarding, hasHydrated, isAuthenticated]);
+  }, [hasCompletedOnboarding, hasHydrated]);
 
   if (!hasHydrated || !authChecked) {
     return <HydrationLoadingScreen />;
   }
 
-  if (isAuthenticated && !hasCompletedOnboarding) {
+  if (!hasCompletedOnboarding) {
     return <OnboardingFlow />;
   }
 

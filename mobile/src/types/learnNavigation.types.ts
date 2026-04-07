@@ -1,14 +1,14 @@
 import type { NativeStackNavigationProp, NativeStackScreenProps } from "@react-navigation/native-stack";
-import type { PersonalizationLevel } from "../data/personalizedExercisePool";
+import type { Experience } from "@/redux/profile-slice";
 
 export type LearnStackParamList = {
   LearnRoadmap: undefined;
   Lesson: {
     lessonId: string;
     lessonTitle: string;
-    personalizedLevel?: PersonalizationLevel;
+    personalizedLevel?: Experience;
   };
-  LessonResults: { accuracy: number; lessonTitle: string };
+  LessonResults: { accuracy: number; lessonTitle: string; lessonId: string; personalizedLevel?: Experience };
 };
 
 export type LearnRoadmapNavigation = NativeStackNavigationProp<LearnStackParamList, "LearnRoadmap">;

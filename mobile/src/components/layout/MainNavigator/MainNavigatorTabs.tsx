@@ -2,6 +2,7 @@ import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Text, View } from "react-native";
+import { useAppSelector } from "@/redux/hooks";
 import { HomeScreen } from "@/components/home/HomeScreen/HomeScreen";
 import { DailyPuzzleScreen } from "@/components/daily-puzzle/DailyPuzzleScreen/DailyPuzzleScreen";
 import { LearnNavigator } from "@/components/layout/LearnNavigator/LearnNavigator";
@@ -10,6 +11,7 @@ import { ProfileScreen } from "@/components/profile/ProfileScreen";
 import { colors } from "@/theme/theme";
 import type { HomeStackParamList } from "@/types/homeNavigation.types";
 import type { MainTabParamList } from "@/types/mainTab.types";
+import { guardDuelAccess } from "@/utils/formatHelpers";
 
 const Tabs = createBottomTabNavigator<MainTabParamList>();
 const HomeStack = createNativeStackNavigator<HomeStackParamList>();
@@ -38,6 +40,7 @@ function HomeNavigator() {
 }
 
 export function MainTabs() {
+  const isGuest = useAppSelector((s) => s.session.isGuest);
   return (
     <Tabs.Navigator
       screenOptions={{
@@ -61,6 +64,16 @@ export function MainTabs() {
         name="DuelTab"
         component={DuelNavigator}
         options={{ tabBarIcon: () => <TabIcon label="⚔️" />, tabBarLabel: "Duel" }}
+        listeners={({ navigation }) => ({
+          tabPress: (e) => {
+            guardDuelAccess(
+              isGuest,
+              () => navigation.getParent()?.navigate("Auth" as never),
+              () => {},
+            );
+            if (isGuest) e.preventDefault();
+          },
+        })}
       />
       <Tabs.Screen
         name="Profile"

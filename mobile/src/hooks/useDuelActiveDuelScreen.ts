@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
+import { AppState } from "react-native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useAppDispatcher, useAppSelector } from "@/redux/hooks";
+import { addStudySeconds } from "@/redux/session-slice";
 import { addXp } from "@/redux/xp-slice";
 import { applyDuelResult } from "@/redux/duel-slice";
 import { logDuel, logNav } from "@/utils/logger";
@@ -53,9 +55,14 @@ export function useDuelActiveDuelScreen(navigation: Nav) {
   }, [dispatch, duelEnd, myScore, navigation, oppScore]);
   useEffect(() => {
     setTimeLeft(DUEL_ACTIVE_ROUND_SECONDS);
-    const i = setInterval(() => setTimeLeft((v) => Math.max(0, v - 1)), 1000);
+    const i = setInterval(() => {
+      setTimeLeft((v) => Math.max(0, v - 1));
+      if (AppState.currentState === "active" && round) {
+        dispatch(addStudySeconds(1));
+      }
+    }, 1000);
     return () => clearInterval(i);
-  }, [roundNumber]);
+  }, [dispatch, round, roundNumber]);
   const submit = (answer: string) => {
     if (!sessionId || !userId) return;
     submitAnswer({ sessionId, roundNumber, answer, timeTakenMs: (DUEL_ACTIVE_ROUND_SECONDS - timeLeft) * 1000 });

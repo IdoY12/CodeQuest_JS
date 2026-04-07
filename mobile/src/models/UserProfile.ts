@@ -5,8 +5,8 @@ export default interface UserProfile {
     avatarUrl: string | null
     progress: {
         goal: "JOB" | "WORK" | "FUN" | "PROJECT" | null
-        experienceLevel: "BEGINNER" | "BASICS" | "INTERMEDIATE" | "ADVANCED" | null
-        dailyCommitmentMinutes: 10 | 15 | 30 | null
+        experienceLevel: "JUNIOR" | "MID" | "SENIOR" | null
+        dailyCommitmentMinutes: 10 | 15 | 25 | null
         notificationsEnabled: boolean
         onboardingCompleted: boolean
     } | null

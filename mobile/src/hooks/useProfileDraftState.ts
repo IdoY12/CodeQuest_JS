@@ -5,7 +5,7 @@ import type { ProfileReduxState } from "./useProfileRedux";
 
 export function useProfileDraftState(r: ProfileReduxState) {
   const [draftGoal, setDraftGoal] = React.useState<(typeof goals)[number]["key"]>(r.goal ?? "FUN");
-  const [draftLevel, setDraftLevel] = React.useState<(typeof levels)[number]["key"]>(r.experience ?? "BEGINNER");
+  const [draftLevel, setDraftLevel] = React.useState<(typeof levels)[number]["key"]>(r.experience ?? "JUNIOR");
   const [draftCommitment, setDraftCommitment] = React.useState<(typeof commitmentOptions)[number]["key"]>(
     r.commitment ?? "15",
   );

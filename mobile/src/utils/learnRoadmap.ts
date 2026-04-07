@@ -1,7 +1,7 @@
 import { logError, logTasks } from "@/utils/logger";
 import LearningService from "@/services/LearningService";
 import type { LearnRoadmapNavigation } from "@/types/learnNavigation.types";
-import type { PersonalizationLevel } from "@/data/personalizedExercisePool";
+import type { Experience } from "@/redux/profile-slice";
 
 type PathKey = string;
 
@@ -19,7 +19,7 @@ export function logChaptersError(path: PathKey, error: unknown): void {
 
 export function navigateToPersonalizedLesson(
   navigation: LearnRoadmapNavigation,
-  experience: PersonalizationLevel,
+  experience: Experience,
 ): void {
   navigation.navigate("Lesson", {
     lessonId: `personalized-${experience}`,

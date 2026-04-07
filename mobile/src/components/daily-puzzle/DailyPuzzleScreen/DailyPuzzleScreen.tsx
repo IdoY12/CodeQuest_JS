@@ -1,16 +1,19 @@
 import React, { useMemo, useState } from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
+import { useIsFocused } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "@/theme/theme";
 import { useAppDispatcher, useAppSelector } from "@/redux/hooks";
 import { addXp } from "@/redux/xp-slice";
 import { markDailyPuzzleSolved } from "@/redux/puzzle-slice";
+import { addStudySeconds } from "@/redux/session-slice";
 import { getPuzzleForDate, isPuzzleAnswerCorrect } from "@/data/dailyPuzzles";
 import type { DailyPuzzleScreenProps } from "@/types/homeNavigation.types";
 import { styles } from "./DailyPuzzleScreen.styles";
 
 export function DailyPuzzleScreen({ navigation }: DailyPuzzleScreenProps) {
   const dispatch = useAppDispatcher();
+  const isFocused = useIsFocused();
   const [input, setInput] = useState("");
   const [message, setMessage] = useState<string | null>(null);
   const solvedDate = useAppSelector((s) => s.puzzle.lastDailyPuzzleSolvedDate);
@@ -18,6 +21,11 @@ export function DailyPuzzleScreen({ navigation }: DailyPuzzleScreenProps) {
   const dateKey = new Date().toLocaleDateString("en-CA");
   const puzzle = useMemo(() => getPuzzleForDate(new Date()), []);
   const alreadySolved = solvedDate === dateKey || puzzleSolvedIdByDate[dateKey] === puzzle.id;
+  React.useEffect(() => {
+    if (!isFocused) return;
+    const t = setInterval(() => dispatch(addStudySeconds(1)), 1000);
+    return () => clearInterval(t);
+  }, [dispatch, isFocused]);
 
   const onSubmit = () => {
     if (alreadySolved) {

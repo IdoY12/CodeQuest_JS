@@ -38,6 +38,9 @@ export function ProfileAuthenticatedLearn({ p }: { p: UseProfileScreenReturn }) 
         selected={p.draftCommitment}
         onSelect={(k) => p.setDraftCommitment(k as (typeof p.commitmentOptions)[number]["key"])}
       />
+      <Text style={profileSectionCardStyles.fieldLabel}>
+        Today: {p.studyMinutesToday} min / {p.commitment} min goal
+      </Text>
       <Pressable
         style={[profileSectionCardStyles.saveButton, p.saving && profileSectionCardStyles.saveButtonDisabled]}
         disabled={p.saving}

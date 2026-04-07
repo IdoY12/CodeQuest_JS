@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { useAppDispatcher } from "@/redux/hooks";
 import { addXp as addXpAction } from "@/redux/xp-slice";
 import type { LessonExerciseCompletionContext } from "@/types/lessonExerciseCompletion.types";
-import type { PersonalizationLevel } from "@/data/personalizedExercisePool";
+import type { Experience } from "@/redux/profile-slice";
 import type Exercise from "@/models/Exercise";
 import type { LessonScreenNavigation } from "@/types/learnNavigation.types";
 import { orchestrateLessonAnswer } from "@/utils/lessonAnswerOrchestrator";
@@ -19,7 +19,8 @@ type Load = {
 
 export function useLessonExerciseCompleteHandler(
   navigation: LessonScreenNavigation,
-  personalizedLevel: PersonalizationLevel | undefined,
+  personalizedLevel: Experience | undefined,
+  lessonId: string,
   lessonTitle: string,
   load: Load,
 ) {
@@ -35,6 +36,7 @@ export function useLessonExerciseCompleteHandler(
         exerciseIndex: load.exerciseIndex,
         correctCount: load.correctCount,
         attemptedCount: load.attemptedCount,
+        lessonId,
         lessonTitle,
         navigation,
         setAttemptedCount: load.setAttemptedCount,
@@ -51,6 +53,7 @@ export function useLessonExerciseCompleteHandler(
       load.setAttemptedCount,
       load.setCorrectCount,
       load.setExerciseIndex,
+      lessonId,
       lessonTitle,
       navigation,
       personalizedLevel,

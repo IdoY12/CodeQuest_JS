@@ -1,20 +1,21 @@
 import * as Haptics from "expo-haptics";
 import type Exercise from "@/models/Exercise";
 import type { LessonScreenNavigation } from "@/types/learnNavigation.types";
-import type { PersonalizationLevel } from "@/data/personalizedExercisePool";
+import type { Experience } from "@/redux/profile-slice";
 import type { LessonExerciseCompletionContext } from "@/types/lessonExerciseCompletion.types";
 
 type AddXp = (n: number) => void;
 
 export type LessonAnswerOrchestratorArgs = {
   completion: LessonExerciseCompletionContext;
-  personalizedLevel: PersonalizationLevel | undefined;
+  personalizedLevel: Experience | undefined;
   addXp: AddXp;
   exercises: Exercise[];
   exerciseIndex: number;
   correctCount: number;
   attemptedCount: number;
   lessonTitle: string;
+  lessonId: string;
   navigation: LessonScreenNavigation;
   setAttemptedCount: (n: number) => void;
   setCorrectCount: (n: number) => void;
@@ -36,11 +37,13 @@ function finishOrAdvance(
   total: number,
   accuracy: number,
   lessonTitle: string,
+  lessonId: string,
+  personalizedLevel: Experience | undefined,
   navigation: LessonScreenNavigation,
   setIndex: (n: number) => void,
 ): void {
   if (nextIndex >= total) {
-    navigation.replace("LessonResults", { accuracy, lessonTitle });
+    navigation.replace("LessonResults", { accuracy, lessonTitle, lessonId, personalizedLevel });
     return;
   }
   setIndex(nextIndex);
@@ -66,5 +69,5 @@ export async function orchestrateLessonAnswer(a: LessonAnswerOrchestratorArgs): 
   await applyXpReward(a, isCorrect, xp);
   hapticForCorrect(isCorrect);
   const accuracy = Math.round((nextCorrect / nextAttempted) * 100);
-  finishOrAdvance(a.exerciseIndex + 1, a.exercises.length, accuracy, a.lessonTitle, a.navigation, a.setExerciseIndex);
+  finishOrAdvance(a.exerciseIndex + 1, a.exercises.length, accuracy, a.lessonTitle, a.lessonId, a.personalizedLevel, a.navigation, a.setExerciseIndex);
 }

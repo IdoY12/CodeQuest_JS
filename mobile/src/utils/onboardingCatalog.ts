@@ -8,14 +8,13 @@ export const ONBOARDING_GOALS: { key: Goal; title: string; subtitle: string }[] 
 ];
 
 export const ONBOARDING_LEVELS: { key: Experience; title: string; subtitle: string }[] = [
-  { key: "BEGINNER", title: "Complete Beginner", subtitle: "Never written a line of code" },
-  { key: "BASICS", title: "I know the basics", subtitle: "Variables, functions, maybe loops" },
-  { key: "INTERMEDIATE", title: "Intermediate", subtitle: "I build things, but have gaps" },
-  { key: "ADVANCED", title: "Advanced", subtitle: "I want real challenges and depth" },
+  { key: "JUNIOR", title: "Junior", subtitle: "Basic syntax, loops, and conditionals" },
+  { key: "MID", title: "Mid", subtitle: "Closures, async/await, and array methods" },
+  { key: "SENIOR", title: "Senior", subtitle: "Advanced patterns and complex problems" },
 ];
 
 export const ONBOARDING_COMMITMENTS: { key: Commitment; title: string; subtitle: string }[] = [
   { key: "10", title: "10 min", subtitle: "Quick daily habit" },
   { key: "15", title: "15 min", subtitle: "Steady progress" },
-  { key: "30", title: "30 min", subtitle: "Fast track" },
+  { key: "25", title: "25 min", subtitle: "Deep focused practice" },
 ];

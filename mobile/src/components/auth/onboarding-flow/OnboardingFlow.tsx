@@ -1,9 +1,9 @@
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useOnboardingWizard } from "@/hooks/useOnboardingWizard";
 import { logOnboarding } from "@/utils/logger";
-import { ONBOARDING_GOALS, ONBOARDING_LEVELS } from "@/utils/onboardingCatalog";
+import { ONBOARDING_COMMITMENTS, ONBOARDING_GOALS, ONBOARDING_LEVELS } from "@/utils/onboardingCatalog";
 import { ObChoice, ObStep } from "./OnboardingFlow.wA";
-import { ObPath, ObRings } from "./OnboardingFlow.wB";
+import { ObPath } from "./OnboardingFlow.wB";
 import { o } from "./OnboardingFlow.styles";
 
 export function OnboardingFlow() {
@@ -12,30 +12,10 @@ export function OnboardingFlow() {
     <SafeAreaView style={o.container} edges={["top", "bottom"]}>
       {w.step === 1 && (
         <ObStep
-          title="What brings you to CodeQuest?"
+          title="What's your level?"
           onContinue={() => {
-            logOnboarding("step:complete", { step: 1, goal: w.goal });
+            logOnboarding("step:complete", { step: 1, level: w.level });
             w.setStep(2);
-          }}
-          enabled={!!w.goal}
-        >
-          {ONBOARDING_GOALS.map((opt) => (
-            <ObChoice
-              key={opt.key}
-              selected={w.goal === opt.key}
-              title={opt.title}
-              subtitle={opt.subtitle}
-              onPress={() => w.setGoal(opt.key)}
-            />
-          ))}
-        </ObStep>
-      )}
-      {w.step === 2 && (
-        <ObStep
-          title="How comfortable are you with JavaScript?"
-          onContinue={() => {
-            logOnboarding("step:complete", { step: 2, level: w.level });
-            w.setStep(3);
           }}
           enabled={!!w.level}
         >
@@ -50,25 +30,45 @@ export function OnboardingFlow() {
           ))}
         </ObStep>
       )}
-      {w.step === 3 && (
+      {w.step === 2 && (
         <ObStep
-          title="How much time can you dedicate daily?"
+          title="What is your goal?"
           onContinue={() => {
-            logOnboarding("step:complete", { step: 3, commitment: w.commitment });
-            w.setStep(4);
+            logOnboarding("step:complete", { step: 2, goal: w.goal });
+            w.setStep(3);
           }}
-          enabled
+          enabled={!!w.goal}
         >
-          <ObRings value={w.commitment} onChange={w.setCommitment} />
+          {ONBOARDING_GOALS.map((opt) => (
+            <ObChoice
+              key={opt.key}
+              selected={w.goal === opt.key}
+              title={opt.title}
+              subtitle={opt.subtitle}
+              onPress={() => w.setGoal(opt.key)}
+            />
+          ))}
         </ObStep>
       )}
-      {w.step === 4 && (
+      {w.step === 3 && (
         <ObStep
-          title="Your path is ready"
-          onContinue={w.submitOnboarding}
-          enabled={!!w.goal && !!w.level}
-          continueLabel={w.submitting ? "Saving..." : "Start My Path"}
+          title="How many minutes do you plan to study per day?"
+          onContinue={() => {
+            logOnboarding("step:complete", { step: 3, commitment: w.commitment });
+            w.submitOnboarding();
+          }}
+          enabled
+          continueLabel={w.submitting ? "Saving..." : "Get Started"}
         >
+          {ONBOARDING_COMMITMENTS.map((opt) => (
+            <ObChoice
+              key={opt.key}
+              selected={w.commitment === opt.key}
+              title={opt.title}
+              subtitle={opt.subtitle}
+              onPress={() => w.setCommitment(opt.key)}
+            />
+          ))}
           <ObPath pathText={w.pathText} submitting={w.submitting} error={w.error} />
         </ObStep>
       )}

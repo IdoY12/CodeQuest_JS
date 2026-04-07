@@ -12,8 +12,8 @@ export function useOnboardingWizard() {
   const user = useAuthenticatedService(UserService);
   const accessToken = useAppSelector((s) => s.session.accessToken);
   const [step, setStep] = useState(1);
-  const [goal, setGoal] = useState<Goal | undefined>(undefined);
   const [level, setLevel] = useState<Experience | undefined>(undefined);
+  const [goal, setGoal] = useState<Goal | undefined>(undefined);
   const [commitment, setCommitment] = useState<Commitment>("15");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -26,33 +26,39 @@ export function useOnboardingWizard() {
   }, [step]);
   const pathText = useMemo(
     () =>
-      level === "ADVANCED"
-        ? "We will throw you into Express APIs, async patterns, and advanced debugging."
-        : "We will start with fundamentals: variables, loops, and functions through interactive challenges.",
+      level === "SENIOR"
+        ? "You will get advanced async patterns, architecture, and performance-focused practice."
+        : level === "MID"
+          ? "You will practice closures, async/await, and moderate algorithm challenges."
+          : "You will start with fundamentals: variables, loops, and simple functions.",
     [level],
   );
   const submitOnboarding = async () => {
-    if (!goal || !level || !accessToken || !user || submitting) return;
+    if (!level || !goal || submitting) return;
     logOnboarding("submit:start", { step, hasToken: Boolean(accessToken), goal, level, commitment });
     setSubmitting(true);
     setError(null);
     try {
-      const response = await user.postOnboarding(goal, level, Number(commitment));
       dispatch(setOnboarding({ goal, experience: level, commitment }));
-      if (!response.onboardingCompleted) {
-        setError("Onboarding not completed");
-        return;
+      if (accessToken && user) {
+        const response = await user.postOnboarding(goal, level, Number(commitment));
+        if (!response.onboardingCompleted) {
+          setError("Onboarding not completed");
+          return;
+        }
+        logOnboarding("submit:success", { pathKey: response.pathKey });
+        dispatch(
+          completeOnboarding({
+            path: response.pathKey,
+            goal,
+            experience: level,
+            commitment,
+            notificationsEnabled: true,
+          }),
+        );
+      } else {
+        dispatch(completeOnboarding({ path: level === "SENIOR" ? "ADVANCED" : "BEGINNER", goal, experience: level, commitment, notificationsEnabled: true }));
       }
-      logOnboarding("submit:success", { pathKey: response.pathKey });
-      dispatch(
-        completeOnboarding({
-          path: response.pathKey,
-          goal,
-          experience: level,
-          commitment,
-          notificationsEnabled: true,
-        }),
-      );
       dispatch(setOnboardingCompleted(true));
     } catch (e) {
       logError("[ONBOARDING]", e, { phase: "submit" });
@@ -64,10 +70,10 @@ export function useOnboardingWizard() {
   return {
     step,
     setStep,
-    goal,
-    setGoal,
     level,
     setLevel,
+    goal,
+    setGoal,
     commitment,
     setCommitment,
     accessToken,

@@ -1,57 +1,51 @@
 import React from "react";
 import { ActivityIndicator, FlatList, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import type Chapter from "@/models/Chapter";
 import { colors } from "@/theme/theme";
-import type { PersonalizationLevel } from "@/data/personalizedExercisePool";
 import { useLearnRoadmapData } from "@/hooks/useLearnRoadmapData";
 import type { LearnRoadmapNavigation } from "@/types/learnNavigation.types";
-import { navigateToPersonalizedLesson, openFirstLessonInChapter } from "@/utils/learnRoadmap";
 import { learnRoadmapStyles as s } from "./LearnRoadmapScreen.styles";
 
 type Props = { navigation: LearnRoadmapNavigation };
 
 export function LearnRoadmapScreen({ navigation }: Props) {
-  const { path, experience, accessToken, chapterData, loading } = useLearnRoadmapData();
-  const onEnter = (index: number, chapterId: string) => {
-    if (index > 0) return;
-    if (experience) {
-      navigateToPersonalizedLesson(navigation, experience as PersonalizationLevel);
-      return;
-    }
-    if (!accessToken) return;
-    void openFirstLessonInChapter(navigation, chapterId, accessToken);
+  const { path, experience, loading, roadmapBlocks } = useLearnRoadmapData();
+  const onEnter = (blockNumber: number, unlocked: boolean) => {
+    if (!unlocked) return;
+    navigation.navigate("Lesson", {
+      lessonId: `personalized-${experience}-block-${blockNumber}`,
+      lessonTitle: `Block ${blockNumber}: ${experience} Practice`,
+      personalizedLevel: experience,
+    });
   };
   return (
     <SafeAreaView style={s.container} edges={["top", "bottom"]}>
       {loading ? (
         <ActivityIndicator color={colors.accent} />
       ) : (
-        <FlatList<Chapter>
+        <FlatList
           style={s.container}
           contentContainerStyle={s.content}
-          data={chapterData}
+          data={roadmapBlocks}
           keyExtractor={(item) => item.id}
           ListHeaderComponent={<Text style={s.title}>{path} Concept Map</Text>}
-          renderItem={({ item: chapter, index }) => (
+          renderItem={({ item: block, index }) => (
             <View style={s.nodeWrap}>
-              <View style={[s.chapterNode, index === 0 && s.chapterNodeActive]}>
+              <View style={[s.chapterNode, block.unlocked && s.chapterNodeActive]}>
                 <Text style={s.chapterTitle}>
-                  Node {index + 1}: {chapter.title}
+                  Node {index + 1}: {block.title}
                 </Text>
-                <Text style={s.chapterDesc}>{chapter.description}</Text>
-                <Text style={s.nodeStatus}>
-                  {index === 0 ? "Current node" : "Locked until previous node complete"}
-                </Text>
+                <Text style={s.chapterDesc}>{block.description}</Text>
+                <Text style={s.nodeStatus}>{block.done ? "Completed 10 / 10" : `${block.completed} / ${block.total} completed`}</Text>
               </View>
               <Pressable
-                style={[s.lessonButton, index > 0 && s.disabled]}
-                disabled={index > 0}
-                onPress={() => onEnter(index, chapter.id)}
+                style={[s.lessonButton, !block.unlocked && s.disabled]}
+                disabled={!block.unlocked}
+                onPress={() => onEnter(index + 1, block.unlocked)}
               >
-                <Text style={s.lessonButtonLabel}>{index === 0 ? "Enter Node" : "Locked"}</Text>
+                <Text style={s.lessonButtonLabel}>{block.done ? "Completed" : block.unlocked ? "Start" : "Locked"}</Text>
               </Pressable>
-              {index < chapterData.length - 1 ? <View style={s.connector} /> : null}
+              {index < roadmapBlocks.length - 1 ? <View style={s.connector} /> : null}
             </View>
           )}
         />

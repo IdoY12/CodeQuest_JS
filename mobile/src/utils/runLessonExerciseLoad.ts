@@ -22,6 +22,7 @@ export async function runLessonExerciseLoad(
   lessonId: string,
   personalizedLevel: Experience | undefined,
   jwt: string | null,
+  initialExerciseIndex: number,
   active: () => boolean,
   setLoading: (v: boolean) => void,
   set: LessonExerciseSetters,
@@ -34,7 +35,7 @@ export async function runLessonExerciseLoad(
       const window = parsePersonalizedBlockWindow(lessonId);
       const payload = all.slice(window.start, window.end);
       logTasks("lesson:loaded-personalized", { level: personalizedLevel, count: payload.length });
-      if (active()) applyLessonExercisePayload(set, payload);
+      if (active()) applyLessonExercisePayload(set, payload, initialExerciseIndex);
       return;
     }
     if (!jwt) {
@@ -44,7 +45,7 @@ export async function runLessonExerciseLoad(
     const learning = new LearningService(jwt);
     const payload: Exercise[] = await learning.getExercises(lessonId);
     logTasks("lesson:loaded-api", { lessonId, count: payload.length });
-    if (active()) applyLessonExercisePayload(set, payload);
+    if (active()) applyLessonExercisePayload(set, payload, initialExerciseIndex);
   } catch (e) {
     logError("[TASKS]", e, { phase: "load-exercises", lessonId });
   } finally {

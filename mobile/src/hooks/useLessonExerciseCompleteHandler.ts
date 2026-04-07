@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import { useAppDispatcher } from "@/redux/hooks";
+import { setExerciseIndex as setSavedExerciseIndex } from "@/redux/lesson-slice";
 import { addXp as addXpAction } from "@/redux/xp-slice";
 import type { LessonExerciseCompletionContext } from "@/types/lessonExerciseCompletion.types";
 import type { Experience } from "@/redux/profile-slice";
@@ -43,6 +44,7 @@ export function useLessonExerciseCompleteHandler(
         setCorrectCount: load.setCorrectCount,
         setExerciseIndex: load.setExerciseIndex,
       });
+      if (load.exerciseIndex + 1 >= load.exercises.length) dispatch(setSavedExerciseIndex(0));
     },
     [
       addXp,

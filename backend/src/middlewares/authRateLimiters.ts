@@ -19,7 +19,7 @@ const limiter = (max: number) =>
     legacyHeaders: false,
   });
 
-export const authRegisterRateLimiter = limiter(8);
+export const authRegisterRateLimiter = process.env.NODE_ENV === "production" ? limiter(8) : limiter(100); // DEV ONLY — do not deploy
 export const authLoginRateLimiter = limiter(8);
 export const authRefreshRateLimiter = limiter(60);
 export const authLogoutRateLimiter = limiter(40);

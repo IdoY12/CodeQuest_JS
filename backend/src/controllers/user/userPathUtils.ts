@@ -7,6 +7,6 @@
  * Consumers: onboarding and preferences handlers
  */
 
-export function resolvePathKey(level: "BEGINNER" | "BASICS" | "INTERMEDIATE" | "ADVANCED" | "JUNIOR" | "MID" | "SENIOR"): "BEGINNER" | "ADVANCED" {
-  return level === "BEGINNER" || level === "BASICS" || level === "JUNIOR" || level === "MID" ? "BEGINNER" : "ADVANCED";
+export function resolvePathKey(level: "JUNIOR" | "MID" | "SENIOR"): "BEGINNER" | "ADVANCED" {
+  return level === "JUNIOR" || level === "MID" ? "BEGINNER" : "ADVANCED";
 }

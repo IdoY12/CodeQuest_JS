@@ -3,7 +3,7 @@ model UserProgress {
   userId                 String       @unique
   pathId                 String
   goal                   String?
-  experienceLevel        String?
+  experienceLevel        ExperienceLevel?
   dailyCommitmentMinutes Int?
   notificationsEnabled   Boolean      @default(true)
   onboardingCompleted    Boolean      @default(false)

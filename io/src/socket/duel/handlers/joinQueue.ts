@@ -33,7 +33,7 @@ export function registerJoinQueue(socket: Socket, duel: DuelNamespace) {
       username: user?.username ?? payload.username ?? "Anonymous",
       avatarId: user?.avatarId ?? "avatar-braces",
       rating: ratingFromDb?.rating ?? payload.rating ?? 1000,
-      experienceLevel: progress?.experienceLevel ?? "BEGINNER",
+      experienceLevel: progress?.experienceLevel ?? "JUNIOR",
       joinedAt: Date.now(),
     };
     handleQueueJoin(socket, duel, entry);

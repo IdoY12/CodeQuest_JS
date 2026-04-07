@@ -27,7 +27,7 @@ export function dispatchSignInSuccess(
   );
   dispatch(setUserIdentity({ username: user.username, email: user.email, avatarUrl: user.avatarUrl }));
   const c: Commitment =
-    user.dailyCommitmentMinutes === 10 || user.dailyCommitmentMinutes === 15 || user.dailyCommitmentMinutes === 30
+    user.dailyCommitmentMinutes === 10 || user.dailyCommitmentMinutes === 15 || user.dailyCommitmentMinutes === 25
       ? (String(user.dailyCommitmentMinutes) as Commitment)
       : "15";
   dispatch(

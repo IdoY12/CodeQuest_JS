@@ -13,6 +13,12 @@ enum ExerciseType {
   TAP_TOKEN
 }
 
+enum ExperienceLevel {
+  JUNIOR
+  MID
+  SENIOR
+}
+
 enum PathType {
   BEGINNER
   ADVANCED

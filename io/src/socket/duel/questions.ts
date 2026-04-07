@@ -18,7 +18,7 @@ export async function pickRandomDuelQuestion(difficulty?: Difficulty) {
 export async function pickQuestionForSession(session: SessionState) {
   const p1Exp = session.player1.experienceLevel;
   const p2Exp = session.player2.experienceLevel;
-  const beginnerLike = ["BEGINNER", "BASICS", "INTERMEDIATE"];
+  const beginnerLike = ["JUNIOR", "MID"];
   const p1IsBeginnerLike = beginnerLike.includes(p1Exp);
   const p2IsBeginnerLike = beginnerLike.includes(p2Exp);
 

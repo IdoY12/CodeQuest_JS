@@ -20,7 +20,7 @@ export async function patchPreferences(req: AuthenticatedRequest, res: Response)
     .object({
       goal: z.enum(["JOB", "WORK", "FUN", "PROJECT"]),
       experienceLevel: z.enum(["JUNIOR", "MID", "SENIOR"]),
-      dailyCommitmentMinutes: z.number().int().refine((value) => value === 10 || value === 15 || value === 30),
+      dailyCommitmentMinutes: z.number().int().refine((value) => value === 10 || value === 15 || value === 25),
       notificationsEnabled: z.boolean(),
     })
     .safeParse(req.body);

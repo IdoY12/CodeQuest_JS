@@ -36,6 +36,8 @@ export async function authRegisterHandler(request: Request, response: Response):
     const accessToken = signAccessToken({
       userId: user.id,
       email: user.email,
+      // Stamp the JWT with the same tokenVersion as the User row so later requests compare DB vs claim; bumping the DB invalidates every old token at once (JWTs otherwise stay valid until expiry).
+      // Column: packages/db/prisma/models/user.prisma (`User.tokenVersion`, default 0). Bump: backend/src/utils/revokeAllSessionsForUser.ts (e.g. logout), backend/src/controllers/user/postChangePasswordHandler.ts, backend/src/controllers/user/deleteAccountHandler.ts.
       tokenVersion: user.tokenVersion,
     });
     const refreshToken = signRefreshToken({

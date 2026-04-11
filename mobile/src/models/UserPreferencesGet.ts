@@ -5,5 +5,5 @@ export default interface UserPreferencesGet {
     userLevel: "JUNIOR" | "MID" | "SENIOR" | null
     dailyGoalMinutes: 10 | 15 | 25 | null
     notificationsEnabled: boolean
-    pathKey: "BEGINNER" | "ADVANCED"
+    pathKey: "JUNIOR" | "MID" | "SENIOR"
 }

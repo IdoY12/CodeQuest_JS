@@ -9,16 +9,16 @@
 
 import type { PrismaClient } from "@prisma/client";
 import { createLessonWithExercises } from "../lib/createLessonWithExercises.js";
-import { requireChapterId } from "../lib/requireChapterId.js";
+import type { GlobalExerciseOrder } from "../lib/createLessonWithExercises.js";
 
-export async function seedLessonBlock_16(prisma: PrismaClient, chapterByTitle: Map<string, string>): Promise<void> {
+export async function seedLessonBlock_16(prisma: PrismaClient, order: GlobalExerciseOrder): Promise<void> {
     await createLessonWithExercises(prisma, {
-      chapterId: requireChapterId(chapterByTitle, "Error Handling and Edge Cases"),
+      chapterTitle: "Error Handling and Edge Cases",
       title: "Handling Failure Correctly",
       description: "Catch runtime exceptions and avoid null access crashes",
       estimatedMinutes: 10,
       orderIndex: 1,
-      difficulty: "ADVANCED",
+      difficulty: "SENIOR",
       exercises: [
         {
           type: "MULTIPLE_CHOICE",
@@ -48,5 +48,5 @@ export async function seedLessonBlock_16(prisma: PrismaClient, chapterByTitle: M
           options: ["Returns null", "Fixes and parses it", "Throws an exception", "Returns empty object"],
         },
       ],
-    });
+    }, order);
 }

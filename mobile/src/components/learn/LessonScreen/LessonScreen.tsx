@@ -13,21 +13,28 @@ import { ExerciseView } from "@/components/learn/ExerciseView/ExerciseView";
 import { lessonScreenStyles } from "./LessonScreen.styles";
 
 export function LessonScreen({ navigation, route }: LessonScreenProps) {
-  const lessonId = route.params.lessonId;
+  const experienceLevel = route.params.experienceLevel;
   const lessonTitle = route.params.lessonTitle;
-  const personalizedLevel = route.params.personalizedLevel;
   const accessToken = useAppSelector((s) => s.session.accessToken);
-  const lessonSource: "personalized" | "curriculum" = personalizedLevel ? "personalized" : "curriculum";
-  const load = useLessonLoad(lessonId, personalizedLevel, accessToken);
+  const load = useLessonLoad(experienceLevel, accessToken);
   const exercise = load.exercises[load.exerciseIndex];
-  const onLessonExerciseComplete = useLessonExerciseCompleteHandler(navigation, personalizedLevel, lessonId, lessonTitle, load);
+  const onLessonExerciseComplete = useLessonExerciseCompleteHandler(navigation, experienceLevel, lessonTitle, load);
   const progress = load.exercises.length > 0 ? ((load.exerciseIndex + 1) / load.exercises.length) * 100 : 0;
-  if (load.loading || !exercise) {
+  if (load.loading) {
     return (
       <SafeAreaView style={lessonScreenStyles.container} edges={["top", "bottom"]}>
         <View style={lessonScreenStyles.content}>
           <Text style={lessonScreenStyles.title}>Loading lesson...</Text>
           <ActivityIndicator color={colors.accent} />
+        </View>
+      </SafeAreaView>
+    );
+  }
+  if (!exercise) {
+    return (
+      <SafeAreaView style={lessonScreenStyles.container} edges={["top", "bottom"]}>
+        <View style={lessonScreenStyles.content}>
+          <Text style={lessonScreenStyles.title}>No exercises for this level yet.</Text>
         </View>
       </SafeAreaView>
     );
@@ -46,12 +53,7 @@ export function LessonScreen({ navigation, route }: LessonScreenProps) {
         </Text>
         <Text style={lessonScreenStyles.prompt}>{exercise.prompt}</Text>
         <CodeSnippet code={exercise.codeSnippet} />
-        <ExerciseView
-          exercise={exercise}
-          lessonSource={lessonSource}
-          accessToken={accessToken}
-          onLessonExerciseComplete={complete}
-        />
+        <ExerciseView exercise={exercise} accessToken={accessToken} onLessonExerciseComplete={complete} />
       </ScrollView>
     </SafeAreaView>
   );

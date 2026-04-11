@@ -1,9 +1,8 @@
 /**
  * POST /api/user/daily-goal-status/:dateKey/mark-notified — records reminder sends.
  *
- * Responsibility: bump incomplete reminder count or mark complete reminder sent.
+ * Responsibility: bump incomplete reminder count or mark complete reminder sent on UserProgress.
  * Layer: backend user HTTP handlers
- * Depends on: zod, Prisma
  * Consumers: user router
  */
 
@@ -11,6 +10,7 @@ import type { Response } from "express";
 import { z } from "zod";
 import { prisma } from "@project/db";
 import type { AuthenticatedRequest } from "../../@types/auth.js";
+import { getProgressForActiveUser } from "@project/db";
 
 export async function postDailyGoalStatusMarkNotified(req: AuthenticatedRequest, res: Response) {
   const dateKey = String(req.params.dateKey);
@@ -21,34 +21,35 @@ export async function postDailyGoalStatusMarkNotified(req: AuthenticatedRequest,
   }
 
   const userId = req.user!.userId;
-  let log = await prisma.dailyPracticeLog.findUnique({
-    where: { userId_dateKey: { userId, dateKey } },
-  });
-  if (!log) {
-    log = await prisma.dailyPracticeLog.create({
+  const progress = await getProgressForActiveUser(prisma, userId);
+  if (!progress) return res.status(404).json({ error: "Progress not found" });
+
+  const sameDay = progress.practiceLogDateKey === dateKey;
+  if (parsed.data.type === "INCOMPLETE") {
+    await prisma.userProgress.update({
+      where: { id: progress.id },
       data: {
-        userId,
-        dateKey,
-        practicedSeconds: 0,
-        incompleteReminderCount: parsed.data.type === "INCOMPLETE" ? 1 : 0,
-        completeReminderSent: parsed.data.type === "COMPLETE",
+        practiceLogDateKey: dateKey,
+        practiceLogSeconds: sameDay ? progress.practiceLogSeconds : 0,
+        practiceLogIncompleteReminders: sameDay ? { increment: 1 } : 1,
+        practiceLogCompleteSent: sameDay ? progress.practiceLogCompleteSent : false,
       },
     });
-  } else if (parsed.data.type === "INCOMPLETE") {
-    log = await prisma.dailyPracticeLog.update({
-      where: { userId_dateKey: { userId, dateKey } },
-      data: { incompleteReminderCount: { increment: 1 } },
-    });
   } else {
-    log = await prisma.dailyPracticeLog.update({
-      where: { userId_dateKey: { userId, dateKey } },
-      data: { completeReminderSent: true },
+    await prisma.userProgress.update({
+      where: { id: progress.id },
+      data: {
+        practiceLogDateKey: dateKey,
+        practiceLogSeconds: sameDay ? progress.practiceLogSeconds : 0,
+        practiceLogCompleteSent: true,
+      },
     });
   }
 
+  const updated = await prisma.userProgress.findUniqueOrThrow({ where: { id: progress.id } });
   return res.json({
     dateKey,
-    incompleteReminderCount: log.incompleteReminderCount,
-    completeReminderSent: log.completeReminderSent,
+    incompleteReminderCount: updated.practiceLogIncompleteReminders,
+    completeReminderSent: updated.practiceLogCompleteSent,
   });
 }

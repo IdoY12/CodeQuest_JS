@@ -3,7 +3,8 @@ import type { ClientExerciseDto, ExerciseWithOptions } from "./clientExerciseDto
 export function mapExerciseRowToClientDto(row: ExerciseWithOptions): ClientExerciseDto {
   return {
     id: row.id,
-    lessonId: row.lessonId,
+    experienceLevel: row.experienceLevel,
+    sectionLabel: row.sectionLabel ?? null,
     type: row.type,
     prompt: row.prompt,
     codeSnippet: row.codeSnippet,

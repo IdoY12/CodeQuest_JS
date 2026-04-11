@@ -24,9 +24,7 @@ export function buildAdvancedBugQuestions(): Prisma.DuelQuestionCreateManyInput[
     options: ["1", "2", "3", "4"],
     explanation: "Advanced bug spotting focuses on async mistakes, middleware flow, and security.",
     type: "FIND_THE_BUG",
-    difficulty: "ADVANCED",
+    difficulty: "SENIOR",
     category: "SCOPE",
-    timesUsed: 0,
-    correctRate: 1,
   }))
 }

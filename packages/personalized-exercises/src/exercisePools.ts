@@ -15,14 +15,14 @@ import { intermediateSpecs } from "./intermediateSpecs.js";
 import { advancedSpecs } from "./advancedSpecs.js";
 
 const exerciseSets: Record<PersonalizationLevel, PersonalizedExercise[]> = {
-  BEGINNER: beginnerSpecs.map(build),
+  JUNIOR: beginnerSpecs.map(build),
   BASICS: basicsSpecs.map(build),
-  INTERMEDIATE: intermediateSpecs.map(build),
-  ADVANCED: advancedSpecs.map(build),
+  MID: intermediateSpecs.map(build),
+  SENIOR: advancedSpecs.map(build),
 };
 
 function assertUniqueAndSizedPools() {
-  const levels: PersonalizationLevel[] = ["BEGINNER", "BASICS", "INTERMEDIATE", "ADVANCED"];
+  const levels: PersonalizationLevel[] = ["JUNIOR", "BASICS", "MID", "SENIOR"];
   const seenIds = new Set<string>();
   for (const level of levels) {
     const list = exerciseSets[level];

@@ -1,7 +1,7 @@
 import type { Response } from "express";
 import { z } from "zod";
 import type { AuthenticatedRequest } from "../../@types/auth.js";
-import { prisma } from "@project/db";
+import { getProgressForActiveUser, prisma } from "@project/db";
 import { DAILY_CHALLENGE_BONUS_XP } from "../../constants/dailyChallengeConstants.js";
 import { logError, logInfo, logWarn } from "../../utils/logger.js";
 
@@ -27,10 +27,13 @@ export async function dailyChallengeSubmitHandler(
     }
     const isCorrect = exercise.correctAnswer === parsed.data.answer;
     if (isCorrect) {
-      await prisma.userProgress.update({
-        where: { userId: request.user!.userId },
-        data: { xpTotal: { increment: exercise.xpReward + DAILY_CHALLENGE_BONUS_XP } },
-      });
+      const progress = await getProgressForActiveUser(prisma, request.user!.userId);
+      if (progress) {
+        await prisma.userProgress.update({
+          where: { id: progress.id },
+          data: { xpTotal: { increment: exercise.xpReward + DAILY_CHALLENGE_BONUS_XP } },
+        });
+      }
     }
     response.json({
       isCorrect,

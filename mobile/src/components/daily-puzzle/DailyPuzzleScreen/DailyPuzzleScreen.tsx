@@ -42,7 +42,7 @@ export function DailyPuzzleScreen({ navigation }: DailyPuzzleScreenProps) {
     }
     dispatch(addXp(40));
     dispatch(markDailyPuzzleSolved({ dateKey, puzzleId: puzzle.id }));
-    setMessage("Puzzle solved! +40 XP and today's Puzzle Solved badge progress updated.");
+    setMessage("Puzzle solved! +40 XP.");
   };
 
   return (

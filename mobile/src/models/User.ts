@@ -4,7 +4,7 @@ export default interface User {
     username: string
     avatarUrl: string | null
     onboardingCompleted: boolean
-    pathKey: "BEGINNER" | "ADVANCED"
+    pathKey: "JUNIOR" | "MID" | "SENIOR"
     goal: "JOB" | "WORK" | "FUN" | "PROJECT" | null
     experienceLevel: "JUNIOR" | "MID" | "SENIOR" | null
     dailyCommitmentMinutes: number | null

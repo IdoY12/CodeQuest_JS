@@ -31,9 +31,7 @@ export function buildAdvancedTokenQuestions(): Prisma.DuelQuestionCreateManyInpu
             : ["??", "&&", "||", "==="],
     explanation: "Token completion checks production API familiarity and modern syntax.",
     type: "TAP_TOKEN",
-    difficulty: "ADVANCED",
+    difficulty: "SENIOR",
     category: "METHODS",
-    timesUsed: 0,
-    correctRate: 1,
   }))
 }

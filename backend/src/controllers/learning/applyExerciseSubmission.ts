@@ -1,4 +1,4 @@
-import { prisma } from "@project/db";
+import { ensureProgressRow, prisma } from "@project/db";
 import { XP_POINTS_PER_LEVEL } from "../../constants/xpProgressConstants.js";
 import type { ExerciseSubmitResponseDto } from "../../dto/exerciseSubmitResponseDto.js";
 
@@ -15,23 +15,20 @@ export async function applyExerciseSubmission(input: SubmitInput): Promise<Exerc
   if (!exercise) return null;
   const isCorrect =
     input.answer.trim().replace(/\s/g, "") === exercise.correctAnswer.trim().replace(/\s/g, "");
-  await prisma.userExerciseHistory.create({
-    data: {
-      userId: input.userId,
-      exerciseId: exercise.id,
-      isCorrect,
-      attempts: input.attempts,
-      timeTakenMs: input.timeTakenMs,
-    },
-  });
   if (isCorrect) {
-    const existingProgress = await prisma.userProgress.findUnique({ where: { userId: input.userId } });
-    if (existingProgress) {
-      const nextXp = existingProgress.xpTotal + exercise.xpReward;
+    await ensureProgressRow(prisma, input.userId, exercise.experienceLevel);
+    const progress = await prisma.userProgress.findUnique({
+      where: {
+        userId_experienceLevel: { userId: input.userId, experienceLevel: exercise.experienceLevel },
+      },
+    });
+    if (progress) {
+      const nextXp = progress.xpTotal + exercise.xpReward;
       const nextLevel = Math.max(1, Math.floor(nextXp / XP_POINTS_PER_LEVEL) + 1);
+      const nextIdx = Math.max(progress.currentExerciseIndex, exercise.orderIndex + 1);
       await prisma.userProgress.update({
-        where: { userId: input.userId },
-        data: { xpTotal: nextXp, level: nextLevel },
+        where: { id: progress.id },
+        data: { xpTotal: nextXp, level: nextLevel, currentExerciseIndex: nextIdx },
       });
     }
   }

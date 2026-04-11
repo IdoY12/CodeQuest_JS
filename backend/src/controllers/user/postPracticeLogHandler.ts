@@ -1,9 +1,8 @@
 /**
  * POST /api/user/practice-log — increments daily practice seconds and streak state.
  *
- * Responsibility: upsert DailyPracticeLog then apply streak rules on UserProgress.
+ * Responsibility: update active UserProgress row + streakHistoryJson; apply streak rules.
  * Layer: backend user HTTP handlers
- * Depends on: zod, Prisma, applyStreakAfterPracticeLog, logger
  * Consumers: user router
  */
 
@@ -11,6 +10,7 @@ import type { Response } from "express";
 import { z } from "zod";
 import { prisma } from "@project/db";
 import type { AuthenticatedRequest } from "../../@types/auth.js";
+import { getProgressForActiveUser, mergeStreakHistoryJson } from "@project/db";
 import { logInfo, logWarn } from "../../utils/logger.js";
 import { applyStreakAfterPracticeLog } from "./applyStreakAfterPracticeLog.js";
 
@@ -29,28 +29,31 @@ export async function postPracticeLog(req: AuthenticatedRequest, res: Response) 
 
   const userId = req.user!.userId;
   const { dateKey, practicedSeconds } = parsed.data;
-  const log = await prisma.dailyPracticeLog.upsert({
-    where: {
-      userId_dateKey: { userId, dateKey },
-    },
-    create: {
-      userId,
-      dateKey,
-      practicedSeconds,
-    },
-    update: {
-      practicedSeconds: { increment: practicedSeconds },
-    },
-  });
-
-  const progress = await prisma.userProgress.findUnique({
-    where: { userId },
-    select: { streakCurrent: true, streakLastDate: true, streakLongest: true, streakShieldAvailable: true },
-  });
-
-  if (progress) {
-    await applyStreakAfterPracticeLog(prisma, userId, parsed.data.dateKey, progress);
+  const progress = await getProgressForActiveUser(prisma, userId);
+  if (!progress) {
+    return res.status(404).json({ error: "Progress not found" });
   }
-  logInfo("[TASKS]", "practice-log:write-success", { userId: req.user?.userId, practicedSeconds: log.practicedSeconds });
-  return res.json({ practicedSeconds: log.practicedSeconds });
+
+  const sameDay = progress.practiceLogDateKey === dateKey;
+  const nextSeconds = sameDay ? progress.practiceLogSeconds + practicedSeconds : practicedSeconds;
+  const nextHistory = mergeStreakHistoryJson(progress.streakHistoryJson, dateKey);
+
+  await prisma.userProgress.update({
+    where: { id: progress.id },
+    data: {
+      practiceLogDateKey: dateKey,
+      practiceLogSeconds: nextSeconds,
+      streakHistoryJson: nextHistory,
+    },
+  });
+
+  await applyStreakAfterPracticeLog(prisma, userId, progress.experienceLevel, dateKey, {
+    streakCurrent: progress.streakCurrent,
+    streakLastDate: progress.streakLastDate,
+    streakLongest: progress.streakLongest,
+    streakShieldAvailable: progress.streakShieldAvailable,
+  });
+
+  logInfo("[TASKS]", "practice-log:write-success", { userId: req.user?.userId, practicedSeconds: nextSeconds });
+  return res.json({ practicedSeconds: nextSeconds });
 }

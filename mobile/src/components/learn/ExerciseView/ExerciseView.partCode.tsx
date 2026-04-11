@@ -10,13 +10,12 @@ import { x } from "./ExerciseView.styles.extra";
 
 type Base = {
   exercise: Exercise;
-  lessonSource: "personalized" | "curriculum";
   accessToken: string | null;
   onLessonExerciseComplete: (answer: string, context: LessonExerciseCompletionContext) => void;
 };
 
-export function EvCodeFill({ exercise, lessonSource, accessToken, onLessonExerciseComplete }: Base) {
-  const u = useExerciseCodeFill(exercise, lessonSource, accessToken, onLessonExerciseComplete);
+export function EvCodeFill({ exercise, accessToken, onLessonExerciseComplete }: Base) {
+  const u = useExerciseCodeFill(exercise, accessToken, onLessonExerciseComplete);
   const tokens = exercise.options.length > 0 ? exercise.options.map((o) => o.text) : [...CODE_FILL_DEFAULT_TOKENS];
   return (
     <View style={v.exerciseCard}>

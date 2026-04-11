@@ -1,9 +1,8 @@
 /**
- * POST /api/user/onboarding — stores first-run goals and assigns a learning path.
+ * POST /api/user/onboarding — stores first-run goals and sets active experience track.
  *
- * Responsibility: upsert UserProgress with onboarding flags after validation.
+ * Responsibility: upsert UserProgress for selected experience level.
  * Layer: backend user HTTP handlers
- * Depends on: zod, Prisma, userPathUtils, logger
  * Consumers: user router
  */
 
@@ -11,8 +10,8 @@ import type { Response } from "express";
 import { z } from "zod";
 import { prisma } from "@project/db";
 import type { AuthenticatedRequest } from "../../@types/auth.js";
+import { pathKeyFromExperience } from "@project/db";
 import { logError, logInfo, logWarn } from "../../utils/logger.js";
-import { resolvePathKey } from "./userPathUtils.js";
 
 export async function postOnboarding(req: AuthenticatedRequest, res: Response) {
   logInfo("[ONBOARDING]", "submit:attempt", { userId: req.user?.userId });
@@ -29,35 +28,33 @@ export async function postOnboarding(req: AuthenticatedRequest, res: Response) {
   }
 
   try {
-    const assignedPathKey = resolvePathKey(parsed.data.experienceLevel);
-    const assignedPath = await prisma.learningPath.findUnique({ where: { key: assignedPathKey } });
-    if (!assignedPath) return res.status(400).json({ error: "Assigned learning path not found" });
+    const level = parsed.data.experienceLevel;
+    await prisma.user.update({
+      where: { id: req.user!.userId },
+      data: { activeExperienceLevel: level },
+    });
 
     const updated = await prisma.userProgress.upsert({
-      where: { userId: req.user!.userId },
+      where: { userId_experienceLevel: { userId: req.user!.userId, experienceLevel: level } },
       create: {
         userId: req.user!.userId,
-        pathId: assignedPath.id,
+        experienceLevel: level,
         goal: parsed.data.goal,
-        experienceLevel: parsed.data.experienceLevel,
         dailyCommitmentMinutes: parsed.data.dailyCommitmentMinutes,
         onboardingCompleted: true,
         notificationsEnabled: true,
       },
       update: {
         goal: parsed.data.goal,
-        experienceLevel: parsed.data.experienceLevel,
         dailyCommitmentMinutes: parsed.data.dailyCommitmentMinutes,
         onboardingCompleted: true,
-        pathId: assignedPath.id,
       },
-      include: { path: true },
     });
 
-    logInfo("[ONBOARDING]", "submit:success", { userId: req.user?.userId, pathKey: updated.path.key });
+    logInfo("[ONBOARDING]", "submit:success", { userId: req.user?.userId, experienceLevel: level });
     return res.json({
       onboardingCompleted: updated.onboardingCompleted,
-      pathKey: updated.path.key,
+      pathKey: pathKeyFromExperience(updated.experienceLevel),
       goal: updated.goal,
       experienceLevel: updated.experienceLevel,
       dailyCommitmentMinutes: updated.dailyCommitmentMinutes,

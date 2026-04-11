@@ -7,7 +7,7 @@
  * Consumers: buildMcqFromSpec.ts, spec files, index.ts
  */
 
-export type PersonalizationLevel = "BEGINNER" | "BASICS" | "INTERMEDIATE" | "ADVANCED";
+export type PersonalizationLevel = "JUNIOR" | "BASICS" | "MID" | "SENIOR";
 
 export interface PersonalizedExercise {
   id: string;

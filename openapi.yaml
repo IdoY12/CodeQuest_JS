@@ -13,7 +13,6 @@ tags:
   - name: User
   - name: Learning
   - name: Duels
-  - name: Badges
   - name: DailyChallenge
   - name: DailyPuzzles
 paths:
@@ -355,15 +354,15 @@ paths:
   /user/streak-history:
     get:
       tags: [User]
-      summary: Streak log history
+      summary: Recent practice dates for streak UI
       responses:
         "200":
-          description: Streak logs
+          description: Date keys (YYYY-MM-DD), newest first, up to 7 entries from active UserProgress row
           content:
             application/json:
               schema:
                 type: array
-                items: { $ref: "#/components/schemas/StreakLog" }
+                items: { type: string, pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" }
   /user/change-password:
     post:
       tags: [User]
@@ -408,96 +407,24 @@ paths:
         "204": { description: Deleted }
         "400": { $ref: "#/components/responses/BadRequest" }
         "404": { $ref: "#/components/responses/NotFound" }
-  /learning/paths:
+  /learning/exercises/{experienceLevel}:
     get:
       tags: [Learning]
-      summary: List learning paths
-      responses:
-        "200":
-          description: Paths
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: "#/components/schemas/LearningPath" }
-        "500": { $ref: "#/components/responses/InternalError" }
-  /learning/chapters/{pathKey}:
-    get:
-      tags: [Learning]
-      summary: List chapters for path
+      summary: List exercises for an experience level
       parameters:
         - in: path
-          name: pathKey
+          name: experienceLevel
           required: true
-          schema: { $ref: "#/components/schemas/PathType" }
-          description: Learning path key
+          schema: { $ref: "#/components/schemas/ExperienceLevel" }
+          description: Curriculum track (JUNIOR, MID, or SENIOR)
       responses:
         "200":
-          description: Chapters
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: "#/components/schemas/Chapter" }
-        "404": { $ref: "#/components/responses/NotFound" }
-        "500": { $ref: "#/components/responses/InternalError" }
-  /learning/lessons/{chapterId}:
-    get:
-      tags: [Learning]
-      summary: List lessons for chapter
-      parameters:
-        - in: path
-          name: chapterId
-          required: true
-          schema: { type: string }
-          description: Chapter id
-      responses:
-        "200":
-          description: Lessons
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: "#/components/schemas/Lesson" }
-        "500": { $ref: "#/components/responses/InternalError" }
-  /learning/exercises/{lessonId}:
-    get:
-      tags: [Learning]
-      summary: List exercises for lesson
-      parameters:
-        - in: path
-          name: lessonId
-          required: true
-          schema: { type: string }
-          description: Lesson id
-      responses:
-        "200":
-          description: Exercises
+          description: Exercises ordered by orderIndex
           content:
             application/json:
               schema:
                 type: array
                 items: { $ref: "#/components/schemas/ExerciseClientDto" }
-        "500": { $ref: "#/components/responses/InternalError" }
-  /learning/personalized/{level}:
-    get:
-      tags: [Learning]
-      summary: List personalized exercises
-      parameters:
-        - in: path
-          name: level
-          required: true
-          schema: { $ref: "#/components/schemas/PersonalizationLevel" }
-          description: Internal personalization tier (non-user-level)
-      responses:
-        "200":
-          description: Personalized exercises
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: "#/components/schemas/PersonalizedExerciseClientDto" }
-        "400": { $ref: "#/components/responses/BadRequest" }
         "500": { $ref: "#/components/responses/InternalError" }
   /learning/submit-exercise:
     post:
@@ -524,36 +451,19 @@ paths:
         "400": { $ref: "#/components/responses/BadRequest" }
         "404": { $ref: "#/components/responses/NotFound" }
         "500": { $ref: "#/components/responses/InternalError" }
-  /learning/lesson-results/{lessonId}:
-    get:
-      tags: [Learning]
-      summary: Get lesson result summary for user
-      parameters:
-        - in: path
-          name: lessonId
-          required: true
-          schema: { type: string }
-          description: Lesson id
-      responses:
-        "200":
-          description: Result summary
-          content:
-            application/json:
-              schema:
-                type: object
-                required: [total, correct, accuracy]
-                properties:
-                  total: { type: integer, description: Total attempts in lesson }
-                  correct: { type: integer, description: Correct attempts in lesson }
-                  accuracy: { type: integer, description: Percentage accuracy 0-100 }
-        "500": { $ref: "#/components/responses/InternalError" }
   /learning/resume:
     get:
       tags: [Learning]
-      summary: Get raw user progress row for resume
+      summary: Resume position for a curriculum track
+      parameters:
+        - in: query
+          name: experienceLevel
+          required: false
+          schema: { $ref: "#/components/schemas/ExperienceLevel" }
+          description: When omitted, uses the user's active experience level
       responses:
         "200":
-          description: Progress row
+          description: Next exercise index for the requested or active level
           content:
             application/json:
               schema: { $ref: "#/components/schemas/UserProgressResume" }
@@ -619,18 +529,6 @@ paths:
                 properties:
                   playersOnline: { type: integer, description: Current online players estimate }
                   estimatedWaitSeconds: { type: integer, description: Estimated wait time in seconds }
-  /badges:
-    get:
-      tags: [Badges]
-      summary: List badges with earned state
-      responses:
-        "200":
-          description: Badges
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: "#/components/schemas/BadgeWithEarned" }
   /daily-challenge:
     get:
       tags: [DailyChallenge]
@@ -775,13 +673,13 @@ components:
     Difficulty:
       type: string
       description: Exercise difficulty enum from Prisma
-      enum: [BEGINNER, INTERMEDIATE, ADVANCED]
-      example: BEGINNER
+      enum: [JUNIOR, MID, SENIOR]
+      example: JUNIOR
     PathType:
       type: string
-      description: Learning path key enum from Prisma
-      enum: [BEGINNER, ADVANCED]
-      example: BEGINNER
+      description: Learning path key aligned with experience level
+      enum: [JUNIOR, MID, SENIOR]
+      example: JUNIOR
     ExerciseType:
       type: string
       description: Exercise type enum from Prisma
@@ -790,14 +688,6 @@ components:
       type: string
       description: Duel category enum from Prisma
       enum: [OUTPUT, SCOPE, ASYNC, TYPES, METHODS]
-    RankTier:
-      type: string
-      description: Duel rank tier enum from Prisma
-      enum: [BRONZE, SILVER, GOLD, PLATINUM, DIAMOND]
-    PersonalizationLevel:
-      type: string
-      description: Internal personalized-exercise tier label
-      enum: [BEGINNER, BASICS, INTERMEDIATE, ADVANCED]
     RegisterRequest:
       type: object
       required: [email, username, password]
@@ -845,44 +735,45 @@ components:
         refreshToken: { type: string, description: JWT refresh token }
     UserProfileProgress:
       type: object
-      required: [goal, experienceLevel, dailyCommitmentMinutes, notificationsEnabled, onboardingCompleted]
+      required: [goal, experienceLevel, dailyCommitmentMinutes, notificationsEnabled, onboardingCompleted, currentExerciseIndex, pathKey]
       properties:
         goal: { allOf: [{ $ref: "#/components/schemas/Goal" }], nullable: true, description: Goal selection }
         experienceLevel: { allOf: [{ $ref: "#/components/schemas/ExperienceLevel" }], nullable: true, description: Experience selection }
         dailyCommitmentMinutes: { type: integer, nullable: true, description: Daily minutes }
         notificationsEnabled: { type: boolean, description: Notifications enabled }
         onboardingCompleted: { type: boolean, description: Onboarding status }
+        currentExerciseIndex: { type: integer, description: Next exercise index in ordered curriculum for this level }
+        pathKey: { $ref: "#/components/schemas/PathType" }
     UserProfileDuelRating:
       type: object
-      required: [rating, wins, losses, draws]
+      required: [rating, wins, losses]
       properties:
         rating: { type: integer, description: Duel rating }
         wins: { type: integer, description: Duel wins }
         losses: { type: integer, description: Duel losses }
-        draws: { type: integer, description: Duel draws }
     UserProfileResponse:
       type: object
-      required: [id, email, username, avatarUrl, createdAt, progress, duelRating]
+      required: [id, email, username, avatarUrl, createdAt, activeExperienceLevel]
       properties:
         id: { type: string, description: User id }
         email: { type: string, format: email, description: User email }
         username: { type: string, description: Username }
         avatarUrl: { type: string, nullable: true, format: uri, description: Avatar URL }
         createdAt: { type: string, format: date-time, description: Created timestamp }
+        activeExperienceLevel: { allOf: [{ $ref: "#/components/schemas/ExperienceLevel" }], nullable: true, description: Active curriculum band }
         progress: { allOf: [{ $ref: "#/components/schemas/UserProfileProgress" }], nullable: true, description: User progress snapshot }
         duelRating: { allOf: [{ $ref: "#/components/schemas/UserProfileDuelRating" }], nullable: true, description: Duel rating snapshot }
     ProgressSummary:
       type: object
-      required: [xpTotal, level, streakCurrent, streakDays, lessonsCompleted, duelWins, duelLosses, duelDraws, duelRating, streakShieldAvailable]
+      required: [xpTotal, level, streakCurrent, streakDays, lessonsCompleted, duelWins, duelLosses, duelRating, streakShieldAvailable]
       properties:
         xpTotal: { type: integer, description: Total XP }
         level: { type: integer, description: Current level }
         streakCurrent: { type: integer, description: Current streak in days }
-        streakDays: { type: array, items: { type: string }, description: Last active date keys }
-        lessonsCompleted: { type: integer, description: Distinct completed lessons }
+        streakDays: { type: array, items: { type: boolean }, description: Last 7 calendar days, practice activity flags }
+        lessonsCompleted: { type: integer, description: Current exercise index (resume position) for active level }
         duelWins: { type: integer, description: Duel wins }
         duelLosses: { type: integer, description: Duel losses }
-        duelDraws: { type: integer, description: Duel draws }
         duelRating: { type: integer, description: Duel rating }
         streakShieldAvailable: { type: boolean, description: Streak shield flag }
     OnboardingRequest:
@@ -943,44 +834,6 @@ components:
         shieldConsumedToday: { type: boolean, description: Shield consumed on date key }
         canSendIncomplete: { type: boolean, description: Incomplete reminder eligibility }
         canSendComplete: { type: boolean, description: Complete reminder eligibility }
-    StreakLog:
-      type: object
-      required: [id, userId, date, xpEarned, exercisesCompleted, lessonsCompleted]
-      properties:
-        id: { type: string, description: Streak log id }
-        userId: { type: string, description: User id }
-        date: { type: string, format: date-time, description: Log date }
-        xpEarned: { type: integer, description: XP earned }
-        exercisesCompleted: { type: integer, description: Exercise count }
-        lessonsCompleted: { type: integer, description: Lesson count }
-    LearningPath:
-      type: object
-      required: [id, key, title, description]
-      properties:
-        id: { type: string, description: Path id }
-        key: { $ref: "#/components/schemas/PathType" }
-        title: { type: string, description: Path title }
-        description: { type: string, description: Path description }
-    Chapter:
-      type: object
-      required: [id, pathId, title, description, orderIndex]
-      properties:
-        id: { type: string, description: Chapter id }
-        pathId: { type: string, description: Path id }
-        title: { type: string, description: Chapter title }
-        description: { type: string, description: Chapter description }
-        orderIndex: { type: integer, description: Sort order }
-    Lesson:
-      type: object
-      required: [id, chapterId, title, description, estimatedMinutes, orderIndex, difficulty]
-      properties:
-        id: { type: string, description: Lesson id }
-        chapterId: { type: string, description: Chapter id }
-        title: { type: string, description: Lesson title }
-        description: { type: string, description: Lesson description }
-        estimatedMinutes: { type: integer, description: Estimated lesson minutes }
-        orderIndex: { type: integer, description: Sort order }
-        difficulty: { $ref: "#/components/schemas/Difficulty" }
     ExerciseOptionClient:
       type: object
       required: [id, text]
@@ -989,26 +842,16 @@ components:
         text: { type: string, description: Option text }
     ExerciseClientDto:
       type: object
-      required: [id, lessonId, type, prompt, codeSnippet, orderIndex, xpReward, options]
+      required: [id, experienceLevel, orderIndex, type, prompt, codeSnippet, xpReward, options]
       properties:
         id: { type: string, description: Exercise id }
-        lessonId: { type: string, description: Lesson id }
+        experienceLevel: { $ref: "#/components/schemas/ExperienceLevel" }
+        sectionLabel: { type: string, nullable: true, description: Optional section heading in curriculum }
         type: { $ref: "#/components/schemas/ExerciseType" }
         prompt: { type: string, description: Prompt text }
         codeSnippet: { type: string, description: Code snippet }
-        orderIndex: { type: integer, description: Sort order }
+        orderIndex: { type: integer, description: Sort order within level }
         xpReward: { type: integer, description: XP reward }
-        options: { type: array, items: { $ref: "#/components/schemas/ExerciseOptionClient" } }
-    PersonalizedExerciseClientDto:
-      type: object
-      required: [id, type, prompt, codeSnippet, xpReward, orderIndex, options]
-      properties:
-        id: { type: string, description: Exercise id }
-        type: { $ref: "#/components/schemas/ExerciseType" }
-        prompt: { type: string, description: Prompt text }
-        codeSnippet: { type: string, description: Code snippet }
-        xpReward: { type: integer, description: XP reward }
-        orderIndex: { type: integer, description: Sort order }
         options: { type: array, items: { $ref: "#/components/schemas/ExerciseOptionClient" } }
     ExerciseSubmitResult:
       oneOf:
@@ -1026,40 +869,21 @@ components:
             xpEarned: { type: integer, enum: [0], description: Always zero when incorrect }
     UserProgressResume:
       type: object
-      nullable: true
-      description: Raw UserProgress row from backend
+      description: Learning resume payload for one experience level
+      required: [experienceLevel, currentExerciseIndex]
       properties:
-        id: { type: string, description: Progress id }
-        userId: { type: string, description: User id }
-        pathId: { type: string, description: Path id }
-        goal: { type: string, nullable: true, description: Goal string }
-        experienceLevel: { allOf: [{ $ref: "#/components/schemas/ExperienceLevel" }], nullable: true, description: Experience level }
-        dailyCommitmentMinutes: { type: integer, nullable: true, description: Daily commitment minutes }
-        notificationsEnabled: { type: boolean, description: Notifications enabled }
-        onboardingCompleted: { type: boolean, description: Onboarding completion status }
-        currentChapterId: { type: string, nullable: true, description: Current chapter id }
-        currentLessonId: { type: string, nullable: true, description: Current lesson id }
-        xpTotal: { type: integer, description: Total XP }
-        level: { type: integer, description: Current level }
-        streakCurrent: { type: integer, description: Current streak }
-        streakLongest: { type: integer, description: Longest streak }
-        streakLastDate: { type: string, nullable: true, format: date-time, description: Last streak date }
-        streakShieldAvailable: { type: boolean, description: Shield available }
-        streakShieldConsumedAt: { type: string, nullable: true, format: date-time, description: Shield consumed timestamp }
-        heartsRemaining: { type: integer, description: Remaining hearts }
-        heartsLastRefill: { type: string, nullable: true, format: date-time, description: Last hearts refill timestamp }
+        experienceLevel: { $ref: "#/components/schemas/ExperienceLevel" }
+        currentExerciseIndex: { type: integer, description: Index of next exercise in ordered list for this level }
     DuelStats:
       type: object
-      required: [rating, wins, losses, draws, rankTier]
+      required: [rating, wins, losses]
       properties:
         rating: { type: integer, description: Duel rating }
         wins: { type: integer, description: Duel wins }
         losses: { type: integer, description: Duel losses }
-        draws: { type: integer, description: Duel draws }
-        rankTier: { $ref: "#/components/schemas/RankTier" }
     DuelSession:
       type: object
-      required: [id, player1Id, player2Id, winnerId, player1Score, player2Score, roundsPlayed, roundReplay, startedAt, endedAt, disconnectReason]
+      required: [id, player1Id, player2Id, winnerId, player1Score, player2Score, roundsPlayed, roundReplay, startedAt, endedAt]
       properties:
         id: { type: string, description: Session id }
         player1Id: { type: string, description: Player 1 id }
@@ -1071,18 +895,15 @@ components:
         roundReplay: { nullable: true, description: Replay JSON blob }
         startedAt: { type: string, format: date-time, description: Start time }
         endedAt: { type: string, format: date-time, nullable: true, description: End time }
-        disconnectReason: { type: string, nullable: true, description: Disconnect reason }
     DuelLeaderboardEntry:
       type: object
-      required: [id, userId, rating, wins, losses, draws, rankTier, user]
+      required: [id, userId, rating, wins, losses, user]
       properties:
         id: { type: string, description: Duel rating row id }
         userId: { type: string, description: User id }
         rating: { type: integer, description: Rating value }
         wins: { type: integer, description: Win count }
         losses: { type: integer, description: Loss count }
-        draws: { type: integer, description: Draw count }
-        rankTier: { $ref: "#/components/schemas/RankTier" }
         user:
           type: object
           required: [username, avatarId]
@@ -1091,7 +912,7 @@ components:
             avatarId: { type: string, description: Avatar id }
     DuelQuestion:
       type: object
-      required: [id, questionText, codeSnippet, correctAnswer, type, difficulty, category, options, explanation, timesUsed, correctRate]
+      required: [id, questionText, codeSnippet, correctAnswer, type, difficulty, category, options, explanation]
       properties:
         id: { type: string, description: Question id }
         questionText: { type: string, description: Question text }
@@ -1102,19 +923,6 @@ components:
         category: { $ref: "#/components/schemas/DuelCategory" }
         options: { nullable: true, description: Optional options JSON }
         explanation: { type: string, description: Explanation text }
-        timesUsed: { type: integer, description: Times used count }
-        correctRate: { type: number, format: float, description: Correct rate ratio }
-    BadgeWithEarned:
-      type: object
-      required: [id, name, description, iconKey, category, unlockConditionJson, earned]
-      properties:
-        id: { type: string, description: Badge id }
-        name: { type: string, description: Badge name }
-        description: { type: string, description: Badge description }
-        iconKey: { type: string, description: Badge icon key }
-        category: { type: string, description: Badge category }
-        unlockConditionJson: { type: string, description: Unlock condition payload as JSON string }
-        earned: { type: boolean, description: Whether current user earned badge }
     DailyChallengeGetResponse:
       type: object
       required: [challengeDate, bonusXp, exercise]

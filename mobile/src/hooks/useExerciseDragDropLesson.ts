@@ -8,7 +8,6 @@ import { useExerciseDragDrop } from "./useLessonExerciseInteractions";
 
 export function useExerciseDragDropLesson(
   exercise: Exercise,
-  lessonSource: "personalized" | "curriculum",
   accessToken: string | null,
   onLessonExerciseComplete: (a: string, c: LessonExerciseCompletionContext) => void,
 ) {
@@ -22,14 +21,8 @@ export function useExerciseDragDropLesson(
     setCurriculumChecked(false);
     setCurriculumCorrect(null);
   }, [exercise.id]);
-  const canP = d.orderedSelection.length === d.lineList.length && !d.hasChecked;
-  const canC = d.orderedSelection.length === d.lineList.length && !curriculumChecked;
-  const canCheck = lessonSource === "personalized" ? canP : canC;
+  const canCheck = d.orderedSelection.length === d.lineList.length && !curriculumChecked;
   const runCheck = async () => {
-    if (lessonSource === "personalized") {
-      d.runCheck(exercise.correctAnswer ?? "");
-      return;
-    }
     if (!accessToken || !learning) return;
     const result = await learning.submitExercise(exercise.id, d.normalizedAnswer);
     setServerResult(result);
@@ -37,18 +30,8 @@ export function useExerciseDragDropLesson(
     setCurriculumChecked(true);
   };
   const goNext = () => {
-    if (lessonSource === "personalized") {
-      onLessonExerciseComplete(d.normalizedAnswer, {
-        source: "personalized",
-        isCorrect: Boolean(d.isCorrect),
-        xpReward: exercise.xpReward,
-      });
-      return;
-    }
     if (!serverResult) return;
     onLessonExerciseComplete(d.normalizedAnswer, { source: "curriculum", submitResult: serverResult });
   };
-  const showResults = lessonSource === "personalized" ? d.hasChecked : curriculumChecked;
-  const isCorrectNow = lessonSource === "personalized" ? d.isCorrect : curriculumCorrect;
-  return { drag: d, canCheck, runCheck, goNext, showResults, isCorrectNow, serverResult };
+  return { drag: d, canCheck, runCheck, goNext, showResults: curriculumChecked, isCorrectNow: curriculumCorrect, serverResult };
 }

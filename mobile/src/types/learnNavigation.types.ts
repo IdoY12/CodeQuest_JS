@@ -4,11 +4,10 @@ import type { Experience } from "@/redux/profile-slice";
 export type LearnStackParamList = {
   LearnRoadmap: undefined;
   Lesson: {
-    lessonId: string;
+    experienceLevel: Experience;
     lessonTitle: string;
-    personalizedLevel?: Experience;
   };
-  LessonResults: { accuracy: number; lessonTitle: string; lessonId: string; personalizedLevel?: Experience };
+  LessonResults: { accuracy: number; lessonTitle: string; experienceLevel: Experience };
 };
 
 export type LearnRoadmapNavigation = NativeStackNavigationProp<LearnStackParamList, "LearnRoadmap">;

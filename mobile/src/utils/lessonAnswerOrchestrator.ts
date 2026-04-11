@@ -1,5 +1,4 @@
 import * as Haptics from "expo-haptics";
-import type Exercise from "@/models/Exercise";
 import type { LessonScreenNavigation } from "@/types/learnNavigation.types";
 import type { Experience } from "@/redux/profile-slice";
 import type { LessonExerciseCompletionContext } from "@/types/lessonExerciseCompletion.types";
@@ -8,21 +7,20 @@ type AddXp = (n: number) => void;
 
 export type LessonAnswerOrchestratorArgs = {
   completion: LessonExerciseCompletionContext;
-  personalizedLevel: Experience | undefined;
   addXp: AddXp;
-  exercises: Exercise[];
+  exercisesLength: number;
   exerciseIndex: number;
   correctCount: number;
   attemptedCount: number;
   lessonTitle: string;
-  lessonId: string;
+  experienceLevel: Experience;
   navigation: LessonScreenNavigation;
   setAttemptedCount: (n: number) => void;
   setCorrectCount: (n: number) => void;
   setExerciseIndex: (n: number) => void;
 };
 
-function grantLocalXp(addXp: AddXp, xp: number): void {
+function grantXp(addXp: AddXp, xp: number): void {
   addXp(xp);
 }
 
@@ -37,37 +35,33 @@ function finishOrAdvance(
   total: number,
   accuracy: number,
   lessonTitle: string,
-  lessonId: string,
-  personalizedLevel: Experience | undefined,
+  experienceLevel: Experience,
   navigation: LessonScreenNavigation,
   setIndex: (n: number) => void,
 ): void {
   if (nextIndex >= total) {
-    navigation.replace("LessonResults", { accuracy, lessonTitle, lessonId, personalizedLevel });
+    navigation.replace("LessonResults", { accuracy, lessonTitle, experienceLevel });
     return;
   }
   setIndex(nextIndex);
 }
 
-function resolveOutcome(completion: LessonExerciseCompletionContext): { isCorrect: boolean; xp: number } {
-  if (completion.source === "personalized") return { isCorrect: completion.isCorrect, xp: completion.xpReward };
-  return { isCorrect: completion.submitResult.isCorrect, xp: completion.submitResult.xpEarned };
-}
-
-async function applyXpReward(a: LessonAnswerOrchestratorArgs, isCorrect: boolean, xp: number): Promise<void> {
-  if (!isCorrect) return;
-  if (a.personalizedLevel) grantLocalXp(a.addXp, xp);
-  else a.addXp(xp);
-}
-
 export async function orchestrateLessonAnswer(a: LessonAnswerOrchestratorArgs): Promise<void> {
-  const { isCorrect, xp } = resolveOutcome(a.completion);
+  const { isCorrect, xpEarned } = a.completion.submitResult;
   const nextAttempted = a.attemptedCount + 1;
   const nextCorrect = isCorrect ? a.correctCount + 1 : a.correctCount;
   a.setAttemptedCount(nextAttempted);
   if (isCorrect) a.setCorrectCount(nextCorrect);
-  await applyXpReward(a, isCorrect, xp);
+  if (isCorrect) grantXp(a.addXp, xpEarned);
   hapticForCorrect(isCorrect);
   const accuracy = Math.round((nextCorrect / nextAttempted) * 100);
-  finishOrAdvance(a.exerciseIndex + 1, a.exercises.length, accuracy, a.lessonTitle, a.lessonId, a.personalizedLevel, a.navigation, a.setExerciseIndex);
+  finishOrAdvance(
+    a.exerciseIndex + 1,
+    a.exercisesLength,
+    accuracy,
+    a.lessonTitle,
+    a.experienceLevel,
+    a.navigation,
+    a.setExerciseIndex,
+  );
 }

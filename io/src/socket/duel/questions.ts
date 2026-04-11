@@ -24,12 +24,12 @@ export async function pickQuestionForSession(session: SessionState) {
 
   const targetDifficulty: Difficulty =
     p1IsBeginnerLike && p2IsBeginnerLike
-      ? "BEGINNER"
+      ? "JUNIOR"
       : !p1IsBeginnerLike && !p2IsBeginnerLike
-        ? "ADVANCED"
+        ? "SENIOR"
         : session.round % 2 === 0
-          ? "ADVANCED"
-          : "BEGINNER";
+          ? "SENIOR"
+          : "JUNIOR";
 
   let q = await pickRandomDuelQuestion(targetDifficulty);
   if (!q) {

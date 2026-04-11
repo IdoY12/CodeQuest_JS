@@ -8,15 +8,13 @@ import { x } from "./ExerciseView.styles.extra";
 
 type Base = {
   exercise: Exercise;
-  lessonSource: "personalized" | "curriculum";
   accessToken: string | null;
   onLessonExerciseComplete: (answer: string, context: LessonExerciseCompletionContext) => void;
 };
 
-export function EvDragDrop({ exercise, lessonSource, accessToken, onLessonExerciseComplete }: Base) {
+export function EvDragDrop({ exercise, accessToken, onLessonExerciseComplete }: Base) {
   const { drag: d, canCheck, runCheck, goNext, showResults, isCorrectNow, serverResult } = useExerciseDragDropLesson(
     exercise,
-    lessonSource,
     accessToken,
     onLessonExerciseComplete,
   );

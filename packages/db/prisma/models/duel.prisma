@@ -8,39 +8,34 @@ model DuelQuestion {
   category      DuelCategory
   options       Json?
   explanation   String       @default("")
-  timesUsed     Int          @default(0)
-  correctRate   Float        @default(1)
 
   @@index([category])
 }
 
 model DuelSession {
-  id               String    @id @default(cuid())
-  player1Id        String
-  player2Id        String
-  winnerId         String?
-  player1Score     Int       @default(0)
-  player2Score     Int       @default(0)
-  roundsPlayed     Int       @default(0)
-  roundReplay      Json?
-  startedAt        DateTime  @default(now())
-  endedAt          DateTime?
-  disconnectReason String?
-  player1          User      @relation("Player1Sessions", fields: [player1Id], references: [id], onDelete: Cascade)
-  player2          User      @relation("Player2Sessions", fields: [player2Id], references: [id], onDelete: Cascade)
-  winner           User?     @relation("WinnerSessions", fields: [winnerId], references: [id], onDelete: SetNull)
+  id           String    @id @default(cuid())
+  player1Id    String
+  player2Id    String
+  winnerId     String?
+  player1Score Int       @default(0)
+  player2Score Int       @default(0)
+  roundsPlayed Int       @default(0)
+  roundReplay  Json?
+  startedAt    DateTime  @default(now())
+  endedAt      DateTime?
+  player1      User      @relation("Player1Sessions", fields: [player1Id], references: [id], onDelete: Cascade)
+  player2      User      @relation("Player2Sessions", fields: [player2Id], references: [id], onDelete: Cascade)
+  winner       User?     @relation("WinnerSessions", fields: [winnerId], references: [id], onDelete: SetNull)
 
   @@index([player1Id])
   @@index([player2Id])
 }
 
 model DuelRating {
-  id       String   @id @default(cuid())
-  userId   String   @unique
-  rating   Int      @default(1000)
-  wins     Int      @default(0)
-  losses   Int      @default(0)
-  draws    Int      @default(0)
-  rankTier RankTier @default(BRONZE)
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(cuid())
+  userId String @unique
+  rating Int    @default(1000)
+  wins   Int    @default(0)
+  losses Int    @default(0)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

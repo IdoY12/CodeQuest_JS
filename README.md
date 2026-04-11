@@ -9,7 +9,7 @@ This document is a **human-readable map of the repository**: what each part does
 **CodeQuest JS** is a monorepo for a coding-learning and duel experience:
 
 - **Mobile app** (Expo / React Native): lessons, exercises, profile, daily challenges, real-time duels.
-- **REST backend** (Express): authentication, user profile, learning content APIs, duels metadata, daily puzzles, badges.
+- **REST backend** (Express): authentication, user profile, learning content APIs, duels metadata, and daily puzzles.
 - **Realtime service** (Socket.IO): duel matchmaking and in-match events.
 - **Shared packages**: database access (Prisma), JWT helpers, static puzzle/exercise data, and small server utilities (CORS, logging, env validation).
 

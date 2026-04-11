@@ -44,9 +44,7 @@ export function buildBeginnerOutputQuestions(): Prisma.DuelQuestionCreateManyInp
               : ["51", "6", "NaN", "undefined"],
     explanation: "Read the operator behavior and method result directly from the snippet.",
     type: "MULTIPLE_CHOICE",
-    difficulty: "BEGINNER",
+    difficulty: "JUNIOR",
     category: "OUTPUT",
-    timesUsed: 0,
-    correctRate: 1,
   }))
 }

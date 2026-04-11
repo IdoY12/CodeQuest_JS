@@ -2,12 +2,11 @@
  * Updates streak counters on user progress after a practice log write.
  *
  * Responsibility: isolate streak shield and day-gap rules from HTTP handler.
- * Layer: backend user controllers
- * Depends on: @prisma/client
+ * Layer: backend user HTTP handlers
  * Consumers: postPracticeLogHandler
  */
 
-import type { PrismaClient } from "@prisma/client";
+import type { ExperienceLevel, PrismaClient } from "@prisma/client";
 
 type ProgressStreakFields = {
   streakCurrent: number;
@@ -19,6 +18,7 @@ type ProgressStreakFields = {
 export async function applyStreakAfterPracticeLog(
   prisma: PrismaClient,
   userId: string,
+  experienceLevel: ExperienceLevel,
   dateKey: string,
   progress: ProgressStreakFields,
 ): Promise<void> {
@@ -50,7 +50,7 @@ export async function applyStreakAfterPracticeLog(
   }
 
   await prisma.userProgress.update({
-    where: { userId },
+    where: { userId_experienceLevel: { userId, experienceLevel } },
     data: {
       streakCurrent: nextStreak,
       streakLongest: Math.max(progress.streakLongest, nextStreak),

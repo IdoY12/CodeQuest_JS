@@ -5,7 +5,7 @@ import { DATABASE_UNAVAILABLE_MESSAGE, isDatabaseUnavailableError } from "../../
 import { comparePassword } from "../../utils/passwordHashing.js";
 import { signAccessToken, signRefreshToken } from "../../utils/sessionJwtTokens.js";
 import { loginBodySchema } from "./authBodySchemas.js";
-import { mapExperienceToPath } from "./authMapExperienceToPath.js";
+import { pathKeyFromExperience } from "@project/db";
 import {
   ensureDuelRatingRow,
   ensureUserProgressForLogin,
@@ -37,7 +37,7 @@ export async function authLoginHandler(request: Request, response: Response): Pr
     const progress = await ensureUserProgressForLogin(user);
     await touchUserLastActive(user.id);
     await ensureDuelRatingRow(user.id);
-    const pathKey = mapExperienceToPath(progress.experienceLevel) ?? progress.path?.key ?? "BEGINNER";
+    const pathKey = pathKeyFromExperience(progress.experienceLevel);
     const accessToken = signAccessToken({
       userId: user.id,
       email: user.email,

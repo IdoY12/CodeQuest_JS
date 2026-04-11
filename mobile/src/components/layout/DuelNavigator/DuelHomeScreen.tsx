@@ -13,7 +13,6 @@ export function DuelHomeScreen({ navigation }: DuelHomeScreenProps) {
   const duelRating = useAppSelector((s) => s.duel.duelRating);
   const duelWins = useAppSelector((s) => s.duel.duelWins);
   const duelLosses = useAppSelector((s) => s.duel.duelLosses);
-  const duelDraws = useAppSelector((s) => s.duel.duelDraws);
   const isGuest = useAppSelector((s) => s.session.isGuest);
   useEffect(() => {
     logNav("screen:enter", { screen: "DuelHomeScreen" });
@@ -23,7 +22,7 @@ export function DuelHomeScreen({ navigation }: DuelHomeScreenProps) {
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <Text style={styles.title}>Duel Rating: {duelRating} RP</Text>
       <Text style={styles.sub}>
-        Win/Loss/Draw: {duelWins} / {duelLosses} / {duelDraws}
+        Wins / Losses: {duelWins} / {duelLosses}
       </Text>
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Recent Duels</Text>

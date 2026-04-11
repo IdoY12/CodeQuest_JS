@@ -1,7 +1,6 @@
 import { prisma } from "@project/db";
-import type { LearningPath, User, UserProgress } from "@prisma/client";
-
-export type ProgressWithPath = UserProgress & { path: LearningPath };
+import type { User, UserProgress } from "@prisma/client";
+import { activeExperienceLevelOf, ensureProgressRow } from "@project/db";
 
 export async function touchUserLastActive(userId: string): Promise<void> {
   await prisma.user.update({
@@ -10,27 +9,19 @@ export async function touchUserLastActive(userId: string): Promise<void> {
   });
 }
 
-export async function ensureUserProgressForLogin(user: User): Promise<ProgressWithPath> {
-  let progress = await prisma.userProgress.findUnique({
-    where: { userId: user.id },
-    include: { path: true },
-  });
-  if (!progress) {
-    const defaultPath = await prisma.learningPath.findUnique({ where: { key: "BEGINNER" } });
-    if (!defaultPath) {
-      throw new Error("BEGINNER path not found");
-    }
-    progress = await prisma.userProgress.create({
-      data: {
-        userId: user.id,
-        pathId: defaultPath.id,
-        onboardingCompleted: false,
-        dailyCommitmentMinutes: 15,
-        notificationsEnabled: true,
-      },
-      include: { path: true },
+export async function ensureUserProgressForLogin(user: User): Promise<UserProgress> {
+  let level = await activeExperienceLevelOf(prisma, user.id);
+  if (!user.activeExperienceLevel) {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { activeExperienceLevel: "JUNIOR" },
     });
+    level = "JUNIOR";
   }
+  await ensureProgressRow(prisma, user.id, level);
+  const progress = await prisma.userProgress.findUniqueOrThrow({
+    where: { userId_experienceLevel: { userId: user.id, experienceLevel: level } },
+  });
   return progress;
 }
 

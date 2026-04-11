@@ -3,7 +3,7 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 export type Goal = "JOB" | "WORK" | "FUN" | "PROJECT";
 export type Experience = "JUNIOR" | "MID" | "SENIOR";
 export type Commitment = "10" | "15" | "25";
-export type PathKey = "BEGINNER" | "ADVANCED";
+export type PathKey = "JUNIOR" | "MID" | "SENIOR";
 
 type ProfileState = {
   username: string;
@@ -22,7 +22,7 @@ const initialState: ProfileState = {
   email: "",
   avatarUrl: null,
   commitment: "15",
-  path: "BEGINNER",
+  path: "JUNIOR",
   notificationsEnabled: true,
   soundsEnabled: true,
   hapticsEnabled: true,
@@ -44,7 +44,7 @@ const profileSlice = createSlice({
       state.goal = goal;
       state.experience = experience;
       state.commitment = commitment;
-      state.path = experience === "SENIOR" ? "ADVANCED" : "BEGINNER";
+      state.path = experience;
     },
     completeOnboarding: (state, a: PayloadAction<{ path: PathKey; goal: Goal; experience: Experience; commitment: Commitment; notificationsEnabled: boolean }>) => {
       const p = a.payload;

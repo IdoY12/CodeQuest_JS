@@ -4,21 +4,17 @@ import { useIsFocused } from "@react-navigation/native";
 import { logNav } from "@/utils/logger";
 import type Exercise from "@/models/Exercise";
 import type { Experience } from "@/redux/profile-slice";
-import { useAppDispatcher, useAppSelector } from "@/redux/hooks";
-import { setCurrentLesson, setExerciseIndex as setSavedExerciseIndex } from "@/redux/lesson-slice";
+import { useAppDispatcher } from "@/redux/hooks";
+import { setCurrentExperienceLevel, setExerciseIndex as setSavedExerciseIndex } from "@/redux/lesson-slice";
 import { addStudySeconds } from "@/redux/session-slice";
 import { useAuthenticatedService } from "@/hooks/useAuthenticatedService";
 import UserService from "@/services/UserService";
 import { drainRefInt } from "@/utils/formatHelpers";
 import { runLessonExerciseLoad } from "@/utils/runLessonExerciseLoad";
 import { tryPostPracticeLog } from "@/utils/tryPostPracticeLog";
-export function useLessonLoad(
-  lessonId: string,
-  personalizedLevel: Experience | undefined,
-  accessToken: string | null,
-) {
+
+export function useLessonLoad(experienceLevel: Experience, accessToken: string | null) {
   const dispatch = useAppDispatcher();
-  const resumeIndex = useAppSelector((s) => (s.lesson.currentLessonId === lessonId ? s.lesson.lessonExerciseIndex : 0));
   const user = useAuthenticatedService(UserService);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,13 +31,13 @@ export function useLessonLoad(
     if (!ok) trackedRef.current += seconds;
   }, [accessToken, user]);
   useEffect(() => {
-    logNav("screen:enter", { screen: "LessonScreen", lessonId });
-    return () => logNav("screen:leave", { screen: "LessonScreen", lessonId });
-  }, [lessonId]);
+    logNav("screen:enter", { screen: "LessonScreen", experienceLevel });
+    return () => logNav("screen:leave", { screen: "LessonScreen", experienceLevel });
+  }, [experienceLevel]);
   useEffect(() => {
-    if (resumeIndex === 0) dispatch(setCurrentLesson(lessonId));
+    dispatch(setCurrentExperienceLevel(experienceLevel));
     let active = true;
-    void runLessonExerciseLoad(lessonId, personalizedLevel, accessToken, resumeIndex, () => active, setLoading, {
+    void runLessonExerciseLoad(experienceLevel, accessToken, () => active, setLoading, {
       setExercises,
       setExerciseIndex,
       setCorrectCount,
@@ -50,7 +46,7 @@ export function useLessonLoad(
     return () => {
       active = false;
     };
-  }, [accessToken, dispatch, lessonId, personalizedLevel, resumeIndex]);
+  }, [accessToken, dispatch, experienceLevel]);
   useEffect(() => {
     if (loading || exercises.length === 0) return;
     dispatch(setSavedExerciseIndex(exerciseIndex));
@@ -75,5 +71,14 @@ export function useLessonLoad(
       void flushPractice();
     };
   }, [dispatch, exerciseIndex, exercises, flushPractice, isFocused, loading]);
-  return { exercises, loading, exerciseIndex, setExerciseIndex, correctCount, setCorrectCount, attemptedCount, setAttemptedCount };
+  return {
+    exercises,
+    loading,
+    exerciseIndex,
+    setExerciseIndex,
+    correctCount,
+    setCorrectCount,
+    attemptedCount,
+    setAttemptedCount,
+  };
 }

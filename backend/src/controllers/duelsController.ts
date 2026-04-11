@@ -10,10 +10,9 @@ export async function getStats(req: AuthenticatedRequest, res: Response) {
     rating: rating?.rating ?? 0,
     wins: rating?.wins ?? 0,
     losses: rating?.losses ?? 0,
-    draws: rating?.draws ?? 0,
-    rankTier: rating?.rankTier ?? "BRONZE",
   });
 }
+
 
 export async function getHistory(req: AuthenticatedRequest, res: Response) {
   logInfo("[DUEL]", "history:fetch", { userId: req.user?.userId });

@@ -26,13 +26,7 @@ export async function authRegisterHandler(request: Request, response: Response):
       response.status(409).json({ error: "Email already exists" });
       return;
     }
-    const path = await prisma.learningPath.findUnique({ where: { key: "BEGINNER" } });
-    if (!path) {
-      logWarn("[AUTH]", "register:path-missing");
-      response.status(400).json({ error: "Path not found" });
-      return;
-    }
-    const user = await createRegisteredUserWithDefaults({ email, username, password, pathId: path.id });
+    const user = await createRegisteredUserWithDefaults({ email, username, password });
     const accessToken = signAccessToken({
       userId: user.id,
       email: user.email,
@@ -54,7 +48,7 @@ export async function authRegisterHandler(request: Request, response: Response):
         avatarId: user.avatarId,
         avatarUrl: user.avatarUrl,
         onboardingCompleted: false,
-        pathKey: "BEGINNER",
+        pathKey: "JUNIOR",
         goal: null,
         experienceLevel: null,
         dailyCommitmentMinutes: 15,

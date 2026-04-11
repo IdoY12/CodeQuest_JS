@@ -9,16 +9,16 @@
 
 import type { PrismaClient } from "@prisma/client";
 import { createLessonWithExercises } from "../lib/createLessonWithExercises.js";
-import { requireChapterId } from "../lib/requireChapterId.js";
+import type { GlobalExerciseOrder } from "../lib/createLessonWithExercises.js";
 
-export async function seedLessonBlock_12(prisma: PrismaClient, chapterByTitle: Map<string, string>): Promise<void> {
+export async function seedLessonBlock_12(prisma: PrismaClient, order: GlobalExerciseOrder): Promise<void> {
     await createLessonWithExercises(prisma, {
-      chapterId: requireChapterId(chapterByTitle, "Async JavaScript"),
+      chapterTitle: "Async JavaScript",
       title: "Execution Order and Awaiting Promises",
       description: "Reason about event loop and async return values",
       estimatedMinutes: 14,
       orderIndex: 1,
-      difficulty: "ADVANCED",
+      difficulty: "SENIOR",
       exercises: [
         {
           type: "MULTIPLE_CHOICE",
@@ -66,5 +66,5 @@ export async function seedLessonBlock_12(prisma: PrismaClient, chapterByTitle: M
           options: ["await", "return", "yield", "new"],
         },
       ],
-    });
+    }, order);
 }

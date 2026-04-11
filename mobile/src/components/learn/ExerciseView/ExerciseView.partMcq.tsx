@@ -7,7 +7,6 @@ import { v } from "./ExerciseView.styles";
 
 type Base = {
   exercise: Exercise;
-  lessonSource: "personalized" | "curriculum";
   accessToken: string | null;
   onLessonExerciseComplete: (answer: string, context: LessonExerciseCompletionContext) => void;
 };
@@ -15,23 +14,15 @@ type Base = {
 export function EvMcqTap({
   variant,
   exercise,
-  lessonSource,
   accessToken,
   onLessonExerciseComplete,
 }: Base & { variant: "mcq" | "tap_token" }) {
-  const u = useExerciseSingleChoice(exercise, variant, lessonSource, accessToken, onLessonExerciseComplete);
+  const u = useExerciseSingleChoice(exercise, variant, accessToken, onLessonExerciseComplete);
   const styleFor = (opt: string) => {
-    if (lessonSource === "curriculum") {
-      if (!u.hasChecked) return v.option;
-      if (u.selected === opt && u.isCorrect) return [v.option, v.correct];
-      if (u.selected === opt && !u.isCorrect) return [v.option, v.wrong];
-      return v.option;
-    }
-    return [
-      v.option,
-      u.selected === opt && opt === exercise.correctAnswer && v.correct,
-      u.selected === opt && opt !== exercise.correctAnswer && v.wrong,
-    ];
+    if (!u.hasChecked) return v.option;
+    if (u.selected === opt && u.isCorrect) return [v.option, v.correct];
+    if (u.selected === opt && !u.isCorrect) return [v.option, v.wrong];
+    return v.option;
   };
   const ok = variant === "tap_token" ? "Token identified." : "Correct!";
   const bad = variant === "tap_token" ? "Wrong token. Continue and review." : "Not quite.";

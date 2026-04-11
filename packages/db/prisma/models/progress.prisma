@@ -1,53 +1,31 @@
 model UserProgress {
-  id                     String       @id @default(cuid())
-  userId                 String       @unique
-  pathId                 String
+  id        String @id @default(cuid())
+  userId    String
+  experienceLevel ExperienceLevel
+
+  currentExerciseIndex Int @default(0)
+
+  streakHistoryJson Json?
+
+  practiceLogDateKey             String?
+  practiceLogSeconds             Int     @default(0)
+  practiceLogIncompleteReminders Int   @default(0)
+  practiceLogCompleteSent        Boolean @default(false)
+
   goal                   String?
-  experienceLevel        ExperienceLevel?
   dailyCommitmentMinutes Int?
-  notificationsEnabled   Boolean      @default(true)
-  onboardingCompleted    Boolean      @default(false)
-  currentChapterId       String?
-  currentLessonId        String?
-  xpTotal                Int          @default(0)
-  level                  Int          @default(1)
-  streakCurrent          Int          @default(0)
-  streakLongest          Int          @default(0)
+  notificationsEnabled   Boolean           @default(true)
+  onboardingCompleted    Boolean           @default(false)
+  xpTotal                Int               @default(0)
+  level                  Int               @default(1)
+  streakCurrent          Int               @default(0)
+  streakLongest          Int               @default(0)
   streakLastDate         DateTime?
-  streakShieldAvailable  Boolean      @default(false)
+  streakShieldAvailable  Boolean           @default(false)
   streakShieldConsumedAt DateTime?
-  heartsRemaining        Int          @default(3)
-  heartsLastRefill       DateTime?
-  user                   User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  path                   LearningPath @relation(fields: [pathId], references: [id], onDelete: Cascade)
-}
 
-model DailyPracticeLog {
-  id                      String   @id @default(cuid())
-  userId                  String
-  dateKey                 String
-  practicedSeconds        Int      @default(0)
-  incompleteReminderCount Int      @default(0)
-  completeReminderSent    Boolean  @default(false)
-  createdAt               DateTime @default(now())
-  updatedAt               DateTime @updatedAt
-  user                    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, dateKey])
+  @@unique([userId, experienceLevel])
   @@index([userId])
-}
-
-model UserExerciseHistory {
-  id          String   @id @default(cuid())
-  userId      String
-  exerciseId  String
-  isCorrect   Boolean
-  attempts    Int
-  timeTakenMs Int
-  completedAt DateTime @default(now())
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  exercise    Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([exerciseId])
 }

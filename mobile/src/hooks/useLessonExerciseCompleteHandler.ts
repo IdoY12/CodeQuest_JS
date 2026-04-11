@@ -4,12 +4,11 @@ import { setExerciseIndex as setSavedExerciseIndex } from "@/redux/lesson-slice"
 import { addXp as addXpAction } from "@/redux/xp-slice";
 import type { LessonExerciseCompletionContext } from "@/types/lessonExerciseCompletion.types";
 import type { Experience } from "@/redux/profile-slice";
-import type Exercise from "@/models/Exercise";
 import type { LessonScreenNavigation } from "@/types/learnNavigation.types";
 import { orchestrateLessonAnswer } from "@/utils/lessonAnswerOrchestrator";
 
 type Load = {
-  exercises: Exercise[];
+  exercises: { length: number };
   exerciseIndex: number;
   correctCount: number;
   attemptedCount: number;
@@ -20,8 +19,7 @@ type Load = {
 
 export function useLessonExerciseCompleteHandler(
   navigation: LessonScreenNavigation,
-  personalizedLevel: Experience | undefined,
-  lessonId: string,
+  experienceLevel: Experience,
   lessonTitle: string,
   load: Load,
 ) {
@@ -31,14 +29,13 @@ export function useLessonExerciseCompleteHandler(
     async (_answer: string, completion: LessonExerciseCompletionContext) => {
       await orchestrateLessonAnswer({
         completion,
-        personalizedLevel,
         addXp,
-        exercises: load.exercises,
+        exercisesLength: load.exercises.length,
         exerciseIndex: load.exerciseIndex,
         correctCount: load.correctCount,
         attemptedCount: load.attemptedCount,
-        lessonId,
         lessonTitle,
+        experienceLevel,
         navigation,
         setAttemptedCount: load.setAttemptedCount,
         setCorrectCount: load.setCorrectCount,
@@ -51,14 +48,14 @@ export function useLessonExerciseCompleteHandler(
       load.attemptedCount,
       load.correctCount,
       load.exerciseIndex,
-      load.exercises,
+      load.exercises.length,
       load.setAttemptedCount,
       load.setCorrectCount,
       load.setExerciseIndex,
-      lessonId,
       lessonTitle,
       navigation,
-      personalizedLevel,
+      experienceLevel,
+      dispatch,
     ],
   );
 }

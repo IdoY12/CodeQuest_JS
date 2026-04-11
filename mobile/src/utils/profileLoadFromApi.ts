@@ -11,8 +11,8 @@ export type DraftSetters = {
   setDraftNotifications: (n: boolean) => void;
 };
 
-export function pathFromExperience(level: LevelKey): "BEGINNER" | "ADVANCED" {
-  return level === "SENIOR" ? "ADVANCED" : "BEGINNER";
+export function pathFromExperience(level: LevelKey): LevelKey {
+  return level;
 }
 
 export function applyProgressToStore(

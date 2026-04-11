@@ -36,10 +36,6 @@ export async function deleteAccount(req: AuthenticatedRequest, res: Response) {
       where: { id: userId },
       data: { tokenVersion: { increment: 1 } },
     });
-    await tx.dailyPracticeLog.deleteMany({ where: { userId } });
-    await tx.userExerciseHistory.deleteMany({ where: { userId } });
-    await tx.userBadge.deleteMany({ where: { userId } });
-    await tx.streakLog.deleteMany({ where: { userId } });
     await tx.duelSession.updateMany({
       where: { winnerId: userId },
       data: { winnerId: null },

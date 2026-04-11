@@ -44,9 +44,7 @@ export function buildAdvancedOutputQuestions(): Prisma.DuelQuestionCreateManyInp
               : ["0", "1", "undefined", "NaN"],
     explanation: "Advanced questions test event loop order, this binding, and references.",
     type: "MULTIPLE_CHOICE",
-    difficulty: "ADVANCED",
+    difficulty: "SENIOR",
     category: "ASYNC",
-    timesUsed: 0,
-    correctRate: 1,
   }))
 }

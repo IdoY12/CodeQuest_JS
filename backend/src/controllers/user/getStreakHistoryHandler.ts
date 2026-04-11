@@ -1,21 +1,19 @@
 /**
- * GET /api/user/streak-history — recent streak log rows for profile visualization.
+ * GET /api/user/streak-history — last practice days for the active experience row.
  *
- * Responsibility: return last 90 streak log entries ordered by date.
+ * Responsibility: read `UserProgress.streakHistoryJson` for the user's active level
+ * (same row `POST /user/practice-log` updates) and return sorted date keys, newest first.
  * Layer: backend user HTTP handlers
- * Depends on: Prisma
  * Consumers: user router
  */
 
 import type { Response } from "express";
 import { prisma } from "@project/db";
 import type { AuthenticatedRequest } from "../../@types/auth.js";
+import { getProgressForActiveUser, streakHistoryAsStrings } from "@project/db";
 
-export async function getStreakHistory(req: AuthenticatedRequest, res: Response) {
-  const logs = await prisma.streakLog.findMany({
-    where: { userId: req.user!.userId },
-    orderBy: { date: "desc" },
-    take: 90,
-  });
-  return res.json(logs);
+export async function getStreakHistory(_req: AuthenticatedRequest, res: Response) {
+  const progress = await getProgressForActiveUser(prisma, _req.user!.userId);
+  const dates = streakHistoryAsStrings(progress?.streakHistoryJson).sort((a: string, b: string) => b.localeCompare(a));
+  return res.json(dates);
 }

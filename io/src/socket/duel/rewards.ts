@@ -1,13 +1,16 @@
-import { prisma } from "@project/db";
+import { activeExperienceLevelOf, prisma } from "@project/db";
 
 export async function applyXpReward(userId: string, xpToAdd: number) {
-  const progress = await prisma.userProgress.findUnique({ where: { userId } }).catch(() => null);
+  const level = await activeExperienceLevelOf(prisma, userId);
+  const progress = await prisma.userProgress
+    .findUnique({ where: { userId_experienceLevel: { userId, experienceLevel: level } } })
+    .catch(() => null);
   if (!progress) return;
   const nextXp = progress.xpTotal + xpToAdd;
   const nextLevel = Math.max(1, Math.floor(nextXp / 250) + 1);
   await prisma.userProgress
     .update({
-      where: { userId },
+      where: { id: progress.id },
       data: {
         xpTotal: nextXp,
         level: nextLevel,

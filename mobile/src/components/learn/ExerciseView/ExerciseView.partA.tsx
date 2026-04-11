@@ -10,16 +10,13 @@ const CONCEPT_SENTINEL = "concept-card";
 
 type Base = {
   exercise: Exercise;
-  lessonSource: "personalized" | "curriculum";
   accessToken: string | null;
   onLessonExerciseComplete: (answer: string, context: LessonExerciseCompletionContext) => void;
 };
 
-export function EvConcept({ exercise, lessonSource, accessToken, onLessonExerciseComplete }: Base) {
+export function EvConcept({ exercise, accessToken, onLessonExerciseComplete }: Base) {
   const learning = useAuthenticatedService(LearningService);
   const [busy, setBusy] = useState(false);
-  const submitPersonalized = () =>
-    onLessonExerciseComplete(CONCEPT_SENTINEL, { source: "personalized", isCorrect: true, xpReward: exercise.xpReward });
   const submitCurriculum = async () => {
     if (!accessToken || !learning) return;
     setBusy(true);
@@ -33,11 +30,7 @@ export function EvConcept({ exercise, lessonSource, accessToken, onLessonExercis
   return (
     <View style={v.exerciseCard}>
       <Text style={v.explanation}>{exercise.explanation ?? ""}</Text>
-      <Pressable
-        style={[v.lessonButton, busy ? { opacity: 0.6 } : null]}
-        disabled={busy || (lessonSource === "curriculum" && !accessToken)}
-        onPress={() => (lessonSource === "personalized" ? submitPersonalized() : void submitCurriculum())}
-      >
+      <Pressable style={[v.lessonButton, busy ? { opacity: 0.6 } : null]} disabled={busy || !accessToken} onPress={() => void submitCurriculum()}>
         <Text style={v.lessonButtonLabel}>Got it</Text>
       </Pressable>
     </View>

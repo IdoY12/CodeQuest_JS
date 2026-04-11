@@ -32,7 +32,7 @@ function GuestProfileBody() {
         experience: nextExperience,
         commitment,
         notificationsEnabled,
-        path: nextExperience === "SENIOR" ? "ADVANCED" : "BEGINNER",
+        path: nextExperience,
       }),
     );
   };
@@ -43,7 +43,7 @@ function GuestProfileBody() {
         experience,
         commitment: nextCommitment,
         notificationsEnabled,
-        path: experience === "SENIOR" ? "ADVANCED" : "BEGINNER",
+        path: experience,
       }),
     );
   };

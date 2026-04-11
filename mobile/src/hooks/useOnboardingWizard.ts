@@ -57,7 +57,7 @@ export function useOnboardingWizard() {
           }),
         );
       } else {
-        dispatch(completeOnboarding({ path: level === "SENIOR" ? "ADVANCED" : "BEGINNER", goal, experience: level, commitment, notificationsEnabled: true }));
+        dispatch(completeOnboarding({ path: level, goal, experience: level, commitment, notificationsEnabled: true }));
       }
       dispatch(setOnboardingCompleted(true));
     } catch (e) {

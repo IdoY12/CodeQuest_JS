@@ -13,7 +13,6 @@ import express from "express";
 import helmet from "helmet";
 import { resolveExpressCorsOrigin } from "@project/server-kit/cors";
 import { authRouter } from "./routers/auth.js";
-import { badgesRouter } from "./routers/badges.js";
 import { dailyChallengeRouter } from "./routers/dailyChallenge.js";
 import { dailyPuzzlesRouter } from "./routers/dailyPuzzles.js";
 import { duelRouter } from "./routers/duels.js";
@@ -48,7 +47,6 @@ app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 app.use("/api/learning", learningRouter);
 app.use("/api/duels", duelRouter);
-app.use("/api/badges", badgesRouter);
 app.use("/api/daily-challenge", dailyChallengeRouter);
 app.use("/api/daily-puzzles", dailyPuzzlesRouter);
 

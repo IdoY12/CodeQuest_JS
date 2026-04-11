@@ -63,7 +63,6 @@ export async function hydrateLegacySessionProgress(
     hydrateStats({
       duelWins: p.duelWins,
       duelLosses: p.duelLosses,
-      duelDraws: p.duelDraws,
       duelRating: p.duelRating,
       lessonsCompleted: p.lessonsCompleted,
     } as never),

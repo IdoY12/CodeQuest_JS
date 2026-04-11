@@ -9,16 +9,16 @@
 
 import type { PrismaClient } from "@prisma/client";
 import { createLessonWithExercises } from "../lib/createLessonWithExercises.js";
-import { requireChapterId } from "../lib/requireChapterId.js";
+import type { GlobalExerciseOrder } from "../lib/createLessonWithExercises.js";
 
-export async function seedLessonBlock_13(prisma: PrismaClient, chapterByTitle: Map<string, string>): Promise<void> {
+export async function seedLessonBlock_13(prisma: PrismaClient, order: GlobalExerciseOrder): Promise<void> {
     await createLessonWithExercises(prisma, {
-      chapterId: requireChapterId(chapterByTitle, "Destructuring and Spread"),
+      chapterTitle: "Destructuring and Spread",
       title: "Modern Object and Array Patterns",
       description: "Use concise extraction and merge syntax",
       estimatedMinutes: 10,
       orderIndex: 1,
-      difficulty: "ADVANCED",
+      difficulty: "SENIOR",
       exercises: [
         {
           type: "MULTIPLE_CHOICE",
@@ -48,5 +48,5 @@ export async function seedLessonBlock_13(prisma: PrismaClient, chapterByTitle: M
           options: ["[1,2]", "[3,4]", "[1, 2, 3, 4]", "[[1,2],[3,4]]"],
         },
       ],
-    });
+    }, order);
 }

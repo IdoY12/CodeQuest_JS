@@ -12,7 +12,6 @@ import { v } from "./ExerciseView.styles";
 
 export type ExerciseViewProps = {
   exercise: Exercise;
-  lessonSource: "personalized" | "curriculum";
   accessToken: string | null;
   onLessonExerciseComplete: (answer: string, context: LessonExerciseCompletionContext) => void;
 };
@@ -20,7 +19,7 @@ export type ExerciseViewProps = {
 export function ExerciseView(p: ExerciseViewProps) {
   const { exercise } = p;
   const t = exercise.type;
-  const s = { exercise, lessonSource: p.lessonSource, accessToken: p.accessToken, onLessonExerciseComplete: p.onLessonExerciseComplete };
+  const s = { exercise, accessToken: p.accessToken, onLessonExerciseComplete: p.onLessonExerciseComplete };
   let body: ReactNode;
   if (t === "CONCEPT_CARD") body = <EvConcept {...s} />;
   else if (t === "MULTIPLE_CHOICE") body = <EvMcqTap variant="mcq" {...s} />;

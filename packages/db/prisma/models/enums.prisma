@@ -1,7 +1,7 @@
 enum Difficulty {
-  BEGINNER
-  INTERMEDIATE
-  ADVANCED
+  JUNIOR
+  MID
+  SENIOR
 }
 
 enum ExerciseType {
@@ -19,23 +19,10 @@ enum ExperienceLevel {
   SENIOR
 }
 
-enum PathType {
-  BEGINNER
-  ADVANCED
-}
-
 enum DuelCategory {
   OUTPUT
   SCOPE
   ASYNC
   TYPES
   METHODS
-}
-
-enum RankTier {
-  BRONZE
-  SILVER
-  GOLD
-  PLATINUM
-  DIAMOND
 }

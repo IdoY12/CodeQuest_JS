@@ -1,21 +1,19 @@
 import type { Request, Response } from "express";
-import { pickDailyPuzzleIndex } from "@project/daily-puzzles";
-import { prisma } from "@project/db";
+import { dailyPuzzleBank, pickDailyPuzzleIndex } from "@project/daily-puzzles";
 import type { ClientPuzzleTodayDto } from "../../dto/clientPuzzleTodayDto.js";
 import { logError, logInfo } from "../../utils/logger.js";
 
 export async function dailyPuzzleTodayHandler(request: Request, response: Response): Promise<void> {
   try {
     logInfo("[TASKS]", "daily-puzzle:today");
-    const puzzles = await prisma.dailyPuzzle.findMany({ orderBy: { orderIndex: "asc" } });
-    if (puzzles.length === 0) {
+    if (dailyPuzzleBank.length === 0) {
       response.status(503).json({ error: "Daily puzzles are not configured" });
       return;
     }
     const dateQuery = request.query.date as string | undefined;
     const anchor = dateQuery ? new Date(`${dateQuery}T12:00:00Z`) : new Date();
-    const index = pickDailyPuzzleIndex(puzzles.length, anchor);
-    const row = puzzles[index];
+    const index = pickDailyPuzzleIndex(dailyPuzzleBank.length, anchor);
+    const row = dailyPuzzleBank[index];
     const puzzle: ClientPuzzleTodayDto = { id: row.id, prompt: row.prompt };
     response.json({
       puzzle,

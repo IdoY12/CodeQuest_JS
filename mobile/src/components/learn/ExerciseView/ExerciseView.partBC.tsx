@@ -8,16 +8,14 @@ import { x } from "./ExerciseView.styles.extra";
 
 type Base = {
   exercise: Exercise;
-  lessonSource: "personalized" | "curriculum";
   accessToken: string | null;
   onLessonExerciseComplete: (answer: string, context: LessonExerciseCompletionContext) => void;
 };
 
-export function EvFindBug({ exercise, lineList, lessonSource, accessToken, onLessonExerciseComplete }: Base & { lineList: string[] }) {
-  const u = useExerciseFindBug(exercise, lessonSource, accessToken, onLessonExerciseComplete);
+export function EvFindBug({ exercise, lineList, accessToken, onLessonExerciseComplete }: Base & { lineList: string[] }) {
+  const u = useExerciseFindBug(exercise, accessToken, onLessonExerciseComplete);
   return (
     <View style={v.exerciseCard}>
-      {lessonSource === "personalized" ? <Text style={x.hearts}>{"❤️".repeat(Math.max(0, u.attemptsLeft))}</Text> : null}
       {lineList.map((line, idx) => (
         <Pressable
           key={`${line}-${idx}`}

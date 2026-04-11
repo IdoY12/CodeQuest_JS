@@ -1,47 +1,35 @@
 /**
- * GET /api/user/progress-summary — aggregates XP, streak, lessons, duel stats.
+ * GET /api/user/progress-summary — aggregates XP, streak, duel stats.
  *
  * Responsibility: parallel reads for dashboard cards on the mobile home screen.
  * Layer: backend user HTTP handlers
- * Depends on: Prisma, buildRecentStreakDays, logger
  * Consumers: user router
  */
 
 import type { Response } from "express";
 import { prisma } from "@project/db";
 import type { AuthenticatedRequest } from "../../@types/auth.js";
+import { getProgressForActiveUser, streakHistoryAsStrings } from "@project/db";
 import { logError } from "../../utils/logger.js";
 import { buildRecentStreakDays } from "./buildRecentStreakDays.js";
 
 export async function getProgressSummary(req: AuthenticatedRequest, res: Response) {
   try {
     const userId = req.user!.userId;
-    const [progress, duelRating, recentPractice, distinctCorrect] = await Promise.all([
-      prisma.userProgress.findUnique({ where: { userId } }),
+    const [progress, duelRating] = await Promise.all([
+      getProgressForActiveUser(prisma, userId),
       prisma.duelRating.findUnique({ where: { userId } }),
-      prisma.dailyPracticeLog.findMany({
-        where: { userId },
-        orderBy: { dateKey: "desc" },
-        take: 7,
-        select: { dateKey: true },
-      }),
-      prisma.userExerciseHistory.findMany({
-        where: { userId, isCorrect: true },
-        distinct: ["exerciseId"],
-        select: { exercise: { select: { lessonId: true } } },
-      }),
     ]);
-    const lessonsCompleted = new Set(distinctCorrect.map((row) => row.exercise.lessonId)).size;
-    const streakDays = buildRecentStreakDays(recentPractice.map((entry) => entry.dateKey));
+    const streakKeys = streakHistoryAsStrings(progress?.streakHistoryJson);
+    const streakDays = buildRecentStreakDays(streakKeys);
     return res.json({
       xpTotal: progress?.xpTotal ?? 0,
       level: progress?.level ?? 1,
       streakCurrent: progress?.streakCurrent ?? 0,
       streakDays,
-      lessonsCompleted,
+      lessonsCompleted: progress?.currentExerciseIndex ?? 0,
       duelWins: duelRating?.wins ?? 0,
       duelLosses: duelRating?.losses ?? 0,
-      duelDraws: duelRating?.draws ?? 0,
       duelRating: duelRating?.rating ?? 0,
       streakShieldAvailable: progress?.streakShieldAvailable ?? false,
     });

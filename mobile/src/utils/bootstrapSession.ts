@@ -50,7 +50,6 @@ export async function bootstrapSession(dispatch: AppDispatch): Promise<void> {
       hydrateStats({
         duelWins: progress.duelWins,
         duelLosses: progress.duelLosses,
-        duelDraws: progress.duelDraws,
         duelRating: progress.duelRating,
         lessonsCompleted: progress.lessonsCompleted,
       }),

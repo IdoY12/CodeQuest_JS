@@ -9,16 +9,16 @@
 
 import type { PrismaClient } from "@prisma/client";
 import { createLessonWithExercises } from "../lib/createLessonWithExercises.js";
-import { requireChapterId } from "../lib/requireChapterId.js";
+import type { GlobalExerciseOrder } from "../lib/createLessonWithExercises.js";
 
-export async function seedLessonBlock_14(prisma: PrismaClient, chapterByTitle: Map<string, string>): Promise<void> {
+export async function seedLessonBlock_14(prisma: PrismaClient, order: GlobalExerciseOrder): Promise<void> {
     await createLessonWithExercises(prisma, {
-      chapterId: requireChapterId(chapterByTitle, "ES6 Classes"),
+      chapterTitle: "ES6 Classes",
       title: "Classes and Inheritance",
       description: "Constructors, instances, and extending behavior",
       estimatedMinutes: 10,
       orderIndex: 1,
-      difficulty: "ADVANCED",
+      difficulty: "SENIOR",
       exercises: [
         {
           type: "MULTIPLE_CHOICE",
@@ -53,5 +53,5 @@ export async function seedLessonBlock_14(prisma: PrismaClient, chapterByTitle: M
           options: ["A", "B", "AB", "BA"],
         },
       ],
-    });
+    }, order);
 }

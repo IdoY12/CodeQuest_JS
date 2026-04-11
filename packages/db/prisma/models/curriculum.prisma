@@ -1,0 +1,26 @@
+model Exercise {
+  id               String           @id @default(cuid())
+  experienceLevel  ExperienceLevel
+  orderIndex       Int
+  sectionLabel     String?
+  type             ExerciseType
+  difficulty       Difficulty
+  prompt           String
+  codeSnippet      String
+  correctAnswer    String
+  explanation      String
+  xpReward         Int
+  options          ExerciseOption[]
+
+  @@index([experienceLevel, orderIndex])
+}
+
+model ExerciseOption {
+  id         String   @id @default(cuid())
+  exerciseId String
+  text       String
+  isCorrect  Boolean  @default(false)
+  exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+
+  @@index([exerciseId])
+}

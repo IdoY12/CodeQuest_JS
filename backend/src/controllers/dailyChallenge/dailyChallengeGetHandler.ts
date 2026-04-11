@@ -8,7 +8,7 @@ export async function dailyChallengeGetHandler(_request: Request, response: Resp
   try {
     logInfo("[TASKS]", "daily-challenge:fetch");
     const exercise = await prisma.exercise.findFirst({
-      where: { type: "FIND_THE_BUG" },
+      where: { type: "FIND_THE_BUG", experienceLevel: "JUNIOR" },
       include: { options: true },
     });
     if (!exercise) {

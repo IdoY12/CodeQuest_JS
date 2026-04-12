@@ -4,8 +4,13 @@ import { useIsFocused } from "@react-navigation/native";
 import { logNav } from "@/utils/logger";
 import type Exercise from "@/models/Exercise";
 import type { Experience } from "@/redux/profile-slice";
-import { useAppDispatcher } from "@/redux/hooks";
-import { setCurrentExperienceLevel, setExerciseIndex as setSavedExerciseIndex } from "@/redux/lesson-slice";
+import { useAppDispatcher, useAppSelector } from "@/redux/hooks";
+import {
+  blockProgressKey,
+  saveBlockProgress,
+  setCurrentExperienceLevel,
+  setExerciseIndex as setSavedExerciseIndex,
+} from "@/redux/lesson-slice";
 import { addStudySeconds } from "@/redux/session-slice";
 import { useAuthenticatedService } from "@/hooks/useAuthenticatedService";
 import UserService from "@/services/UserService";
@@ -16,6 +21,9 @@ import { tryPostPracticeLog } from "@/utils/tryPostPracticeLog";
 export function useLessonLoad(experienceLevel: Experience, accessToken: string | null, blockIndex: number) {
   const dispatch = useAppDispatcher();
   const user = useAuthenticatedService(UserService);
+  const savedLocalIndex = useAppSelector(
+    (s) => s.lesson.blockProgress?.[blockProgressKey(experienceLevel, blockIndex)] ?? 0,
+  );
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [exerciseIndex, setExerciseIndex] = useState(0);
@@ -37,7 +45,7 @@ export function useLessonLoad(experienceLevel: Experience, accessToken: string |
   useEffect(() => {
     dispatch(setCurrentExperienceLevel(experienceLevel));
     let active = true;
-    void runLessonExerciseLoad(experienceLevel, accessToken, blockIndex, () => active, setLoading, {
+    void runLessonExerciseLoad(experienceLevel, accessToken, blockIndex, savedLocalIndex, () => active, setLoading, {
       setExercises,
       setExerciseIndex,
       setCorrectCount,
@@ -46,11 +54,15 @@ export function useLessonLoad(experienceLevel: Experience, accessToken: string |
     return () => {
       active = false;
     };
+    // savedLocalIndex intentionally excluded: it is captured once at mount and must not
+    // trigger a reload when Redux writes the progress back during the lesson.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken, blockIndex, dispatch, experienceLevel]);
   useEffect(() => {
     if (loading || exercises.length === 0) return;
     dispatch(setSavedExerciseIndex(exerciseIndex));
-  }, [dispatch, exerciseIndex, exercises.length, loading]);
+    dispatch(saveBlockProgress({ level: experienceLevel, blockIndex, exerciseIndex }));
+  }, [blockIndex, dispatch, exerciseIndex, experienceLevel, exercises.length, loading]);
   useEffect(() => {
     const sub = AppState.addEventListener("change", (next) => {
       if (appStateRef.current === "active" && next !== "active") void flushPractice();

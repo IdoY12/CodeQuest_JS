@@ -9,6 +9,7 @@ export async function runLessonExerciseLoad(
   experienceLevel: Experience,
   jwt: string | null,
   blockIndex: number,
+  savedLocalIndex: number,
   active: () => boolean,
   setLoading: (v: boolean) => void,
   set: LessonExerciseSetters,
@@ -20,7 +21,9 @@ export async function runLessonExerciseLoad(
     const blockStart = blockIndex * EXERCISES_PER_BLOCK;
     const blockExercises = allExercises.slice(blockStart, blockStart + EXERCISES_PER_BLOCK);
 
-    let startIndex = 0;
+    // Local progress is the baseline; server resume overrides for authenticated users.
+    let startIndex =
+      savedLocalIndex > 0 && savedLocalIndex < blockExercises.length ? savedLocalIndex : 0;
     if (jwt) {
       try {
         const resume = await learning.getResumeForLevel(experienceLevel);
@@ -29,7 +32,7 @@ export async function runLessonExerciseLoad(
           startIndex = resumeWithinBlock;
         }
       } catch {
-        // resume is a best-effort optimisation; start from 0 on failure
+        // server resume is best-effort; local progress already applied above
       }
     }
 

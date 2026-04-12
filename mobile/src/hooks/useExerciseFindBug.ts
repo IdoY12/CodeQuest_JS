@@ -16,15 +16,21 @@ export function useExerciseFindBug(
   const [curriculumChecked, setCurriculumChecked] = useState(false);
   const [curriculumCorrect, setCurriculumCorrect] = useState<boolean | null>(null);
   const [serverResult, setServerResult] = useState<ExerciseSubmitResult | null>(null);
+  // Tracks the line number that was SUBMITTED last — same separation of concerns as in
+  // useExerciseSingleChoice so tapping a new line never prematurely colours it.
+  const [lastCheckedAnswer, setLastCheckedAnswer] = useState<string | null>(null);
   useEffect(() => {
     setSelected(null);
     setCurriculumChecked(false);
     setCurriculumCorrect(null);
     setServerResult(null);
+    setLastCheckedAnswer(null);
   }, [exercise.id]);
-  const canCheck = Boolean(selected && !curriculumChecked);
+  // Allow re-checking until the user finds the correct line.
+  const canCheck = Boolean(selected) && curriculumCorrect !== true;
   const runCheck = useCallback(async () => {
     if (!selected) return;
+    setLastCheckedAnswer(selected);
     const result =
       accessToken && learning
         ? await learning.submitExercise(exercise.id, selected)
@@ -46,5 +52,6 @@ export function useExerciseFindBug(
     showResults: curriculumChecked,
     isCorrectNow: curriculumCorrect,
     serverResult,
+    lastCheckedAnswer,
   };
 }

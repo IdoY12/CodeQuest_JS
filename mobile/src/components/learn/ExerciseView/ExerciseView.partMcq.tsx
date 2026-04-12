@@ -19,13 +19,14 @@ export function EvMcqTap({
 }: Base & { variant: "mcq" | "tap_token" }) {
   const u = useExerciseSingleChoice(exercise, variant, accessToken, onLessonExerciseComplete);
   const styleFor = (opt: string) => {
-    if (!u.hasChecked) return v.option;
-    if (u.selected === opt && u.isCorrect) return [v.option, v.correct];
-    if (u.selected === opt && !u.isCorrect) return [v.option, v.wrong];
+    // Red/green only for what was ACTUALLY SUBMITTED — never for the current tap target.
+    if (u.lastCheckedAnswer === opt && u.isCorrect) return [v.option, v.correct];
+    if (u.lastCheckedAnswer === opt && !u.isCorrect && u.hasChecked) return [v.option, v.wrong];
+    // Neutral accent border so the user can see their tap registered before re-checking.
+    if (u.selected === opt) return [v.option, v.optionSelected];
     return v.option;
   };
   const ok = variant === "tap_token" ? "Token identified." : "Correct!";
-  const bad = variant === "tap_token" ? "Wrong token. Continue and review." : "Not quite.";
   return (
     <View style={v.exerciseCard}>
       {variant === "tap_token" ? <Text style={v.hint}>Tap the correct token from this list.</Text> : null}
@@ -37,14 +38,16 @@ export function EvMcqTap({
       <Pressable style={[v.lessonButton, !u.canCheck && v.disabled]} disabled={!u.canCheck} onPress={() => void u.runCheck()}>
         <Text style={v.lessonButtonLabel}>Check</Text>
       </Pressable>
-      {u.hasChecked ? (
+      {u.hasChecked && u.isCorrect ? (
         <>
-          <Text style={[v.feedback, u.isCorrect ? v.feedbackGood : v.feedbackBad]}>{u.isCorrect ? ok : bad}</Text>
-          {u.isCorrect && u.serverResult?.explanation ? <Text style={v.feedback}>{u.serverResult.explanation}</Text> : null}
+          <Text style={[v.feedback, v.feedbackGood]}>{ok}</Text>
+          {u.serverResult?.explanation ? <Text style={v.feedback}>{u.serverResult.explanation}</Text> : null}
           <Pressable style={v.lessonButton} onPress={u.goNext}>
             <Text style={v.lessonButtonLabel}>Next</Text>
           </Pressable>
         </>
+      ) : u.hasChecked ? (
+        <Text style={[v.feedback, v.feedbackBad]}>Try again.</Text>
       ) : null}
     </View>
   );

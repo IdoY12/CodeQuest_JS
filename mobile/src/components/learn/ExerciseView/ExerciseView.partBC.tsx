@@ -16,30 +16,38 @@ export function EvFindBug({ exercise, lineList, accessToken, onLessonExerciseCom
   const u = useExerciseFindBug(exercise, accessToken, onLessonExerciseComplete);
   return (
     <View style={v.exerciseCard}>
-      {lineList.map((line, idx) => (
-        <Pressable
-          key={`${line}-${idx}`}
-          onPress={() => u.setSelected(String(idx + 1))}
-          style={[x.line, u.selected === String(idx + 1) && x.lineSelected]}
-        >
-          <Text style={x.lineText}>
-            {idx + 1}. {line}
-          </Text>
-        </Pressable>
-      ))}
+      {lineList.map((line, idx) => {
+        const lineNumber = String(idx + 1);
+        const lineExtraStyle = (() => {
+          if (u.lastCheckedAnswer === lineNumber && u.isCorrectNow) return v.correct;
+          if (u.selected === lineNumber) return x.lineSelected;
+          return null;
+        })();
+        return (
+          <Pressable
+            key={`${line}-${idx}`}
+            onPress={() => u.setSelected(lineNumber)}
+            style={lineExtraStyle ? [x.line, lineExtraStyle] : x.line}
+          >
+            <Text style={x.lineText}>
+              {idx + 1}. {line}
+            </Text>
+          </Pressable>
+        );
+      })}
       <Pressable style={[v.lessonButton, !u.canCheck && v.disabled]} disabled={!u.canCheck} onPress={() => void u.runCheck()}>
         <Text style={v.lessonButtonLabel}>Check Line</Text>
       </Pressable>
-      {u.showResults ? (
+      {u.showResults && u.isCorrectNow ? (
         <>
-          <Text style={[v.feedback, u.isCorrectNow ? v.feedbackGood : v.feedbackBad]}>
-            {u.isCorrectNow ? "Great catch." : "Bug revealed. Review explanation and continue."}
-          </Text>
-          {u.isCorrectNow && u.serverResult?.explanation ? <Text style={v.feedback}>{u.serverResult.explanation}</Text> : null}
+          <Text style={[v.feedback, v.feedbackGood]}>Great catch.</Text>
+          {u.serverResult?.explanation ? <Text style={v.feedback}>{u.serverResult.explanation}</Text> : null}
           <Pressable style={v.lessonButton} onPress={u.goNext}>
             <Text style={v.lessonButtonLabel}>Next</Text>
           </Pressable>
         </>
+      ) : u.showResults ? (
+        <Text style={[v.feedback, v.feedbackBad]}>Not the right line. Try again.</Text>
       ) : null}
     </View>
   );

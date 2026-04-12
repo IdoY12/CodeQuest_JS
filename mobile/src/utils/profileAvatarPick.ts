@@ -1,7 +1,6 @@
 import { Alert } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
-import type UserService from "@/services/UserService";
 
 const MAX_BYTES = 5 * 1024 * 1024;
 
@@ -32,10 +31,6 @@ export async function resizeToJpeg(uri: string): Promise<string> {
     { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG },
   );
   return manipulated.uri;
-}
-
-export async function blobFromUri(user: UserService, uri: string): Promise<Blob> {
-  return user.readBlobFromUri(uri);
 }
 
 export function alertIfBlobTooLarge(blob: Blob): boolean {

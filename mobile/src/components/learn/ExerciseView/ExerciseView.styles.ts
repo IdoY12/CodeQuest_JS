@@ -22,6 +22,8 @@ export const v = StyleSheet.create({
   optionLabel: { color: colors.textPrimary },
   correct: { borderColor: colors.success, backgroundColor: "rgba(78,205,196,0.2)" },
   wrong: { borderColor: colors.danger, backgroundColor: "rgba(255,107,107,0.2)" },
+  // Neutral "selected, not yet checked" indicator so the user can see their tap registered.
+  optionSelected: { borderColor: colors.accent },
   lessonButton: {
     backgroundColor: colors.accent,
     padding: spacing.md,
@@ -31,7 +33,7 @@ export const v = StyleSheet.create({
   },
   lessonButtonLabel: { color: "#111", fontWeight: "800" },
   disabled: { opacity: 0.5 },
-  feedback: { marginTop: spacing.md, fontWeight: "700" },
+  feedback: { marginTop: spacing.md, fontWeight: "700", color: colors.textPrimary },
   feedbackGood: { color: colors.success },
   feedbackBad: { color: colors.danger },
 });

@@ -7,7 +7,7 @@
  * Consumers: app.ts
  */
 
-import { Router } from "express";
+import { raw, Router } from "express";
 import {
   deleteAccount,
   getAvatarPresignedUrl,
@@ -23,6 +23,7 @@ import {
   postDailyGoalStatusMarkNotified,
   postOnboarding,
   postPracticeLog,
+  putAvatarDirectUpload,
 } from "../controllers/user/index.js";
 import { authMiddleware } from "../middlewares/auth.js";
 
@@ -32,6 +33,9 @@ userRouter.use(authMiddleware);
 userRouter.get("/profile", getProfile);
 userRouter.patch("/profile", patchProfile);
 userRouter.get("/avatar/presigned-url", getAvatarPresignedUrl);
+// raw() parses the binary image body as a Buffer for this route only.
+// The app-level JSON parser skips non-application/json content types.
+userRouter.put("/avatar/upload", raw({ type: "image/*", limit: "5mb" }), putAvatarDirectUpload);
 userRouter.patch("/avatar", patchAvatar);
 userRouter.get("/progress-summary", getProgressSummary);
 userRouter.post("/onboarding", postOnboarding);

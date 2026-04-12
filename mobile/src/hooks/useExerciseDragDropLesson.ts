@@ -22,7 +22,8 @@ export function useExerciseDragDropLesson(
     setCurriculumChecked(false);
     setCurriculumCorrect(null);
   }, [exercise.id]);
-  const canCheck = d.orderedSelection.length === d.lineList.length && !curriculumChecked;
+  // Allow re-checking after wrong attempts — user must hit Reset to rearrange first.
+  const canCheck = d.orderedSelection.length === d.lineList.length && curriculumCorrect !== true;
   const runCheck = async () => {
     const result =
       accessToken && learning

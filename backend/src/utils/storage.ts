@@ -2,6 +2,19 @@ import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { avatarS3Bucket, avatarS3Endpoint, avatarS3Region, s3Client } from "../aws/s3Client.js";
 
+/**
+ * In local dev the S3 endpoint resolves to localhost, which devices on the LAN cannot
+ * reach. Replace localhost:<port> with <clientHostname>:<port> so the device can both
+ * complete the PUT and later load the stored image URL.
+ * This is a no-op in production (avatarS3Endpoint is empty for real AWS S3).
+ */
+export function rewriteLocalS3UrlForClient(url: string, clientHostname: string): string {
+  if (!avatarS3Endpoint) return url;
+  const endpointUrl = new URL(avatarS3Endpoint);
+  if (endpointUrl.hostname !== "localhost") return url;
+  return url.replace(`localhost:${endpointUrl.port}`, `${clientHostname}:${endpointUrl.port}`);
+}
+
 export function getAvatarBucketName(): string {
   return avatarS3Bucket;
 }
@@ -17,8 +30,9 @@ export function extractAvatarKeyFromUrl(url: string): string | null {
   try {
     const parsed = new URL(url);
     if (avatarS3Endpoint) {
-      const endpointHost = new URL(avatarS3Endpoint).host;
-      if (parsed.host !== endpointHost) return null;
+      // In local/dev mode the presigned URL host may be a LAN IP rather than "localhost"
+      // (rewritten in getAvatarPresignedUrlHandler so devices can reach LocalStack).
+      // Validate by bucket path prefix only — do not enforce an exact hostname match.
       const path = parsed.pathname.replace(/^\/+/, "");
       const prefix = `${avatarS3Bucket}/`;
       if (!path.startsWith(prefix)) return null;
@@ -55,6 +69,18 @@ export async function deleteAvatarObject(key: string): Promise<void> {
     new DeleteObjectCommand({
       Bucket: avatarS3Bucket,
       Key: key,
+    }),
+  );
+}
+
+/** Upload raw bytes directly from the server to S3 — no presigned URL required. */
+export async function putAvatarObject(key: string, body: Buffer, contentType: string): Promise<void> {
+  await s3Client.send(
+    new PutObjectCommand({
+      Bucket: avatarS3Bucket,
+      Key: key,
+      Body: body,
+      ContentType: contentType,
     }),
   );
 }

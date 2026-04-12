@@ -6,8 +6,8 @@ export default interface Exercise {
   type: "CONCEPT_CARD" | "MULTIPLE_CHOICE" | "FIND_THE_BUG" | "DRAG_DROP" | "CODE_FILL" | "TAP_TOKEN";
   prompt: string;
   codeSnippet: string;
-  correctAnswer?: string;
-  explanation?: string;
+  correctAnswer: string;
+  explanation: string | null;
   xpReward: number;
-  options: Array<{ id: string; text: string; isCorrect?: boolean }>;
+  options: Array<{ id: string; text: string; isCorrect: boolean }>;
 }

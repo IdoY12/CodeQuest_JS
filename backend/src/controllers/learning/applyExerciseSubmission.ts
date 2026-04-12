@@ -32,12 +32,12 @@ export async function applyExerciseSubmission(input: SubmitInput): Promise<Exerc
       });
     }
   }
-  return isCorrect
-    ? {
-        isCorrect: true,
-        xpEarned: exercise.xpReward,
-        correctAnswer: exercise.correctAnswer,
-        explanation: exercise.explanation,
-      }
-    : { isCorrect: false, xpEarned: 0 };
+  // Always include correctAnswer and explanation so the client can reveal the correct
+  // option in green and show the explanation regardless of whether the attempt was right.
+  return {
+    isCorrect,
+    xpEarned: isCorrect ? exercise.xpReward : 0,
+    correctAnswer: exercise.correctAnswer,
+    explanation: exercise.explanation,
+  };
 }

@@ -8,8 +8,10 @@ type RetryableConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
 export default abstract class AuthAware {
   protected axiosInstance: AxiosInstance;
+  protected readonly jwt: string;
 
   constructor(jwt: string) {
+    this.jwt = jwt;
     this.axiosInstance = axios.create({
       baseURL: API_BASE_URL,
       headers: {

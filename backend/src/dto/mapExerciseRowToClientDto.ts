@@ -8,8 +8,10 @@ export function mapExerciseRowToClientDto(row: ExerciseWithOptions): ClientExerc
     type: row.type,
     prompt: row.prompt,
     codeSnippet: row.codeSnippet,
+    correctAnswer: row.correctAnswer,
+    explanation: row.explanation ?? null,
     orderIndex: row.orderIndex,
     xpReward: row.xpReward,
-    options: row.options.map((option) => ({ id: option.id, text: option.text })),
+    options: row.options.map((option) => ({ id: option.id, text: option.text, isCorrect: option.isCorrect })),
   };
 }

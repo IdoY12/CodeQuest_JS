@@ -52,16 +52,16 @@ export function EvDragDrop({ exercise, accessToken, onLessonExerciseComplete }: 
       <Pressable style={[v.lessonButton, !canCheck && v.disabled]} disabled={!canCheck} onPress={() => void runCheck()}>
         <Text style={v.lessonButtonLabel}>Check</Text>
       </Pressable>
-      {showResults ? (
+      {showResults && isCorrectNow ? (
         <>
-          <Text style={[v.feedback, isCorrectNow ? v.feedbackGood : v.feedbackBad]}>
-            {isCorrectNow ? "Perfect order." : "Order is incorrect. Reset and try again, or continue."}
-          </Text>
-          {isCorrectNow && serverResult?.explanation ? <Text style={v.feedback}>{serverResult.explanation}</Text> : null}
+          <Text style={[v.feedback, v.feedbackGood]}>Perfect order.</Text>
+          {serverResult?.explanation ? <Text style={v.feedback}>{serverResult.explanation}</Text> : null}
           <Pressable style={v.lessonButton} onPress={goNext}>
             <Text style={v.lessonButtonLabel}>Next</Text>
           </Pressable>
         </>
+      ) : showResults ? (
+        <Text style={[v.feedback, v.feedbackBad]}>Order is incorrect. Reset and try again.</Text>
       ) : null}
     </View>
   );

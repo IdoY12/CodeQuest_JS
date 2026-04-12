@@ -5,7 +5,6 @@ import { logError } from "@/utils/logger";
 import { setUserIdentity } from "@/redux/profile-slice";
 import {
   alertIfBlobTooLarge,
-  blobFromUri,
   ensurePickerPermission,
   pickImageUri,
   resizeToJpeg,
@@ -32,13 +31,18 @@ export async function runAvatarUpload(
   setProgress(20);
   const jpegUri = await resizeToJpeg(rawUri);
   setProgress(38);
-  const blob = await blobFromUri(user, jpegUri);
+  // Read the local file URI into a Blob using fetch (React Native native fetch handles
+  // file:// URIs correctly, unlike axios/XHR).
+  const response = await fetch(jpegUri);
+  if (!response.ok) throw new Error(`Failed to read image (${response.status})`);
+  const blob = await response.blob();
   if (alertIfBlobTooLarge(blob)) return;
-  const signed = await user.presignAvatarUpload("image/jpeg", blob.size);
-  setProgress(62);
-  await user.putPresignedAvatarBlob(signed.uploadUrl, blob);
+  setProgress(55);
+  // Upload through the backend (server → S3), avoiding presigned-URL host/signature
+  // mismatches that occur when a physical device accesses a local dev S3 endpoint.
+  const { publicUrl } = await user.uploadAvatarBlob(blob);
   setProgress(85);
-  await persistAvatarUrl(user, signed.publicUrl, dispatch);
+  await persistAvatarUrl(user, publicUrl, dispatch);
   setProgress(100);
   setSaveMessage("Profile picture updated.");
 }

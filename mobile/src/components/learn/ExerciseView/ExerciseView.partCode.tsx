@@ -37,16 +37,16 @@ export function EvCodeFill({ exercise, accessToken, onLessonExerciseComplete }: 
       <Pressable style={[v.lessonButton, !u.canCheck && v.disabled]} disabled={!u.canCheck} onPress={() => void u.runCheck()}>
         <Text style={v.lessonButtonLabel}>Submit</Text>
       </Pressable>
-      {u.showResults ? (
+      {u.showResults && u.isCorrectNow ? (
         <>
-          <Text style={[v.feedback, u.isCorrectNow ? v.feedbackGood : v.feedbackBad]}>
-            {u.isCorrectNow ? "Nice work." : "Try another token combination next time."}
-          </Text>
-          {u.isCorrectNow && u.serverResult?.explanation ? <Text style={v.feedback}>{u.serverResult.explanation}</Text> : null}
+          <Text style={[v.feedback, v.feedbackGood]}>Nice work.</Text>
+          {u.serverResult?.explanation ? <Text style={v.feedback}>{u.serverResult.explanation}</Text> : null}
           <Pressable style={v.lessonButton} onPress={u.goNext}>
             <Text style={v.lessonButtonLabel}>Next</Text>
           </Pressable>
         </>
+      ) : u.showResults ? (
+        <Text style={[v.feedback, v.feedbackBad]}>Try again.</Text>
       ) : null}
     </View>
   );

@@ -1,7 +1,6 @@
-import axios from "axios";
 import AuthAware from "@/services/AuthAware";
+import { API_BASE_URL } from "@/config/network";
 import type AvatarPatchResponse from "@/models/AvatarPatchResponse";
-import type AvatarPresignedUrl from "@/models/AvatarPresignedUrl";
 import type ChangePasswordResponse from "@/models/ChangePasswordResponse";
 import type DailyGoalStatus from "@/models/DailyGoalStatus";
 import type OnboardingResponse from "@/models/OnboardingResponse";
@@ -74,11 +73,22 @@ export default class UserService extends AuthAware {
     return data;
   }
 
-  async presignAvatarUpload(contentType: string, fileSize: number): Promise<AvatarPresignedUrl> {
-    const { data } = await this.axiosInstance.get<AvatarPresignedUrl>(
-      `/user/avatar/presigned-url?contentType=${encodeURIComponent(contentType)}&fileSize=${fileSize}`,
-    );
-    return data;
+  /**
+   * Upload a JPEG image blob to the backend, which stores it in S3 and returns the
+   * public URL. Using fetch (not axios) so the binary body is sent correctly on
+   * React Native / Hermes. The Authorization header is added manually from this.jwt.
+   */
+  async uploadAvatarBlob(blob: Blob): Promise<{ publicUrl: string }> {
+    const response = await fetch(`${API_BASE_URL}/user/avatar/upload`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "image/jpeg",
+        Authorization: `Bearer ${this.jwt}`,
+      },
+      body: blob,
+    });
+    if (!response.ok) throw new Error(`Avatar upload failed (${response.status})`);
+    return response.json() as Promise<{ publicUrl: string }>;
   }
 
   async postOnboarding(
@@ -100,17 +110,6 @@ export default class UserService extends AuthAware {
       practicedSeconds,
     });
     return data;
-  }
-
-  async readBlobFromUri(uri: string): Promise<Blob> {
-    const { data } = await axios.get<Blob>(uri, { responseType: "blob" });
-    return data;
-  }
-
-  async putPresignedAvatarBlob(uploadUrl: string, blob: Blob): Promise<void> {
-    await axios.put(uploadUrl, blob, {
-      headers: { "Content-Type": "image/jpeg" },
-    });
   }
 
   async getDailyGoalStatus(dateKey: string): Promise<DailyGoalStatus> {

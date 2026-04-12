@@ -19,7 +19,7 @@ export function LessonScreen({ navigation, route }: LessonScreenProps) {
   const accessToken = useAppSelector((s) => s.session.accessToken);
   const load = useLessonLoad(experienceLevel, accessToken, blockIndex);
   const exercise = load.exercises[load.exerciseIndex];
-  const onLessonExerciseComplete = useLessonExerciseCompleteHandler(navigation, experienceLevel, lessonTitle, load);
+  const onLessonExerciseComplete = useLessonExerciseCompleteHandler(navigation, experienceLevel, lessonTitle, blockIndex, load);
   const progress = load.exercises.length > 0 ? ((load.exerciseIndex + 1) / load.exercises.length) * 100 : 0;
   if (load.loading) {
     return (

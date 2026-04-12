@@ -14,7 +14,7 @@ export { getPreferences } from "./getPreferencesHandler.js";
 export { getProfile } from "./getProfileHandler.js";
 export { getProgressSummary } from "./getProgressSummaryHandler.js";
 export { getStreakHistory } from "./getStreakHistoryHandler.js";
-export { patchAvatar } from "./patchAvatarHandler.js";
+export { patchAvatar, putAvatarDirectUpload } from "./patchAvatarHandler.js";
 export { patchPreferences } from "./patchPreferencesHandler.js";
 export { patchProfile } from "./patchProfileHandler.js";
 export { postChangePassword } from "./postChangePasswordHandler.js";

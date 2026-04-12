@@ -1,18 +1,46 @@
 /**
- * PATCH /api/user/avatar — persists avatar URL after client upload to our bucket.
+ * Avatar handlers:
+ *   PUT  /api/user/avatar/upload — accepts raw image bytes, uploads to S3 server-side,
+ *                                  returns { publicUrl }. No presigned URL involved so
+ *                                  LAN devices are not affected by localhost/signature issues.
+ *   PATCH /api/user/avatar       — persists avatar URL after upload to our bucket.
  *
- * Responsibility: validate URL belongs to bucket and remove prior object if replaced.
+ * Responsibility: server-side S3 upload and avatar URL persistence.
  * Layer: backend user HTTP handlers
- * Depends on: zod, Prisma, storage helpers, logger
+ * Depends on: crypto, zod, Prisma, storage helpers, logger
  * Consumers: user router
  */
 
+import { randomUUID } from "crypto";
 import type { Response } from "express";
 import { z } from "zod";
 import { prisma } from "@project/db";
 import type { AuthenticatedRequest } from "../../@types/auth.js";
-import { deleteAvatarObject, extractAvatarKeyFromUrl } from "../../utils/storage.js";
-import { logWarn } from "../../utils/logger.js";
+import {
+  deleteAvatarObject,
+  extractAvatarKeyFromUrl,
+  getAvatarPublicUrl,
+  putAvatarObject,
+  rewriteLocalS3UrlForClient,
+} from "../../utils/storage.js";
+import { logError, logInfo, logWarn } from "../../utils/logger.js";
+
+export async function putAvatarDirectUpload(req: AuthenticatedRequest, res: Response) {
+  const body = req.body as Buffer;
+  if (!Buffer.isBuffer(body) || body.length === 0) {
+    return res.status(400).json({ error: "Empty or invalid image body" });
+  }
+  const key = `avatars/${req.user!.userId}/${randomUUID()}.jpg`;
+  try {
+    await putAvatarObject(key, body, "image/jpeg");
+    const publicUrl = rewriteLocalS3UrlForClient(getAvatarPublicUrl(key), req.hostname);
+    logInfo("[USER]", "avatar:upload-ok", { userId: req.user?.userId, bytes: body.length, publicUrl });
+    return res.json({ publicUrl });
+  } catch (error) {
+    logError("[USER]", error, { phase: "avatar-direct-upload", userId: req.user?.userId });
+    return res.status(500).json({ error: "Upload failed" });
+  }
+}
 
 export async function patchAvatar(req: AuthenticatedRequest, res: Response) {
   const parsed = z.object({ avatarUrl: z.string().url() }).safeParse(req.body);

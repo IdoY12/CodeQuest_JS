@@ -8,6 +8,8 @@ export type ClientExerciseDto = {
   type: ExerciseType;
   prompt: string;
   codeSnippet: string;
+  correctAnswer: string;
+  explanation: string | null;
   orderIndex: number;
   xpReward: number;
   options: ClientExerciseOptionDto[];

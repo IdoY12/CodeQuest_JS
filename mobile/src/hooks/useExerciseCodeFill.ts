@@ -22,7 +22,8 @@ export function useExerciseCodeFill(
     setCurriculumChecked(false);
     setCurriculumCorrect(null);
   }, [exercise.id]);
-  const canCheck = input.trim().length > 0 && !curriculumChecked;
+  // Allow re-submitting until the correct answer is entered.
+  const canCheck = input.trim().length > 0 && curriculumCorrect !== true;
   const runCheck = async () => {
     const answer = input.trim();
     const result =

@@ -13,12 +13,12 @@ function normalise(s: string): string {
 }
 
 export function evaluateExerciseLocally(exercise: Exercise, answer: string): ExerciseSubmitResult {
-  const isCorrect = normalise(answer) === normalise(exercise.correctAnswer ?? "");
+  const isCorrect = normalise(answer) === normalise(exercise.correctAnswer);
   return {
     isCorrect,
     xpEarned: isCorrect ? exercise.xpReward : 0,
     correctAnswer: exercise.correctAnswer,
-    explanation: exercise.explanation,
+    explanation: exercise.explanation ?? undefined,
   };
 }
 

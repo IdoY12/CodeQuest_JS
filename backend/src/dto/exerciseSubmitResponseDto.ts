@@ -1,3 +1,6 @@
-export type ExerciseSubmitResponseDto =
-  | { isCorrect: true; xpEarned: number; correctAnswer: string; explanation: string }
-  | { isCorrect: false; xpEarned: 0 };
+export type ExerciseSubmitResponseDto = {
+  isCorrect: boolean;
+  xpEarned: number;
+  correctAnswer: string;
+  explanation: string;
+};

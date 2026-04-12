@@ -15,10 +15,6 @@ export function rewriteLocalS3UrlForClient(url: string, clientHostname: string):
   return url.replace(`localhost:${endpointUrl.port}`, `${clientHostname}:${endpointUrl.port}`);
 }
 
-export function getAvatarBucketName(): string {
-  return avatarS3Bucket;
-}
-
 export function getAvatarPublicUrl(key: string): string {
   if (avatarS3Endpoint) {
     return `${avatarS3Endpoint}/${avatarS3Bucket}/${key}`;

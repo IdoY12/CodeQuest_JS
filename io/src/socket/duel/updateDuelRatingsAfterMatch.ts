@@ -3,7 +3,7 @@
  *
  * Responsibility: Prisma upserts for duelRating rows used by matchmaking.
  * Layer: io duel session
- * Depends on: @prisma/client
+ * Depends on: @project/db
  * Consumers: endSession.ts
  */
 

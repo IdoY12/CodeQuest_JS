@@ -7,4 +7,4 @@
  * Consumers: io socket handlers and bootstrap
  */
 
-export { logError, logInfo, logWarn } from "@project/server-kit/logger";
+export { logError, logInfo } from "@project/server-kit/logger";

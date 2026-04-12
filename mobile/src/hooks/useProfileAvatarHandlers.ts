@@ -32,5 +32,5 @@ export function useProfileAvatarHandlers(r: ProfileReduxState, d: ProfileDraftSt
       { text: "Choose from Library", onPress: () => void pickImageAndUpload("library") },
     ]);
   }, [pickImageAndUpload]);
-  return { pickImageAndUpload, onAvatarPress };
+  return { onAvatarPress };
 }

@@ -6,8 +6,6 @@ export function requestLogger(req: Request, res: Response, next: NextFunction) {
   const fullUrl = `${req.protocol}://${req.get("host")}${req.originalUrl}`;
   const sanitizedBody = sanitizeBody(req.body);
 
-  console.log(`${req.method} ${req.url} - Body:`, sanitizedBody);
-
   logInfo("[REQ]", "incoming", {
     method: req.method,
     url: fullUrl,

@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { AppDispatch } from "@/redux/store";
 import { dispatchSignInSuccess } from "@/utils/dispatchSignInSuccess";
 import { logAuth, logError, logNav } from "@/utils/logger";
-import { API_BASE_URL } from "@/config/network";
 import authService from "@/services/AuthService";
 
 export function useAuthScreen(dispatch: AppDispatch) {
@@ -24,18 +23,15 @@ export function useAuthScreen(dispatch: AppDispatch) {
   const onSubmit = useCallback(async () => {
     if (!canSubmit || loading) return;
     logAuth("submit:start", { mode: isLogin ? "login" : "register", email });
-    if (__DEV__) console.log("[AUTH] submit:start", { mode: isLogin ? "login" : "register", email, apiBaseUrl: API_BASE_URL });
     setLoading(true);
     setError(null);
     try {
       const response = isLogin
         ? await authService.login(email, password)
         : await authService.register(email, username, password);
-      if (__DEV__) console.log("[AUTH] submit:response", { mode: isLogin ? "login" : "register", userId: response.user.id });
       dispatchSignInSuccess(dispatch, response.user, response.accessToken, response.refreshToken);
       logAuth("submit:success", { mode: isLogin ? "login" : "register", userId: response.user.id, onboardingCompleted: response.user.onboardingCompleted });
     } catch (submitError) {
-      if (__DEV__) console.log("[AUTH] submit:error", submitError);
       logError("[AUTH]", submitError, { mode: isLogin ? "login" : "register" });
       setError(submitError instanceof Error ? submitError.message : "Unable to continue");
     } finally {

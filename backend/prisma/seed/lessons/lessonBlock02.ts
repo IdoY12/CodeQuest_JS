@@ -1,10 +1,10 @@
 /**
- * Seeds one curriculum lesson block (exercises + metadata) into Prisma.
+ * Seeds curriculum lesson block 02 — Junior track, Operators & Loops.
  *
  * Responsibility: isolated lesson createMany for maintainability under file line limits.
  * Layer: backend prisma seed
- * Depends on: ../lib/createLessonWithExercises.js, ../lib/requireChapterId.js
- * Consumers: ../runMain.js
+ * Depends on: ../lib/createLessonWithExercises.js
+ * Consumers: runAllLessonBlocks.ts
  */
 
 import type { PrismaClient } from "@prisma/client";
@@ -12,109 +12,104 @@ import { createLessonWithExercises } from "../lib/createLessonWithExercises.js";
 import type { GlobalExerciseOrder } from "../lib/createLessonWithExercises.js";
 
 export async function seedLessonBlock_02(prisma: PrismaClient, order: GlobalExerciseOrder): Promise<void> {
-    await createLessonWithExercises(prisma, {
-      chapterTitle: "Junior track",
-      title: "Operators, conditionals, and loops",
-      description: "Comparisons, if/else, for and while",
-      estimatedMinutes: 12,
-      orderIndex: 2,
-      difficulty: "JUNIOR",
-      exercises: [
-        {
-          type: "MULTIPLE_CHOICE",
-          prompt: "What is logged?",
-          codeSnippet: "console.log(6 / 2 + 1);",
-          correctAnswer: "4",
-          explanation: "6 / 2 is 3, then +1 gives 4.",
-          xpReward: 20,
-          options: ["3", "4", "7", "12"],
-        },
-        {
-          type: "MULTIPLE_CHOICE",
-          prompt: "What does strict equality return?",
-          codeSnippet: "console.log(5 === '5');",
-          correctAnswer: "false",
-          explanation: "=== checks both value and type.",
-          xpReward: 20,
-          options: ["true", "false", "5", "'5'"],
-        },
-        {
-          type: "MULTIPLE_CHOICE",
-          prompt: "What is printed?",
-          codeSnippet: "const isMember = true;\nif (isMember) { console.log('Access'); } else { console.log('Denied'); }",
-          correctAnswer: "Access",
-          explanation: "The if branch runs when condition is true.",
-          xpReward: 20,
-          options: ["Denied", "Access", "Both", "Nothing"],
-        },
-        {
-          type: "MULTIPLE_CHOICE",
-          prompt: "What does this output?",
-          codeSnippet: "const age = 15;\nif (age >= 18) { console.log('Adult'); } else { console.log('Minor'); }",
-          correctAnswer: "Minor",
-          explanation: "15 is not greater than or equal to 18.",
-          xpReward: 20,
-          options: ["Adult", "Minor", "undefined", "false"],
-        },
-        {
-          type: "MULTIPLE_CHOICE",
-          prompt: "What value is assigned?",
-          codeSnippet: "const online = false;\nconst status = online ? 'On' : 'Off';\nconsole.log(status);",
-          correctAnswer: "Off",
-          explanation: "Ternary chooses the second value when condition is false.",
-          xpReward: 20,
-          options: ["On", "Off", "false", "status"],
-        },
-        {
-          type: "MULTIPLE_CHOICE",
-          prompt: "How many times does this loop run?",
-          codeSnippet: "for (let i = 1; i <= 5; i++) {\n  console.log(i);\n}",
-          correctAnswer: "5",
-          explanation: "It runs for i = 1,2,3,4,5.",
-          xpReward: 20,
-          options: ["4", "5", "6", "1"],
-        },
-        {
-          type: "MULTIPLE_CHOICE",
-          prompt: "What is printed?",
-          codeSnippet: "let n = 1;\nwhile (n < 4) {\n  console.log(n);\n  n++;\n}",
-          correctAnswer: "1, 2, 3",
-          explanation: "The loop prints each value before incrementing until n becomes 4.",
-          xpReward: 20,
-          options: ["1, 2, 3", "1, 2, 3, 4", "2, 3, 4", "1"],
-        },
-        {
-          type: "MULTIPLE_CHOICE",
-          prompt: "What does `continue` do inside a `for` loop?",
-          codeSnippet: "for (let i = 0; i < 3; i++) {\n  if (i === 1) continue;\n  console.log(i);\n}",
-          correctAnswer: "Skips the rest of the current iteration",
-          explanation: "`continue` jumps to the next iteration without finishing the loop body.",
-          xpReward: 20,
-          options: [
-            "Exits the loop entirely",
-            "Skips the rest of the current iteration",
-            "Restarts from i = 0",
-            "Throws an error",
-          ],
-        },
-        {
-          type: "CODE_FILL",
-          prompt: "Fill the blank with the keyword that exits a loop early.",
-          codeSnippet: "for (let i = 0; i < 10; i++) {\n  if (i === 4) ___;\n}",
-          correctAnswer: "break",
-          explanation: "`break` leaves the nearest enclosing loop.",
-          xpReward: 20,
-          options: ["break", "continue", "return", "stop"],
-        },
-        {
-          type: "MULTIPLE_CHOICE",
-          prompt: "What is logged?",
-          codeSnippet: "let sum = 0;\nfor (const n of [2, 3]) {\n  sum += n;\n}\nconsole.log(sum);",
-          correctAnswer: "5",
-          explanation: "`for...of` visits each value; 2 + 3 equals 5.",
-          xpReward: 20,
-          options: ["0", "5", "23", "6"],
-        },
-      ],
-    }, order);
+  await createLessonWithExercises(prisma, {
+    chapterTitle: "Junior track",
+    title: "Operators, conditionals, and loops",
+    description: "Comparisons, if/else, for and while loops, break and continue",
+    estimatedMinutes: 12,
+    orderIndex: 2,
+    difficulty: "JUNIOR",
+    exercises: [
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What does `===` check that `==` does not?",
+        codeSnippet: "console.log(1 === '1');",
+        correctAnswer: "Type and value",
+        explanation: "=== (strict equality) checks both value and type without coercion.",
+        xpReward: 20,
+        options: ["Value only", "Type and value", "Reference equality", "Object identity"],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What does `console.log(1 == '1')` output?",
+        codeSnippet: "console.log(1 == '1');",
+        correctAnswer: "true",
+        explanation: "== performs type coercion, converting the string '1' to the number 1 before comparing.",
+        xpReward: 20,
+        options: ["true", "false", "TypeError", "undefined"],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What does `!false` evaluate to?",
+        codeSnippet: "console.log(!false);",
+        correctAnswer: "true",
+        explanation: "The ! operator inverts a boolean; !false is true.",
+        xpReward: 20,
+        options: ["false", "true", "null", "0"],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What does this ternary evaluate to?",
+        codeSnippet: "const result = 10 > 3 ? 'yes' : 'no';",
+        correctAnswer: '"yes"',
+        explanation: "10 > 3 is true, so the ternary returns the first branch.",
+        xpReward: 20,
+        options: ['"yes"', '"no"', "true", "undefined"],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "How many times does this loop run?",
+        codeSnippet: "for (let i = 0; i < 4; i++) { }",
+        correctAnswer: "4",
+        explanation: "i starts at 0 and runs while i < 4, executing for i = 0, 1, 2, 3 — four times.",
+        xpReward: 20,
+        options: ["3", "4", "5", "infinite"],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What does `break` do inside a loop?",
+        codeSnippet: "for (let i = 0; i < 10; i++) {\n  if (i === 3) break;\n}",
+        correctAnswer: "Exits the loop immediately",
+        explanation: "break terminates the enclosing loop immediately.",
+        xpReward: 20,
+        options: ["Skips to the next iteration", "Exits the loop immediately", "Restarts the loop", "Pauses execution"],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What does `continue` do inside a loop?",
+        codeSnippet: "for (let i = 0; i < 5; i++) {\n  if (i === 2) continue;\n  console.log(i);\n}",
+        correctAnswer: "Skips to the next iteration",
+        explanation: "continue skips the rest of the current iteration body and moves to the next one.",
+        xpReward: 20,
+        options: ["Exits the loop", "Skips to the next iteration", "Restarts from the beginning", "Throws an error"],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What does `&&` return when the left operand is falsy?",
+        codeSnippet: "console.log(0 && 'hello');",
+        correctAnswer: "The left operand",
+        explanation: "&& short-circuits and returns the first falsy value it encounters.",
+        xpReward: 20,
+        options: ["true", "false", "The left operand", "The right operand"],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What is the final value of x?",
+        codeSnippet: "let x = 0;\nwhile (x < 5) { x++; }\nconsole.log(x);",
+        correctAnswer: "5",
+        explanation: "The loop increments x until x equals 5, at which point x < 5 becomes false.",
+        xpReward: 20,
+        options: ["4", "5", "6", "0"],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What does `||` return when the left operand is truthy?",
+        codeSnippet: "console.log('hello' || 'world');",
+        correctAnswer: "The left operand",
+        explanation: "|| short-circuits and returns the first truthy value it encounters.",
+        xpReward: 20,
+        options: ["The left operand", "The right operand", "true", "false"],
+      },
+    ],
+  }, order);
 }

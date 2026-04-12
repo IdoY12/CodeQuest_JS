@@ -4,6 +4,7 @@ import type ExerciseSubmitResult from "@/models/ExerciseSubmitResult";
 import type { LessonExerciseCompletionContext } from "@/types/lessonExerciseCompletion.types";
 import { useAuthenticatedService } from "@/hooks/useAuthenticatedService";
 import LearningService from "@/services/LearningService";
+import { evaluateExerciseLocally } from "@/utils/lessonExerciseState";
 
 export function useExerciseSingleChoice(
   exercise: Exercise,
@@ -25,12 +26,14 @@ export function useExerciseSingleChoice(
   const canCheck = Boolean(selected && !hasChecked);
   const runCheck = useCallback(async () => {
     if (!selected) return;
-    if (!accessToken || !learning) return;
-    const result = await learning.submitExercise(exercise.id, selected);
+    const result =
+      accessToken && learning
+        ? await learning.submitExercise(exercise.id, selected)
+        : evaluateExerciseLocally(exercise, selected);
     setServerResult(result);
     setIsCorrect(result.isCorrect);
     setHasChecked(true);
-  }, [accessToken, exercise.id, learning, selected]);
+  }, [accessToken, exercise, learning, selected]);
   const goNext = useCallback(() => {
     if (!selected || !serverResult) return;
     onLessonExerciseComplete(selected, { source: "curriculum", submitResult: serverResult });

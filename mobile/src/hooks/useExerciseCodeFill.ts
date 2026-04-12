@@ -4,6 +4,7 @@ import type ExerciseSubmitResult from "@/models/ExerciseSubmitResult";
 import type { LessonExerciseCompletionContext } from "@/types/lessonExerciseCompletion.types";
 import { useAuthenticatedService } from "@/hooks/useAuthenticatedService";
 import LearningService from "@/services/LearningService";
+import { evaluateExerciseLocally } from "@/utils/lessonExerciseState";
 
 export function useExerciseCodeFill(
   exercise: Exercise,
@@ -23,8 +24,11 @@ export function useExerciseCodeFill(
   }, [exercise.id]);
   const canCheck = input.trim().length > 0 && !curriculumChecked;
   const runCheck = async () => {
-    if (!accessToken || !learning) return;
-    const result = await learning.submitExercise(exercise.id, input.trim());
+    const answer = input.trim();
+    const result =
+      accessToken && learning
+        ? await learning.submitExercise(exercise.id, answer)
+        : evaluateExerciseLocally(exercise, answer);
     setServerResult(result);
     setCurriculumCorrect(result.isCorrect);
     setCurriculumChecked(true);

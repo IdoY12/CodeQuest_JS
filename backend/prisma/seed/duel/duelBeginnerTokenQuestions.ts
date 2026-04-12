@@ -9,29 +9,38 @@
 
 import type { Prisma } from "@prisma/client";
 
+type QuestionTemplate = Pick<Prisma.DuelQuestionCreateManyInput, "codeSnippet" | "correctAnswer" | "options">;
+
+const TEMPLATES: QuestionTemplate[] = [
+  {
+    codeSnippet: "const nums = [1,2,3];\nconst result = nums.___(n => n * 2);",
+    correctAnswer: "map",
+    options: ["map", "filter", "reduce", "forEach"],
+  },
+  {
+    codeSnippet: "const name = 'codequest';\nconsole.log(name.___());",
+    correctAnswer: "toUpperCase",
+    options: ["trim", "toUpperCase", "slice", "repeat"],
+  },
+  {
+    codeSnippet: "const flag = true;\nif (flag ___ false) {\n  console.log('ok');\n}",
+    correctAnswer: "&&",
+    options: ["&&", "=>", "||", "??"],
+  },
+  {
+    codeSnippet: "const x = 4;\nconsole.log(___ x);",
+    correctAnswer: "typeof",
+    options: ["typeof", "return", "delete", "await"],
+  },
+];
+
 export function buildBeginnerTokenQuestions(): Prisma.DuelQuestionCreateManyInput[] {
-  return Array.from({ length: 8 }).map((_, index) => ({
-    questionText: `Beginner Token ${index + 1}: Pick the correct token.`,
-    codeSnippet:
-      index % 4 === 0
-        ? "const nums = [1,2,3];\nconst result = nums.___(n => n * 2);"
-        : index % 4 === 1
-          ? "const name = 'codequest';\nconsole.log(name.___());"
-          : index % 4 === 2
-            ? "const flag = true;\nif (flag ___ false) {\n  console.log('ok');\n}"
-            : "const x = 4;\nconsole.log(___ x);",
-    correctAnswer: index % 4 === 0 ? "map" : index % 4 === 1 ? "toUpperCase" : index % 4 === 2 ? "&&" : "typeof",
-    options:
-      index % 4 === 0
-        ? ["map", "filter", "reduce", "forEach"]
-        : index % 4 === 1
-          ? ["trim", "toUpperCase", "slice", "repeat"]
-          : index % 4 === 2
-            ? ["&&", "=>", "||", "??"]
-            : ["typeof", "return", "delete", "await"],
+  return Array.from({ length: 8 }).map((_, i) => ({
+    questionText: `Beginner Token ${i + 1}: Pick the correct token.`,
+    ...TEMPLATES[i % TEMPLATES.length],
     explanation: "Choose the token that makes the code valid and correct.",
     type: "TAP_TOKEN",
     difficulty: "JUNIOR",
     category: "TYPES",
-  }))
+  }));
 }

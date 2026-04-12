@@ -1,10 +1,10 @@
 /**
- * Seeds one curriculum lesson block (exercises + metadata) into Prisma.
+ * Seeds curriculum lesson block 04 — Mid track, Objects & Classes.
  *
  * Responsibility: isolated lesson createMany for maintainability under file line limits.
  * Layer: backend prisma seed
- * Depends on: ../lib/createLessonWithExercises.js, ../lib/requireChapterId.js
- * Consumers: ../runMain.js
+ * Depends on: ../lib/createLessonWithExercises.js
+ * Consumers: runAllLessonBlocks.ts
  */
 
 import type { PrismaClient } from "@prisma/client";
@@ -12,120 +12,134 @@ import { createLessonWithExercises } from "../lib/createLessonWithExercises.js";
 import type { GlobalExerciseOrder } from "../lib/createLessonWithExercises.js";
 
 export async function seedLessonBlock_04(prisma: PrismaClient, order: GlobalExerciseOrder): Promise<void> {
-    await createLessonWithExercises(prisma, {
-      chapterTitle: "Mid track",
-      title: "Objects, classes, and `this`",
-      description: "Reason about constructors, methods, and object behavior",
-      estimatedMinutes: 14,
-      orderIndex: 1,
-      difficulty: "MID",
-      exercises: [
-        {
-          type: "MULTIPLE_CHOICE",
-          prompt: "What does this log?",
-          codeSnippet: "class Counter { n = 0; bump() { this.n++; } }\nconst c = new Counter();\nc.bump();\nconsole.log(c.n);",
-          correctAnswer: "1",
-          explanation: "bump runs with `this` bound to the instance, so n becomes 1.",
-          xpReward: 25,
-          options: ["0", "1", "undefined", "NaN"],
-        },
-        {
-          type: "MULTIPLE_CHOICE",
-          prompt: "What is true about this factory function?",
-          codeSnippet: "function makeUser(name) {\n  return { name, greet() { return `Hi, ${this.name}`; } };\n}",
-          correctAnswer: "greet uses `this` to read the enclosing object",
-          explanation: "Methods on object literals get dynamic `this` from the call site.",
-          xpReward: 25,
-          options: [
-            "greet always sees a global `this`",
-            "greet uses `this` to read the enclosing object",
-            "`this` is lexically bound like an arrow function",
-            "name is private to greet",
-          ],
-        },
-        {
-          type: "TAP_TOKEN",
-          prompt: "Tap the expression that creates an instance.",
-          codeSnippet: "class Box {}\nconst b = new Box();",
-          correctAnswer: "new Box()",
-          explanation: "`new` calls the constructor and returns an instance.",
-          xpReward: 25,
-          options: ["class Box", "new Box()", "const b", "Box {}"],
-        },
-        {
-          type: "MULTIPLE_CHOICE",
-          prompt: "What does this output?",
-          codeSnippet: "const o = { v: 1, m: () => this?.v };\nconsole.log(o.m());",
-          correctAnswer: "undefined",
-          explanation: "Arrow methods do not receive their own `this` from the object; `this` follows lexical rules.",
-          xpReward: 25,
-          options: ["1", "undefined", "o", "NaN"],
-        },
-        {
-          type: "CODE_FILL",
-          prompt: "Fill the blank so `Dog` inherits behavior from `Animal`.",
-          codeSnippet: "class Animal { speak() { return '...'; } }\nclass Dog ___ Animal {\n  speak() { return 'woof'; }\n}",
-          correctAnswer: "extends",
-          explanation: "`extends` sets up prototype inheritance between classes.",
-          xpReward: 25,
-          options: ["extends", "implements", "inherits", "from"],
-        },
-        {
-          type: "FIND_THE_BUG",
-          prompt: "Tap the line missing `new` for the constructor call.",
-          codeSnippet: "class Box {\n  constructor(v) { this.v = v; }\n}\nconst b = Box(1);",
-          correctAnswer: "4",
-          explanation: "Call `new Box(1)` so `this` is set inside the constructor.",
-          xpReward: 25,
-          options: ["1", "2", "3", "4"],
-        },
-        {
-          type: "MULTIPLE_CHOICE",
-          prompt: "What does `Object.create(proto)` do?",
-          codeSnippet: "const base = { a: 1 };\nconst child = Object.create(base);\nconsole.log(child.a);",
-          correctAnswer: "Makes an object whose prototype is `base`",
-          explanation: "Object.create links the new object's [[Prototype]] to the argument.",
-          xpReward: 25,
-          options: [
-            "Copies enumerable keys into a new object",
-            "Makes an object whose prototype is `base`",
-            "Freezes `base`",
-            "Returns `base` unchanged",
-          ],
-        },
-        {
-          type: "MULTIPLE_CHOICE",
-          prompt: "What is logged?",
-          codeSnippet: "function show() { return this.x; }\nconst obj = { x: 7, show };\nconsole.log(obj.show());",
-          correctAnswer: "7",
-          explanation: "When `show` is called as `obj.show()`, `this` is `obj`.",
-          xpReward: 25,
-          options: ["undefined", "7", "show", "NaN"],
-        },
-        {
-          type: "TAP_TOKEN",
-          prompt: "Tap the keyword that invokes a parent method from a subclass.",
-          codeSnippet: "class B extends A {\n  m() { /* keyword */ super.m(); }\n}",
-          correctAnswer: "super",
-          explanation: "`super` reaches the parent class prototype for methods.",
-          xpReward: 25,
-          options: ["super", "this", "extends", "base"],
-        },
-        {
-          type: "MULTIPLE_CHOICE",
-          prompt: "What does `static` on a class method mean?",
-          codeSnippet: "class Util { static id() { return 1; } }\nconsole.log(Util.id());",
-          correctAnswer: "It lives on the constructor, not each instance",
-          explanation: "Static members are properties of the class function itself.",
-          xpReward: 25,
-          options: [
-            "It runs only once ever",
-            "It lives on the constructor, not each instance",
-            "It cannot return values",
-            "It is private to instances",
-          ],
-        },
-      ],
-    },
-    order);
+  await createLessonWithExercises(prisma, {
+    chapterTitle: "Mid track",
+    title: "Objects, classes, and `this`",
+    description: "Constructors, methods, this, inheritance with extends, and super",
+    estimatedMinutes: 14,
+    orderIndex: 1,
+    difficulty: "MID",
+    exercises: [
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "How do you access the `name` property of `obj` using bracket notation?",
+        codeSnippet: "const obj = { name: 'Alice' };\n// access with bracket notation",
+        correctAnswer: 'obj["name"]',
+        explanation: "Bracket notation accepts a string key inside square brackets.",
+        xpReward: 25,
+        options: ['obj["name"]', "obj.(name)", "obj->name", "obj::name"],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What does `this` refer to inside a regular class method?",
+        codeSnippet: "class Dog {\n  bark() { console.log(this.name); }\n}",
+        correctAnswer: "The instance the method is called on",
+        explanation: "Inside a class method, this refers to the specific object instance on which the method is invoked.",
+        xpReward: 25,
+        options: [
+          "The global object",
+          "The instance the method is called on",
+          "The class constructor function",
+          "undefined",
+        ],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "Which keyword sets up class inheritance in JavaScript?",
+        codeSnippet: "class Puppy ___ Dog { }",
+        correctAnswer: "extends",
+        explanation: "extends establishes the prototype chain so Puppy inherits Dog's methods.",
+        xpReward: 25,
+        options: ["implements", "extends", "inherits", "derives"],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What is `super()` used for in a subclass constructor?",
+        codeSnippet: "class Puppy extends Dog {\n  constructor(name) {\n    super(name);\n  }\n}",
+        correctAnswer: "Calls the parent class constructor",
+        explanation: "super() must be called before using this in a subclass constructor; it runs the parent's constructor.",
+        xpReward: 25,
+        options: [
+          "Calls the parent class constructor",
+          "Creates a static copy of the parent",
+          "Accesses the parent's private fields",
+          "Calls sibling class methods",
+        ],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What does the `new` keyword do?",
+        codeSnippet: "const dog = new Dog('Rex');",
+        correctAnswer: "Creates an instance of a class",
+        explanation: "new creates a new object, sets its prototype, runs the constructor, and returns the instance.",
+        xpReward: 25,
+        options: [
+          "Allocates raw memory",
+          "Creates an instance of a class",
+          "Declares a new constant binding",
+          "Copies an existing object",
+        ],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What is the result of accessing a property that doesn't exist on an object?",
+        codeSnippet: "const obj = { a: 1 };\nconsole.log(obj.b);",
+        correctAnswer: "undefined",
+        explanation: "Accessing a non-existent property returns undefined rather than throwing an error.",
+        xpReward: 25,
+        options: ["null", "TypeError", "undefined", "0"],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What does `Object.keys(obj)` return?",
+        codeSnippet: "const obj = { x: 1, y: 2 };\nconsole.log(Object.keys(obj));",
+        correctAnswer: "An array of own enumerable property names",
+        explanation: "Object.keys returns an array of the object's own enumerable string-keyed property names.",
+        xpReward: 25,
+        options: [
+          "An array of property values",
+          "An array of own enumerable property names",
+          "An object with swapped keys and values",
+          "The number of properties",
+        ],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What does `hasOwnProperty('key')` check?",
+        codeSnippet: "const obj = { a: 1 };\nconsole.log(obj.hasOwnProperty('a'));",
+        correctAnswer: "Whether the object itself (not its prototype) has that property",
+        explanation: "hasOwnProperty only checks properties defined directly on the object, not inherited ones.",
+        xpReward: 25,
+        options: [
+          "Whether the object or prototype chain has the property",
+          "Whether the property value is truthy",
+          "Whether the object itself (not its prototype) has that property",
+          "Whether the property is writable",
+        ],
+      },
+      {
+        type: "CODE_FILL",
+        prompt: "Fill in the instance property name to increment the counter.",
+        codeSnippet: "class Counter {\n  constructor() { this.count = 0; }\n  increment() { this.___ += 1; }\n}",
+        correctAnswer: "count",
+        explanation: "this.count refers to the count property set in the constructor.",
+        xpReward: 25,
+        options: ["count", "value", "total", "self"],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What is an object literal in JavaScript?",
+        codeSnippet: "const person = { name: 'Bob', age: 30 };",
+        correctAnswer: "A value defined using { key: value } syntax",
+        explanation: "Object literals are the most common way to create objects using curly-brace syntax.",
+        xpReward: 25,
+        options: [
+          "A string that looks like an object",
+          "An object created with Object.create()",
+          "A frozen, immutable object",
+          "A value defined using { key: value } syntax",
+        ],
+      },
+    ],
+  }, order);
 }

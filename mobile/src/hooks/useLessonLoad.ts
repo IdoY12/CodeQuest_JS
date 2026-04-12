@@ -13,7 +13,7 @@ import { drainRefInt } from "@/utils/formatHelpers";
 import { runLessonExerciseLoad } from "@/utils/runLessonExerciseLoad";
 import { tryPostPracticeLog } from "@/utils/tryPostPracticeLog";
 
-export function useLessonLoad(experienceLevel: Experience, accessToken: string | null) {
+export function useLessonLoad(experienceLevel: Experience, accessToken: string | null, blockIndex: number) {
   const dispatch = useAppDispatcher();
   const user = useAuthenticatedService(UserService);
   const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -37,7 +37,7 @@ export function useLessonLoad(experienceLevel: Experience, accessToken: string |
   useEffect(() => {
     dispatch(setCurrentExperienceLevel(experienceLevel));
     let active = true;
-    void runLessonExerciseLoad(experienceLevel, accessToken, () => active, setLoading, {
+    void runLessonExerciseLoad(experienceLevel, accessToken, blockIndex, () => active, setLoading, {
       setExercises,
       setExerciseIndex,
       setCorrectCount,
@@ -46,7 +46,7 @@ export function useLessonLoad(experienceLevel: Experience, accessToken: string |
     return () => {
       active = false;
     };
-  }, [accessToken, dispatch, experienceLevel]);
+  }, [accessToken, blockIndex, dispatch, experienceLevel]);
   useEffect(() => {
     if (loading || exercises.length === 0) return;
     dispatch(setSavedExerciseIndex(exerciseIndex));

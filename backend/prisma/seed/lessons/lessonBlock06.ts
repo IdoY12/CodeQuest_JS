@@ -1,10 +1,10 @@
 /**
- * Seeds one curriculum lesson block (exercises + metadata) into Prisma.
+ * Seeds curriculum lesson block 06 — Mid track, Async & Debugging.
  *
  * Responsibility: isolated lesson createMany for maintainability under file line limits.
  * Layer: backend prisma seed
- * Depends on: ../lib/createLessonWithExercises.js, ../lib/requireChapterId.js
- * Consumers: ../runMain.js
+ * Depends on: ../lib/createLessonWithExercises.js
+ * Consumers: runAllLessonBlocks.ts
  */
 
 import type { PrismaClient } from "@prisma/client";
@@ -12,124 +12,144 @@ import { createLessonWithExercises } from "../lib/createLessonWithExercises.js";
 import type { GlobalExerciseOrder } from "../lib/createLessonWithExercises.js";
 
 export async function seedLessonBlock_06(prisma: PrismaClient, order: GlobalExerciseOrder): Promise<void> {
-    await createLessonWithExercises(prisma, {
-      chapterTitle: "Mid track",
-      title: "Async flow and debugging",
-      description: "Promises, await, and common pitfalls",
-      estimatedMinutes: 14,
-      orderIndex: 3,
-      difficulty: "MID",
-      exercises: [
-        {
-          type: "MULTIPLE_CHOICE",
-          prompt: "What does this log first?",
-          codeSnippet: "console.log('A');\nPromise.resolve().then(() => console.log('B'));\nconsole.log('C');",
-          correctAnswer: "A then C then B",
-          explanation: "Synchronous logs run before microtask callbacks scheduled by Promise.then.",
-          xpReward: 25,
-          options: ["A then B then C", "A then C then B", "C then A then B", "B then A then C"],
-        },
-        {
-          type: "MULTIPLE_CHOICE",
-          prompt: "What type is `run()` when `run` is async?",
-          codeSnippet: "async function run() { return 1; }\nconsole.log(typeof run());",
-          correctAnswer: "object",
-          explanation: "async functions always return a Promise, whose typeof is 'object'.",
-          xpReward: 25,
-          options: ["number", "function", "object", "undefined"],
-        },
-        {
-          type: "CODE_FILL",
-          prompt: "Fill the blank to wait for the Promise result inside an async function.",
-          codeSnippet: "async function load() {\n  const data = ___ fetch('/api');\n}",
-          correctAnswer: "await",
-          explanation: "`await` pauses the async function until the Promise settles.",
-          xpReward: 25,
-          options: ["await", "return", "yield", "async"],
-        },
-        {
-          type: "FIND_THE_BUG",
-          prompt: "Tap the line that forgets to await a Promise-returning call.",
-          codeSnippet: "async function save() {\n  const ok = writeFile('log.txt', 'done');\n  return ok;\n}",
-          correctAnswer: "2",
-          explanation: "`writeFile` returns a Promise; await it (or return the chain) before treating it as a boolean.",
-          xpReward: 25,
-          options: ["1", "2", "3", "4"],
-        },
-        {
-          type: "MULTIPLE_CHOICE",
-          prompt: "What does `Promise.all` do if one input Promise rejects?",
-          codeSnippet: "await Promise.all([ok1, fail, ok2]);",
-          correctAnswer: "Rejects immediately with that rejection",
-          explanation: "Promise.all short-circuits on the first rejection.",
-          xpReward: 25,
-          options: [
-            "Waits for all to finish and returns mixed results",
-            "Rejects immediately with that rejection",
-            "Resolves to undefined",
-            "Throws synchronously before awaiting",
-          ],
-        },
-        {
-          type: "TAP_TOKEN",
-          prompt: "Tap the API that runs tasks concurrently and keeps fulfilled results.",
-          codeSnippet: "const results = await Promise.___([p1, p2]);",
-          correctAnswer: "allSettled",
-          explanation: "`allSettled` waits for every Promise and reports status per entry.",
-          xpReward: 25,
-          options: ["allSettled", "race", "any", "defer"],
-        },
-        {
-          type: "MULTIPLE_CHOICE",
-          prompt: "What is a safe pattern to avoid unhandled rejections in an async IIFE?",
-          codeSnippet: "(async () => { await work(); })();",
-          correctAnswer: "Attach `.catch` to the returned Promise or use top-level await in a module",
-          explanation: "Fire-and-forget async calls still return a Promise that can reject.",
-          xpReward: 25,
-          options: [
-            "Wrap the body in JSON.stringify",
-            "Attach `.catch` to the returned Promise or use top-level await in a module",
-            "Prefix with void to silence errors",
-            "Use setTimeout(0) around await",
-          ],
-        },
-        {
-          type: "MULTIPLE_CHOICE",
-          prompt: "What does `JSON.parse(JSON.stringify(obj))` lose?",
-          codeSnippet: "// deep clone via JSON",
-          correctAnswer: "Functions, `undefined`, Symbols, and some nested types",
-          explanation: "JSON serialization only preserves JSON-safe data shapes.",
-          xpReward: 25,
-          options: [
-            "Only string keys",
-            "Functions, `undefined`, Symbols, and some nested types",
-            "Nothing; it is a perfect clone",
-            "Only numbers",
-          ],
-        },
-        {
-          type: "TAP_TOKEN",
-          prompt: "Tap the helper that formats an Error with stack trace for logs.",
-          codeSnippet: "try { risky(); } catch (e) { console.___(e); }",
-          correctAnswer: "error",
-          explanation: "`console.error` is the usual choice for printing exceptions.",
-          xpReward: 25,
-          options: ["error", "log", "table", "clear"],
-        },
-        {
-          type: "MULTIPLE_CHOICE",
-          prompt: "What does `queueMicrotask` schedule compared to `setTimeout(fn, 0)`?",
-          codeSnippet: "// scheduling",
-          correctAnswer: "Microtasks run before the next macrotask turn",
-          explanation: "Microtask queue drains before rendering or timer callbacks in the macrotask queue.",
-          xpReward: 25,
-          options: [
-            "They always run in the same tick",
-            "Microtasks run before the next macrotask turn",
-            "Timers always run first",
-            "Microtasks never run on the web",
-          ],
-        },
-      ],
-    }, order);
+  await createLessonWithExercises(prisma, {
+    chapterTitle: "Mid track",
+    title: "Async flow and debugging",
+    description: "Promises, async/await, try/catch, and common async pitfalls",
+    estimatedMinutes: 14,
+    orderIndex: 3,
+    difficulty: "MID",
+    exercises: [
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What does `async` before a function guarantee about its return value?",
+        codeSnippet: "async function getData() {\n  return 42;\n}",
+        correctAnswer: "It always returns a Promise",
+        explanation: "Any async function always returns a Promise, even when you return a plain value.",
+        xpReward: 25,
+        options: [
+          "It returns the value directly",
+          "It always returns a Promise",
+          "It runs synchronously",
+          "It never throws",
+        ],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What does `await` do inside an async function?",
+        codeSnippet: "async function load() {\n  const data = await fetchData();\n}",
+        correctAnswer: "Pauses the current function until the Promise resolves",
+        explanation: "await suspends only the current async function, allowing the event loop to process other work.",
+        xpReward: 25,
+        options: [
+          "Blocks the entire JavaScript thread",
+          "Pauses the current function until the Promise resolves",
+          "Converts a callback to a Promise",
+          "Skips errors",
+        ],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What does `.catch(handler)` handle?",
+        codeSnippet: "fetch('/api').catch(err => console.error(err));",
+        correctAnswer: "Rejected Promises or thrown errors",
+        explanation: ".catch handles rejections and any errors thrown earlier in the Promise chain.",
+        xpReward: 25,
+        options: [
+          "Resolved Promise values",
+          "Rejected Promises or thrown errors",
+          "Pending Promise states",
+          "Timeout errors only",
+        ],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What is stored in `result` when `await` is accidentally omitted?",
+        codeSnippet: "async function run() {\n  const result = fetch('/api/data');\n  console.log(result);\n}",
+        correctAnswer: "A Promise object, not the resolved value",
+        explanation: "Without await, you receive the Promise itself. Forgetting await is a common async bug.",
+        xpReward: 25,
+        options: [
+          "The API response data",
+          "A Promise object, not the resolved value",
+          "undefined",
+          "A TypeError",
+        ],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What does this eventually resolve to?",
+        codeSnippet: "Promise.resolve(5).then(v => v * 2)",
+        correctAnswer: "10",
+        explanation: "Promise.resolve(5) creates a resolved promise; .then multiplies by 2, producing 10.",
+        xpReward: 25,
+        options: ["5", "10", "Promise(10)", "undefined"],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What does `setTimeout(fn, 0)` guarantee?",
+        codeSnippet: "setTimeout(() => console.log('async'), 0);\nconsole.log('sync');",
+        correctAnswer: "fn runs after all synchronous code completes",
+        explanation: "Even with delay 0, setTimeout schedules fn in the macrotask queue, after synchronous code and microtasks.",
+        xpReward: 25,
+        options: [
+          "fn runs immediately",
+          "fn runs before any Promises resolve",
+          "fn runs after all synchronous code completes",
+          "fn runs exactly 0 ms later",
+        ],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "How can you handle errors in async/await?",
+        codeSnippet: "async function load() {\n  try {\n    await riskyOp();\n  } catch (e) { }\n}",
+        correctAnswer: "Both try/catch and .catch() on the returned Promise",
+        explanation: "Errors can be caught with try/catch inside the function, or with .catch() on the Promise it returns.",
+        xpReward: 25,
+        options: [
+          "Only try/catch inside the function",
+          "Only .catch() on the call site",
+          "Both try/catch and .catch() on the returned Promise",
+          "Async functions never throw",
+        ],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What does `try/catch` catch?",
+        codeSnippet: "try {\n  throw new Error('oops');\n} catch (e) {\n  console.log(e.message);\n}",
+        correctAnswer: "Any thrown value within the try block",
+        explanation: "try/catch catches any thrown value — Error objects, strings, numbers — from within the try block.",
+        xpReward: 25,
+        options: [
+          "Only network errors",
+          "Only TypeError instances",
+          "Only syntax errors",
+          "Any thrown value within the try block",
+        ],
+      },
+      {
+        type: "CODE_FILL",
+        prompt: "Fill in the keyword that marks a function as asynchronous.",
+        codeSnippet: "___ function loadUser() {\n  const user = await fetchUser();\n  return user;\n}",
+        correctAnswer: "async",
+        explanation: "The async keyword enables await inside a function and makes it return a Promise.",
+        xpReward: 25,
+        options: ["async", "await", "Promise", "defer"],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What is the most common cause of an 'unhandled promise rejection' warning?",
+        codeSnippet: "fetch('/missing'); // no .catch",
+        correctAnswer: "A Promise that rejects with no .catch or try/catch",
+        explanation: "Any rejected Promise without an error handler triggers an unhandled rejection warning.",
+        xpReward: 25,
+        options: [
+          "Using async/await instead of .then()",
+          "A Promise that rejects with no .catch or try/catch",
+          "Calling await outside an async function",
+          "Using setTimeout inside a Promise",
+        ],
+      },
+    ],
+  }, order);
 }

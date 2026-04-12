@@ -1,10 +1,10 @@
 /**
- * Seeds one curriculum lesson block (exercises + metadata) into Prisma.
+ * Seeds curriculum lesson block 03 — Junior track, Functions & Arrays.
  *
  * Responsibility: isolated lesson createMany for maintainability under file line limits.
  * Layer: backend prisma seed
- * Depends on: ../lib/createLessonWithExercises.js, ../lib/requireChapterId.js
- * Consumers: ../runMain.js
+ * Depends on: ../lib/createLessonWithExercises.js
+ * Consumers: runAllLessonBlocks.ts
  */
 
 import type { PrismaClient } from "@prisma/client";
@@ -12,108 +12,119 @@ import { createLessonWithExercises } from "../lib/createLessonWithExercises.js";
 import type { GlobalExerciseOrder } from "../lib/createLessonWithExercises.js";
 
 export async function seedLessonBlock_03(prisma: PrismaClient, order: GlobalExerciseOrder): Promise<void> {
-    await createLessonWithExercises(prisma, {
-      chapterTitle: "Junior track",
-      title: "Functions and array basics",
-      description: "Declare functions, return values, and use arrays",
-      estimatedMinutes: 12,
-      orderIndex: 3,
-      difficulty: "JUNIOR",
-      exercises: [
-        {
-          type: "MULTIPLE_CHOICE",
-          prompt: "What gets logged?",
-          codeSnippet: "function greet() { return 'Hi'; }\nconsole.log(greet());",
-          correctAnswer: "Hi",
-          explanation: "greet returns 'Hi', and console.log prints it.",
-          xpReward: 20,
-          options: ["greet", "Hi", "undefined", "function"],
-        },
-        {
-          type: "MULTIPLE_CHOICE",
-          prompt: "What is the difference here?",
-          codeSnippet: "function say(){ console.log('Hi'); }\nfunction get(){ return 'Hi'; }",
-          correctAnswer: "say logs directly, get returns a value",
-          explanation: "console.log outputs immediately; return passes a value to the caller.",
-          xpReward: 20,
-          options: [
-            "Both return strings",
-            "say logs directly, get returns a value",
-            "Both throw errors",
-            "get logs directly, say returns value",
-          ],
-        },
-        {
-          type: "DRAG_DROP",
-          prompt: "Arrange the lines to build a valid function that returns a full name.",
-          codeSnippet: "function fullName(first, last) {\nreturn `${first} ${last}`;\n}\nconsole.log(fullName('Ada', 'Lovelace'));",
-          correctAnswer: "function fullName(first, last) {||return `${first} ${last}`;||}||console.log(fullName('Ada', 'Lovelace'));",
-          explanation: "The function declaration must wrap the return statement before calling it.",
-          xpReward: 25,
-        },
-        {
-          type: "CODE_FILL",
-          prompt: "Fill the blank with the keyword that sends a value back.",
-          codeSnippet: "function add(a, b) {\n  /* blank */\n  a + b;\n}",
-          correctAnswer: "return",
-          explanation: "return sends a value back to whoever called the function.",
-          xpReward: 20,
-          options: ["return", "console.log", "let", "const"],
-        },
-        {
-          type: "MULTIPLE_CHOICE",
-          prompt: "What is logged?",
-          codeSnippet: "const triple = (n) => n * 3;\nconsole.log(triple(4));",
-          correctAnswer: "12",
-          explanation: "Arrow functions can return an expression without braces.",
-          xpReward: 20,
-          options: ["4", "12", "7", "undefined"],
-        },
-        {
-          type: "MULTIPLE_CHOICE",
-          prompt: "What happens if a function has no `return`?",
-          codeSnippet: "function f() { 1 + 1; }\nconsole.log(f());",
-          correctAnswer: "It returns undefined",
-          explanation: "Without an explicit return, the call result is undefined.",
-          xpReward: 20,
-          options: ["It returns 2", "It returns undefined", "It throws", "It returns null"],
-        },
-        {
-          type: "MULTIPLE_CHOICE",
-          prompt: "What is logged?",
-          codeSnippet: "const colors = ['red', 'blue', 'green'];\nconsole.log(colors[1]);",
-          correctAnswer: "blue",
-          explanation: "Array indexes start at 0, so index 1 is 'blue'.",
-          xpReward: 20,
-          options: ["red", "blue", "green", "undefined"],
-        },
-        {
-          type: "MULTIPLE_CHOICE",
-          prompt: "What does this output?",
-          codeSnippet: "const nums = [4, 9, 16];\nconsole.log(nums.length);",
-          correctAnswer: "3",
-          explanation: ".length returns the number of elements in the array.",
-          xpReward: 20,
-          options: ["2", "3", "4", "16"],
-        },
-        {
-          type: "MULTIPLE_CHOICE",
-          prompt: "What is logged?",
-          codeSnippet: "const xs = [10, 20];\nxs.push(30);\nconsole.log(xs[2]);",
-          correctAnswer: "30",
-          explanation: "`push` appends to the end; index 2 is the third element.",
-          xpReward: 20,
-          options: ["20", "30", "undefined", "10"],
-        },
-        {
-          type: "MULTIPLE_CHOICE",
-          prompt: "What is logged?",
-          codeSnippet: "const nums = [1, 2, 3];\nconsole.log(nums.at(-1));",
-          correctAnswer: "3",
-          explanation: "Negative indices count from the end; -1 is the last element.",
-          xpReward: 20,
-          options: ["1", "2", "3", "undefined"],
-        },
-      ],
-    }, order);
+  await createLessonWithExercises(prisma, {
+    chapterTitle: "Junior track",
+    title: "Functions and array basics",
+    description: "Declarations vs expressions, arrow functions, and core array methods",
+    estimatedMinutes: 12,
+    orderIndex: 3,
+    difficulty: "JUNIOR",
+    exercises: [
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What is the key difference between a function declaration and a function expression?",
+        codeSnippet: "// Declaration\nfunction greet() {}\n// Expression\nconst greet2 = function() {};",
+        correctAnswer: "Declarations are hoisted; expressions are not",
+        explanation: "Function declarations are hoisted so they can be called before they appear in source. Expressions are not.",
+        xpReward: 20,
+        options: [
+          "Declarations are hoisted; expressions are not",
+          "Expressions are always faster",
+          "Declarations require a return statement",
+          "There is no practical difference",
+        ],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What does `arr.push(5)` do?",
+        codeSnippet: "const arr = [1, 2, 3];\narr.push(5);",
+        correctAnswer: "Adds 5 to the end of the array",
+        explanation: "push appends the given value to the end of the array and returns the new length.",
+        xpReward: 20,
+        options: [
+          "Adds 5 to the beginning",
+          "Removes the last element",
+          "Adds 5 to the end of the array",
+          "Returns the element at index 5",
+        ],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What is the output?",
+        codeSnippet: "const double = n => n * 2;\nconsole.log(double(4));",
+        correctAnswer: "8",
+        explanation: "A concise arrow function implicitly returns the expression. 4 × 2 = 8.",
+        xpReward: 20,
+        options: ["4", "8", "2", "undefined"],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What does this return?",
+        codeSnippet: "console.log([1, 2, 3, 4].filter(n => n > 2));",
+        correctAnswer: "[3, 4]",
+        explanation: "filter returns a new array containing only elements for which the callback returns true.",
+        xpReward: 20,
+        options: ["[1, 2]", "[3, 4]", "[2, 3, 4]", "[1]"],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What does `arr.pop()` do?",
+        codeSnippet: "const arr = [1, 2, 3];\nconst last = arr.pop();",
+        correctAnswer: "Removes and returns the last element",
+        explanation: "pop removes the last element from the array, mutates it, and returns the removed element.",
+        xpReward: 20,
+        options: [
+          "Adds an element to the end",
+          "Removes and returns the last element",
+          "Removes and returns the first element",
+          "Returns without removing",
+        ],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What does `[1, 2, 3].map(n => n + 10)` return?",
+        codeSnippet: "console.log([1, 2, 3].map(n => n + 10));",
+        correctAnswer: "[11, 12, 13]",
+        explanation: "map creates a new array by applying the callback to each element.",
+        xpReward: 20,
+        options: ["[1, 2, 3]", "[11, 12, 13]", "[10, 10, 10]", "[10, 11, 12]"],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What is `['a', 'b', 'c'][1]`?",
+        codeSnippet: "console.log(['a', 'b', 'c'][1]);",
+        correctAnswer: '"b"',
+        explanation: "Arrays are zero-indexed, so index 1 is the second element.",
+        xpReward: 20,
+        options: ['"a"', '"b"', '"c"', "undefined"],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What does `[5, 12, 3].find(n => n > 10)` return?",
+        codeSnippet: "console.log([5, 12, 3].find(n => n > 10));",
+        correctAnswer: "12",
+        explanation: "find returns the first element that satisfies the condition — a single value, not an array.",
+        xpReward: 20,
+        options: ["[12]", "12", "3", "undefined"],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What is printed?",
+        codeSnippet: "function noReturn() { }\nconsole.log(noReturn());",
+        correctAnswer: "undefined",
+        explanation: "A function without a return statement implicitly returns undefined.",
+        xpReward: 20,
+        options: ["null", "0", "undefined", "void"],
+      },
+      {
+        type: "CODE_FILL",
+        prompt: "Fill in the method name to add 'c' to the end of the array.",
+        codeSnippet: "const items = ['a', 'b'];\nitems.___('c');",
+        correctAnswer: "push",
+        explanation: "push is the standard array method for appending one or more elements to the end.",
+        xpReward: 20,
+        options: ["push", "add", "append", "insert"],
+      },
+    ],
+  }, order);
 }

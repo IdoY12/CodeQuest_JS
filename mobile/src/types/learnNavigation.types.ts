@@ -6,6 +6,7 @@ export type LearnStackParamList = {
   Lesson: {
     experienceLevel: Experience;
     lessonTitle: string;
+    blockIndex: number;
   };
   LessonResults: { accuracy: number; lessonTitle: string; experienceLevel: Experience };
 };

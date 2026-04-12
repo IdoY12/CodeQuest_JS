@@ -15,8 +15,9 @@ import { lessonScreenStyles } from "./LessonScreen.styles";
 export function LessonScreen({ navigation, route }: LessonScreenProps) {
   const experienceLevel = route.params.experienceLevel;
   const lessonTitle = route.params.lessonTitle;
+  const blockIndex = route.params.blockIndex;
   const accessToken = useAppSelector((s) => s.session.accessToken);
-  const load = useLessonLoad(experienceLevel, accessToken);
+  const load = useLessonLoad(experienceLevel, accessToken, blockIndex);
   const exercise = load.exercises[load.exerciseIndex];
   const onLessonExerciseComplete = useLessonExerciseCompleteHandler(navigation, experienceLevel, lessonTitle, load);
   const progress = load.exercises.length > 0 ? ((load.exerciseIndex + 1) / load.exercises.length) * 100 : 0;

@@ -5,6 +5,7 @@ import type { LessonExerciseCompletionContext } from "@/types/lessonExerciseComp
 import { useAuthenticatedService } from "@/hooks/useAuthenticatedService";
 import LearningService from "@/services/LearningService";
 import { useExerciseDragDrop } from "./useLessonExerciseInteractions";
+import { evaluateExerciseLocally } from "@/utils/lessonExerciseState";
 
 export function useExerciseDragDropLesson(
   exercise: Exercise,
@@ -23,8 +24,10 @@ export function useExerciseDragDropLesson(
   }, [exercise.id]);
   const canCheck = d.orderedSelection.length === d.lineList.length && !curriculumChecked;
   const runCheck = async () => {
-    if (!accessToken || !learning) return;
-    const result = await learning.submitExercise(exercise.id, d.normalizedAnswer);
+    const result =
+      accessToken && learning
+        ? await learning.submitExercise(exercise.id, d.normalizedAnswer)
+        : evaluateExerciseLocally(exercise, d.normalizedAnswer);
     setServerResult(result);
     setCurriculumCorrect(result.isCorrect);
     setCurriculumChecked(true);

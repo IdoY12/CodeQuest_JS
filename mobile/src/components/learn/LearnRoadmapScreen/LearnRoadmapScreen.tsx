@@ -9,19 +9,19 @@ import { learnRoadmapStyles as s } from "./LearnRoadmapScreen.styles";
 type Props = { navigation: LearnRoadmapNavigation };
 
 export function LearnRoadmapScreen({ navigation }: Props) {
-  const { activeExperience, levelRows } = useLearnRoadmapData();
+  const { activeExperience, blocks } = useLearnRoadmapData();
   return (
     <SafeAreaView style={s.container} edges={["top", "bottom"]}>
       <FlatList
         style={s.container}
         contentContainerStyle={s.content}
-        data={levelRows}
-        keyExtractor={(item) => item.experienceLevel}
+        data={blocks}
+        keyExtractor={(item) => String(item.blockIndex)}
         ListHeaderComponent={
           <Text style={s.title}>
-            Practice by level{"\n"}
+            {activeExperience.charAt(0) + activeExperience.slice(1).toLowerCase()} track{"\n"}
             <Text style={{ color: colors.textSecondary, fontSize: 14 }}>
-              Your active preference: {activeExperience}. Each level keeps its own place in the exercise list.
+              3 blocks · 10 exercises each. Change your level in Profile.
             </Text>
           </Text>
         }
@@ -35,8 +35,9 @@ export function LearnRoadmapScreen({ navigation }: Props) {
               style={s.lessonButton}
               onPress={() =>
                 navigation.navigate("Lesson", {
-                  experienceLevel: item.experienceLevel,
+                  experienceLevel: activeExperience,
                   lessonTitle: item.title,
+                  blockIndex: item.blockIndex,
                 })
               }
             >

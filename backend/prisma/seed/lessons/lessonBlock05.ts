@@ -1,10 +1,10 @@
 /**
- * Seeds one curriculum lesson block (exercises + metadata) into Prisma.
+ * Seeds curriculum lesson block 05 — Mid track, Collections & Patterns.
  *
  * Responsibility: isolated lesson createMany for maintainability under file line limits.
  * Layer: backend prisma seed
- * Depends on: ../lib/createLessonWithExercises.js, ../lib/requireChapterId.js
- * Consumers: ../runMain.js
+ * Depends on: ../lib/createLessonWithExercises.js
+ * Consumers: runAllLessonBlocks.ts
  */
 
 import type { PrismaClient } from "@prisma/client";
@@ -12,113 +12,129 @@ import { createLessonWithExercises } from "../lib/createLessonWithExercises.js";
 import type { GlobalExerciseOrder } from "../lib/createLessonWithExercises.js";
 
 export async function seedLessonBlock_05(prisma: PrismaClient, order: GlobalExerciseOrder): Promise<void> {
-    await createLessonWithExercises(prisma, {
-      chapterTitle: "Mid track",
-      title: "Maps, sets, and array patterns",
-      description: "Choose the right collection API for lookups and uniqueness",
-      estimatedMinutes: 14,
-      orderIndex: 2,
-      difficulty: "MID",
-      exercises: [
-        {
-          type: "MULTIPLE_CHOICE",
-          prompt: "What does this log?",
-          codeSnippet: "const m = new Map([['a', 1], ['b', 2]]);\nm.set('a', 9);\nconsole.log(m.get('a'));",
-          correctAnswer: "9",
-          explanation: "Map.set overwrites the value for an existing key.",
-          xpReward: 25,
-          options: ["1", "9", "undefined", "2"],
-        },
-        {
-          type: "MULTIPLE_CHOICE",
-          prompt: "Why prefer `Map` over a plain object for arbitrary keys?",
-          codeSnippet: "// keys can be objects, no prototype collisions",
-          correctAnswer: "Any value can be a key without prototype key clashes",
-          explanation: "Maps keep keys in insertion order and avoid inherited property names like `toString`.",
-          xpReward: 25,
-          options: [
-            "Maps are always faster than objects",
-            "Any value can be a key without prototype key clashes",
-            "Objects cannot store numbers",
-            "Maps serialize to JSON automatically",
-          ],
-        },
-        {
-          type: "TAP_TOKEN",
-          prompt: "Tap the call that removes duplicates from an array of numbers.",
-          codeSnippet: "const nums = [1, 1, 2];\nconst uniq = [...new ___(nums)];",
-          correctAnswer: "Set",
-          explanation: "Set stores unique values; spread back into an array.",
-          xpReward: 25,
-          options: ["Set", "Map", "WeakMap", "Array"],
-        },
-        {
-          type: "MULTIPLE_CHOICE",
-          prompt: "What is the size of `s` after this code?",
-          codeSnippet: "const s = new Set([1, 2, 2, 3]);\ns.add(3);",
-          correctAnswer: "3",
-          explanation: "Set ignores duplicate inserts; 1,2,3 remain three entries.",
-          xpReward: 25,
-          options: ["4", "3", "5", "2"],
-        },
-        {
-          type: "CODE_FILL",
-          prompt: "Fill the blank to shallow-copy all elements into a new array.",
-          codeSnippet: "const src = [1, 2, 3];\nconst copy = ___;",
-          correctAnswer: "[...src]",
-          explanation: "Spreading `src` into an array literal copies elements into a new array.",
-          xpReward: 25,
-          options: ["[...src]", "src", "...src", "src.slice"],
-        },
-        {
-          type: "MULTIPLE_CHOICE",
-          prompt: "What does `[...arr].reverse()` do compared to `arr.reverse()`?",
-          codeSnippet: "// compare mutation",
-          correctAnswer: "Only the spread version leaves `arr` unchanged",
-          explanation: "Array.prototype.reverse mutates in place; copying first avoids that.",
-          xpReward: 25,
-          options: [
-            "Both return the same reference",
-            "Only the spread version leaves `arr` unchanged",
-            "Both throw on sparse arrays",
-            "`reverse` cannot run on numbers",
-          ],
-        },
-        {
-          type: "MULTIPLE_CHOICE",
-          prompt: "What does `flatMap` return here?",
-          codeSnippet: "const out = [1, 2].flatMap(n => [n, n * 10]);\nconsole.log(out.length);",
-          correctAnswer: "4",
-          explanation: "Each element expands to two values, then flattened one level: four items.",
-          xpReward: 25,
-          options: ["2", "4", "6", "1"],
-        },
-        {
-          type: "TAP_TOKEN",
-          prompt: "Tap the method that returns the first element matching a predicate.",
-          codeSnippet: "const users = [{id:1},{id:2}];\nconst u = users.___(x => x.id === 2);",
-          correctAnswer: "find",
-          explanation: "`find` stops at the first match and returns that element.",
-          xpReward: 25,
-          options: ["find", "filter", "map", "some"],
-        },
-        {
-          type: "MULTIPLE_CHOICE",
-          prompt: "What is logged?",
-          codeSnippet: "const g = new Map([[{}, 1]]);\nconst k = [...g.keys()][0];\nconsole.log(g.get(k));",
-          correctAnswer: "1",
-          explanation: "The same object reference used as key retrieves the stored value.",
-          xpReward: 25,
-          options: ["undefined", "1", "null", "NaN"],
-        },
-        {
-          type: "DRAG_DROP",
-          prompt: "Arrange lines to group unique ids with Set then check membership.",
-          codeSnippet: "const ids = new Set([1, 2, 2]);\nconsole.log(ids.has(2));\nconsole.log(ids.size);",
-          correctAnswer: "const ids = new Set([1, 2, 2]);||console.log(ids.has(2));||console.log(ids.size);",
-          explanation: "Construct the Set, then query membership and size.",
-          xpReward: 30,
-        },
-      ],
-    }, order);
+  await createLessonWithExercises(prisma, {
+    chapterTitle: "Mid track",
+    title: "Maps, sets, and array patterns",
+    description: "Map, Set, WeakMap, spread, rest, destructuring, and reduce",
+    estimatedMinutes: 14,
+    orderIndex: 2,
+    difficulty: "MID",
+    exercises: [
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What does a `Map` preserve that a plain object does not?",
+        codeSnippet: "const map = new Map();\nmap.set(1, 'one');\nmap.set('two', 2);",
+        correctAnswer: "Insertion order for any key type",
+        explanation: "Map preserves insertion order for all key types, including objects and numbers.",
+        xpReward: 25,
+        options: [
+          "String-only key access",
+          "Insertion order for any key type",
+          "Prototype chain inheritance",
+          "JSON serialisation support",
+        ],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What does a `Set` guarantee about its values?",
+        codeSnippet: "const s = new Set([1, 2, 2, 3]);\nconsole.log(s.size);",
+        correctAnswer: "Each value appears at most once",
+        explanation: "A Set automatically discards duplicate values on insertion.",
+        xpReward: 25,
+        options: [
+          "Values are sorted automatically",
+          "Values are all the same type",
+          "Each value appears at most once",
+          "Values are immutable",
+        ],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What does the spread operator do in `Math.max(...[3, 1, 4])`?",
+        codeSnippet: "console.log(Math.max(...[3, 1, 4]));",
+        correctAnswer: "Expands the array into individual arguments",
+        explanation: "... unpacks the array so Math.max receives three separate numeric arguments.",
+        xpReward: 25,
+        options: [
+          "Creates a shallow copy of the array",
+          "Expands the array into individual arguments",
+          "Concatenates multiple arrays",
+          "Converts the array to a string",
+        ],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What does `const [a, b] = [10, 20]` do?",
+        codeSnippet: "const [a, b] = [10, 20];\nconsole.log(a, b);",
+        correctAnswer: "Assigns 10 to a and 20 to b",
+        explanation: "Array destructuring unpacks values by position into the named variables.",
+        xpReward: 25,
+        options: [
+          "Creates an array [a, b]",
+          "Assigns 10 to a and 20 to b",
+          "Checks if a equals 10",
+          "Creates a tuple",
+        ],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What does `Array.from('hello')` return?",
+        codeSnippet: "console.log(Array.from('hello'));",
+        correctAnswer: "['h','e','l','l','o']",
+        explanation: "Array.from iterates any iterable — here it splits the string into individual characters.",
+        xpReward: 25,
+        options: ["['hello']", "['h','e','l','l','o']", "5", "[104,101,108,108,111]"],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What does `...args` collect in `function f(a, ...args)`?",
+        codeSnippet: "function f(a, ...args) { console.log(args); }\nf(1, 2, 3, 4);",
+        correctAnswer: "All arguments after a",
+        explanation: "Rest parameters collect all remaining arguments into a real array, here [2, 3, 4].",
+        xpReward: 25,
+        options: [
+          "All arguments including a",
+          "All arguments after a",
+          "Only the last argument",
+          "The arguments object",
+        ],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What is the result?",
+        codeSnippet: "console.log([...new Set([1, 1, 2, 2, 3])]);",
+        correctAnswer: "[1, 2, 3]",
+        explanation: "new Set removes duplicates; spreading it back into an array gives the unique values.",
+        xpReward: 25,
+        options: ["[1, 2, 3]", "[1, 1, 2, 2, 3]", "Set(3)", "[3]"],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What does `[1, 2, 3, 4].reduce((acc, n) => acc + n, 0)` return?",
+        codeSnippet: "console.log([1, 2, 3, 4].reduce((acc, n) => acc + n, 0));",
+        correctAnswer: "10",
+        explanation: "reduce accumulates: starting from 0 it adds 1+2+3+4 = 10.",
+        xpReward: 25,
+        options: ["10", "24", "0", "[1, 2, 3, 4]"],
+      },
+      {
+        type: "CODE_FILL",
+        prompt: "Fill in the blank to destructure the `name` property from the object.",
+        codeSnippet: "const user = { name: 'Sam', age: 25 };\nconst { ___ } = user;\nconsole.log(name);",
+        correctAnswer: "name",
+        explanation: "Object destructuring extracts a property using its key name.",
+        xpReward: 25,
+        options: ["name", "user.name", "'name'", "this.name"],
+      },
+      {
+        type: "MULTIPLE_CHOICE",
+        prompt: "What type of values must a `WeakMap` use as keys?",
+        codeSnippet: "const wm = new WeakMap();\nwm.set({}, 'value');",
+        correctAnswer: "Objects only",
+        explanation: "WeakMap keys must be objects, allowing the garbage collector to reclaim keys with no other references.",
+        xpReward: 25,
+        options: ["Strings only", "Objects only", "Numbers and strings", "Any primitive"],
+      },
+    ],
+  }, order);
 }

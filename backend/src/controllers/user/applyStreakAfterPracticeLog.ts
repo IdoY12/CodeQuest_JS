@@ -12,7 +12,6 @@ type ProgressStreakFields = {
   streakCurrent: number;
   streakLastDate: Date | null;
   streakLongest: number;
-  streakShieldAvailable: boolean;
 };
 
 export async function applyStreakAfterPracticeLog(
@@ -28,25 +27,13 @@ export async function applyStreakAfterPracticeLog(
   const daysBetween = streakLastDate ? Math.floor((today.getTime() - streakLastDate.getTime()) / msInDay) : null;
 
   let nextStreak = progress.streakCurrent;
-  let shieldAvailable = progress.streakShieldAvailable;
-  let shieldConsumedAt: Date | null = null;
 
   if (daysBetween === null || daysBetween <= 0) {
     nextStreak = Math.max(1, progress.streakCurrent);
   } else if (daysBetween === 1) {
     nextStreak = progress.streakCurrent + 1;
   } else if (daysBetween > 1) {
-    if (progress.streakShieldAvailable) {
-      shieldAvailable = false;
-      shieldConsumedAt = today;
-      nextStreak = progress.streakCurrent;
-    } else {
-      nextStreak = 1;
-    }
-  }
-
-  if (nextStreak >= 7 && !shieldAvailable) {
-    shieldAvailable = true;
+    nextStreak = 1;
   }
 
   await prisma.userProgress.update({
@@ -55,8 +42,6 @@ export async function applyStreakAfterPracticeLog(
       streakCurrent: nextStreak,
       streakLongest: Math.max(progress.streakLongest, nextStreak),
       streakLastDate: today,
-      streakShieldAvailable: shieldAvailable,
-      ...(shieldConsumedAt !== null ? { streakShieldConsumedAt: shieldConsumedAt } : {}),
     },
   });
 }

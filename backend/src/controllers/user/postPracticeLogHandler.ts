@@ -51,7 +51,6 @@ export async function postPracticeLog(req: AuthenticatedRequest, res: Response) 
     streakCurrent: progress.streakCurrent,
     streakLastDate: progress.streakLastDate,
     streakLongest: progress.streakLongest,
-    streakShieldAvailable: progress.streakShieldAvailable,
   });
 
   logInfo("[TASKS]", "practice-log:write-success", { userId: req.user?.userId, practicedSeconds: nextSeconds });

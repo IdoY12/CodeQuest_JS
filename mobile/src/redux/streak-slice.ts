@@ -3,13 +3,11 @@ import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 interface StreakState {
   streakCurrent: number;
   streakDays: boolean[];
-  streakShieldAvailable: boolean;
 }
 
 const initialState: StreakState = {
   streakCurrent: 0,
   streakDays: [false, false, false, false, false, false, false],
-  streakShieldAvailable: false,
 };
 
 const streakSlice = createSlice({

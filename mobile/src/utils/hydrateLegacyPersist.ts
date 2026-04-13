@@ -54,7 +54,6 @@ export async function hydrateLegacySessionProgress(
     hydrateStreak({
       streakCurrent: p.streakCurrent,
       streakDays: p.streakDays,
-      streakShieldAvailable: p.streakShieldAvailable,
     } as never),
   );
   dispatch(

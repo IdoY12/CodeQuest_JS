@@ -8,7 +8,6 @@ export function useHomeScreen() {
   const xp = useAppSelector((s) => s.xp.xpTotal);
   const streak = useAppSelector((s) => s.streak.streakCurrent);
   const streakDays = useAppSelector((s) => s.streak.streakDays);
-  const streakShieldAvailable = useAppSelector((s) => s.streak.streakShieldAvailable);
   const studySecondsToday = useAppSelector((s) => s.session.studySecondsToday);
   const commitment = useAppSelector((s) => s.profile.commitment);
   useEffect(() => {
@@ -29,7 +28,6 @@ export function useHomeScreen() {
     xp,
     streak,
     streakDays,
-    streakShieldAvailable,
     nextLevelXp,
     currentLevelProgress,
     practiceMinutesToday,

@@ -11,7 +11,6 @@ export function useProfileRedux() {
   const duelWins = useAppSelector((s) => s.duel.duelWins);
   const duelLosses = useAppSelector((s) => s.duel.duelLosses);
   const duelRating = useAppSelector((s) => s.duel.duelRating);
-  const streakShieldAvailable = useAppSelector((s) => s.streak.streakShieldAvailable);
   const goal = useAppSelector((s) => s.profile.goal);
   const experience = useAppSelector((s) => s.profile.experience);
   const commitment = useAppSelector((s) => s.profile.commitment);
@@ -35,7 +34,6 @@ export function useProfileRedux() {
     duelWins,
     duelLosses,
     duelRating,
-    streakShieldAvailable,
     goal,
     experience,
     commitment,

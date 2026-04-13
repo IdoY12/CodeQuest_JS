@@ -21,12 +21,6 @@ export async function runDailyGoalNotificationCheck(
   try {
     logApp("daily-goal:check");
     const status = await user.getDailyGoalStatus(dateKey);
-    if (status.shieldConsumedToday) {
-      await fireNotification(
-        "Streak Shield activated",
-        "You missed a day, but your shield protected the streak.",
-      );
-    }
     if (status.canSendComplete) {
       await fireNotification(
         "Daily goal crushed!",

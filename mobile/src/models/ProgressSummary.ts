@@ -7,5 +7,4 @@ export default interface ProgressSummary {
   duelWins: number;
   duelLosses: number;
   duelRating: number;
-  streakShieldAvailable: boolean;
 }

@@ -31,7 +31,6 @@ export async function getProgressSummary(req: AuthenticatedRequest, res: Respons
       duelWins: duelRating?.wins ?? 0,
       duelLosses: duelRating?.losses ?? 0,
       duelRating: duelRating?.rating ?? 0,
-      streakShieldAvailable: progress?.streakShieldAvailable ?? false,
     });
   } catch (error) {
     logError("[USER]", error, { phase: "progress-summary", userId: req.user?.userId });

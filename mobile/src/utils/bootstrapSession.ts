@@ -43,7 +43,6 @@ export async function bootstrapSession(dispatch: AppDispatch): Promise<void> {
       hydrateStreak({
         streakCurrent: progress.streakCurrent,
         streakDays: progress.streakDays,
-        streakShieldAvailable: progress.streakShieldAvailable,
       }),
     );
     dispatch(

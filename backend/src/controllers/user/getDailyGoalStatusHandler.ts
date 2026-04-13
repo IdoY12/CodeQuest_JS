@@ -26,17 +26,12 @@ export async function getDailyGoalStatus(req: AuthenticatedRequest, res: Respons
   const completeSent = sameDay ? progress.practiceLogCompleteSent : false;
   const canSendIncomplete = progress.notificationsEnabled && remainingMinutes > 0 && incompleteCount < 2;
   const canSendComplete = progress.notificationsEnabled && remainingMinutes === 0 && !completeSent;
-  const shieldConsumedDateKey = progress.streakShieldConsumedAt
-    ? new Date(progress.streakShieldConsumedAt).toLocaleDateString("en-CA")
-    : null;
   return res.json({
     dateKey,
     goalMinutes,
     practicedMinutes,
     remainingMinutes,
     notificationsEnabled: progress.notificationsEnabled,
-    streakShieldAvailable: progress.streakShieldAvailable,
-    shieldConsumedToday: shieldConsumedDateKey === dateKey,
     canSendIncomplete,
     canSendComplete,
   });

@@ -19,7 +19,6 @@ export function ProfileAuthenticatedTop({ p }: { p: UseProfileScreenReturn }) {
       </View>
     );
   }
-  const shield = p.streakShieldAvailable ? "🛡️ Streak Shield active" : "No streak shield active";
   return (
     <>
       <View style={t.hero}>
@@ -40,7 +39,6 @@ export function ProfileAuthenticatedTop({ p }: { p: UseProfileScreenReturn }) {
         <Text style={t.meta}>
           Level {p.level} · Duel {p.duelRating} · {p.duelWinRate} win rate
         </Text>
-        <Text style={t.shield}>{shield}</Text>
       </View>
       {p.uploadingAvatar ? (
         <View style={t.upCard}>

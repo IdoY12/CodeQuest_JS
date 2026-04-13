@@ -33,12 +33,13 @@ export function HomeScreen({ navigation }: HomeMainScreenProps) {
         <View style={styles.card}>
           <Text style={styles.cardTitle}>🔥 {h.streak}-day streak!</Text>
           <Text style={styles.subText}>
-            {h.streakShieldAvailable ? "🛡️ Streak Shield ready (one miss protected)" : "Reach 7 days to unlock a Streak Shield"}
+            Complete at least one exercise every day to keep your streak alive.
           </Text>
           <View style={styles.row}>
             {h.streakDays.map((done, idx) => (
               <View key={idx} style={[styles.dot, done && styles.dotDone, idx === 6 && styles.dotToday]} />
             ))}
+            {h.streak > 7 && <Text style={styles.date}>Day {h.streak}</Text>}
           </View>
         </View>
         <View style={styles.card}>

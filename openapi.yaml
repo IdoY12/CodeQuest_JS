@@ -777,7 +777,7 @@ components:
         duelRating: { allOf: [{ $ref: "#/components/schemas/UserProfileDuelRating" }], nullable: true, description: Duel rating snapshot }
     ProgressSummary:
       type: object
-      required: [xpTotal, level, streakCurrent, streakDays, lessonsCompleted, duelWins, duelLosses, duelRating, streakShieldAvailable]
+      required: [xpTotal, level, streakCurrent, streakDays, lessonsCompleted, duelWins, duelLosses, duelRating]
       properties:
         xpTotal: { type: integer, description: Total XP }
         level: { type: integer, description: Current level }
@@ -787,7 +787,6 @@ components:
         duelWins: { type: integer, description: Duel wins }
         duelLosses: { type: integer, description: Duel losses }
         duelRating: { type: integer, description: Duel rating }
-        streakShieldAvailable: { type: boolean, description: Streak shield flag }
     OnboardingRequest:
       type: object
       required: [goal, experienceLevel, dailyCommitmentMinutes]
@@ -835,15 +834,13 @@ components:
         pathKey: { $ref: "#/components/schemas/PathType" }
     DailyGoalStatus:
       type: object
-      required: [dateKey, goalMinutes, practicedMinutes, remainingMinutes, notificationsEnabled, streakShieldAvailable, shieldConsumedToday, canSendIncomplete, canSendComplete]
+      required: [dateKey, goalMinutes, practicedMinutes, remainingMinutes, notificationsEnabled, canSendIncomplete, canSendComplete]
       properties:
         dateKey: { type: string, description: Date key }
         goalMinutes: { type: integer, description: Daily goal in minutes }
         practicedMinutes: { type: integer, description: Practiced minutes }
         remainingMinutes: { type: integer, description: Remaining minutes }
         notificationsEnabled: { type: boolean, description: Notifications enabled }
-        streakShieldAvailable: { type: boolean, description: Shield availability }
-        shieldConsumedToday: { type: boolean, description: Shield consumed on date key }
         canSendIncomplete: { type: boolean, description: Incomplete reminder eligibility }
         canSendComplete: { type: boolean, description: Complete reminder eligibility }
     ExerciseOptionClient:

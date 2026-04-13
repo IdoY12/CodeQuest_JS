@@ -30,14 +30,6 @@ export function HomeScreen({ navigation }: HomeMainScreenProps) {
             <View style={[styles.progressFill, { width: `${h.dailyGoalProgressPct}%` }]} />
           </View>
         </View>
-        {h.multiplierEndsAt && h.remainingMultiplierMs > 0 ? (
-          <View style={styles.multiplierCard}>
-            <Text style={styles.cardTitle}>⚡ {h.multiplierFactor.toFixed(0)}x XP Window</Text>
-            <Text style={styles.timer}>
-              Ends in {String(h.multiplierMinutes).padStart(2, "0")}:{String(h.multiplierSeconds).padStart(2, "0")}
-            </Text>
-          </View>
-        ) : null}
         <View style={styles.card}>
           <Text style={styles.cardTitle}>🔥 {h.streak}-day streak!</Text>
           <Text style={styles.subText}>
@@ -63,11 +55,6 @@ export function HomeScreen({ navigation }: HomeMainScreenProps) {
           <Pressable style={styles.primary} onPress={() => navigation.navigate("LearnTab")}>
             <Text style={styles.primaryText}>Continue</Text>
           </Pressable>
-        </View>
-        <View style={styles.dailyCard}>
-          <Text style={styles.cardTitle}>👑 Daily Challenge</Text>
-          <Text style={styles.subText}>Find the bug in a loop boundary and earn +80 XP bonus.</Text>
-          <Text style={styles.timer}>Resets daily</Text>
         </View>
         <View style={styles.card}>
           <Text style={styles.cardTitle}>🧩 Daily Code Puzzle</Text>

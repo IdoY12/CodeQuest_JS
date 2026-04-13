@@ -58,8 +58,6 @@ flowchart LR
 | `packages/db/` | Prisma schema, migrations, DB URL injection, `connectDatabase`. |
 | `packages/auth-jwt/` | Sign/verify access and refresh tokens (shared secret contract with backend/io). |
 | `packages/server-kit/` | Shared server concerns: CORS resolution, structured logging, production security checks. |
-| `packages/daily-puzzles/` | Static daily puzzle definitions consumed by backend/mobile. |
-| `packages/personalized-exercises/` | Static personalized exercise data. |
 | `infra/` | Local infrastructure helpers (e.g. LocalStack S3 init). |
 | `docker-compose.yml` | Postgres, LocalStack, backend, io — wired for local full-stack runs. |
 | `patches/` | **`patch-package`** patches applied after `npm install` (see below). |
@@ -91,7 +89,7 @@ flowchart LR
 
 - Curriculum structure and server-driven learning APIs live in the **backend** (`backend/src/routers/learning.ts` and related controllers).
 - Some content is **seeded** into the database from `backend/prisma/seed/` (orchestrated by `backend/prisma/seed/runMain.ts`). Typechecking for seed scripts is included via `backend/tsconfig.prisma.json`.
-- **`@project/daily-puzzles`** and **`@project/personalized-exercises`** provide versioned static data; the backend exposes them through dedicated routes.
+- Daily puzzle content is stored in the **`DailyPuzzle`** database table, seeded from `backend/prisma/seed/dailyPuzzles.ts`.
 
 ---
 
@@ -144,7 +142,7 @@ Path alias: `@/*` → `mobile/src/*` (see `mobile/tsconfig.json`).
 1. **`packages/db`** — Schema (`packages/db/prisma/`), migrations, and exported `connectDatabase`. Wrong schema changes ripple through backend, io, and seeds.
 2. **`packages/auth-jwt`** — Token shape and expiry constants; must stay aligned with backend auth routes and io verification.
 3. **`packages/server-kit`** — CORS and security validation; changes affect both deployable servers.
-4. **`packages/daily-puzzles` / `packages/personalized-exercises`** — Data-only changes; ensure backend routes and mobile consumers expect the same types.
+4. **`packages/db`** migrations and `backend/prisma/seed/dailyPuzzles.ts` — daily puzzle data lives in the DB; schema changes require a new migration and re-seed.
 
 ---
 

@@ -5,7 +5,5 @@ backend/dist/
 io/dist/
 mobile/dist/
 packages/auth-jwt/dist/
-packages/daily-puzzles/dist/
 packages/db/dist/
-packages/personalized-exercises/dist/
 packages/server-kit/dist/

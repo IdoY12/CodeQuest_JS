@@ -27,7 +27,6 @@
     "@aws-sdk/s3-request-presigner": "^3.922.0",
     "@prisma/client": "^6.19.0",
     "@project/auth-jwt": "file:../packages/auth-jwt",
-    "@project/daily-puzzles": "file:../packages/daily-puzzles",
     "@project/db": "file:../packages/db",
     "@project/server-kit": "file:../packages/server-kit",
     "bcrypt": "^6.0.0",

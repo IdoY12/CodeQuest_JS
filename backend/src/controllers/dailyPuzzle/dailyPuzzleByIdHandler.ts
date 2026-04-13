@@ -1,7 +1,7 @@
 /**
- * Returns today's puzzle, selected by daysSinceEpoch % totalCount.
+ * Returns a specific puzzle by its database id — used for prev/next navigation.
  *
- * Responsibility: deterministic daily rotation from the DailyPuzzle table.
+ * Responsibility: fetch a single DailyPuzzle row and its adjacent ids.
  * Layer: backend daily-puzzles controller
  * Depends on: @project/db (prisma), DailyPuzzleDto
  * Consumers: dailyPuzzles router
@@ -12,19 +12,18 @@ import { prisma } from "@project/db";
 import type { DailyPuzzleDto } from "../../dto/clientPuzzleTodayDto.js";
 import { logError, logInfo } from "../../utils/logger.js";
 
-export async function dailyPuzzleTodayHandler(_request: Request, response: Response): Promise<void> {
+export async function dailyPuzzleByIdHandler(request: Request, response: Response): Promise<void> {
   try {
-    logInfo("[TASKS]", "daily-puzzle:today");
-    const totalCount = await prisma.dailyPuzzle.count();
-    if (totalCount === 0) {
-      response.status(503).json({ error: "Daily puzzles are not configured" });
+    const id = Number(request.params.id);
+    if (!Number.isInteger(id) || id <= 0) {
+      response.status(400).json({ error: "Invalid puzzle id" });
       return;
     }
-    const daysSinceEpoch = Math.floor(Date.now() / (1000 * 60 * 60 * 24));
-    const orderIndex = daysSinceEpoch % totalCount;
-    const puzzle = await prisma.dailyPuzzle.findUnique({ where: { orderIndex } });
+    logInfo("[TASKS]", "daily-puzzle:by-id", { id });
+    const totalCount = await prisma.dailyPuzzle.count();
+    const puzzle = await prisma.dailyPuzzle.findUnique({ where: { id } });
     if (!puzzle) {
-      response.status(503).json({ error: "Daily puzzle not found for today" });
+      response.status(404).json({ error: "Puzzle not found" });
       return;
     }
     const prevPuzzle =
@@ -45,7 +44,7 @@ export async function dailyPuzzleTodayHandler(_request: Request, response: Respo
     };
     response.json(body);
   } catch (error) {
-    logError("[TASKS]", error, { phase: "daily-puzzle-today" });
-    response.status(500).json({ error: "Failed to load daily puzzle" });
+    logError("[TASKS]", error, { phase: "daily-puzzle-by-id" });
+    response.status(500).json({ error: "Failed to load puzzle" });
   }
 }

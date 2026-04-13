@@ -1,1 +1,0 @@
-export const DAILY_CHALLENGE_BONUS_XP = 80;

@@ -5,6 +5,7 @@ export const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   content: { flex: 1, padding: spacing.xxl, paddingTop: spacing.giant, gap: spacing.lg },
   title: { color: colors.textPrimary, fontSize: fontSize.xl, fontWeight: "800" },
+  counter: { color: colors.textMuted, fontSize: fontSize.sm },
   prompt: { color: colors.textSecondary, fontSize: fontSize.md, lineHeight: 28 },
   input: {
     borderWidth: 1,
@@ -16,6 +17,18 @@ export const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     fontSize: fontSize.base,
   },
+  navRow: { flexDirection: "row", gap: spacing.sm },
+  navButton: {
+    flex: 1,
+    minHeight: 40,
+    borderRadius: radius.button,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  navButtonDisabled: { opacity: 0.35 },
+  navLabel: { color: colors.textPrimary, fontWeight: "600", fontSize: fontSize.sm },
   submitButton: {
     minHeight: 52,
     borderRadius: radius.button,

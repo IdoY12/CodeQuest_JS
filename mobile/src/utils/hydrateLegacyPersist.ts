@@ -48,8 +48,6 @@ export async function hydrateLegacySessionProgress(
     hydrateXp({
       level: p.level,
       xpTotal: p.xpTotal,
-      xpMultiplierFactor: p.xpMultiplierFactor,
-      xpMultiplierEndsAt: p.xpMultiplierEndsAt,
     } as never),
   );
   dispatch(

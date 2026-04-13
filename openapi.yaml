@@ -574,53 +574,65 @@ paths:
     get:
       tags: [DailyPuzzles]
       security: []
-      summary: Get today's puzzle
+      summary: Get today's puzzle (deterministic by daysSinceEpoch % totalCount)
+      responses:
+        "200":
+          description: Today's puzzle
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DailyPuzzleClient" }
+        "503": { $ref: "#/components/responses/ServiceUnavailable" }
+        "500": { $ref: "#/components/responses/InternalError" }
+  /daily-puzzles/{id}:
+    get:
+      tags: [DailyPuzzles]
+      security: []
+      summary: Get a specific puzzle by database id (used for prev/next navigation)
       parameters:
-        - in: query
-          name: date
-          required: false
-          schema: { type: string, pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" }
-          description: Optional date override (YYYY-MM-DD)
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+          description: Puzzle database id
       responses:
         "200":
           description: Puzzle payload
           content:
             application/json:
-              schema:
-                type: object
-                required: [puzzle, puzzleIndex, puzzleDate]
-                properties:
-                  puzzle: { $ref: "#/components/schemas/DailyPuzzleClient" }
-                  puzzleIndex: { type: integer, description: Selected puzzle index }
-                  puzzleDate: { type: string, description: Puzzle date (YYYY-MM-DD) }
-        "503": { $ref: "#/components/responses/ServiceUnavailable" }
+              schema: { $ref: "#/components/schemas/DailyPuzzleClient" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
         "500": { $ref: "#/components/responses/InternalError" }
-  /daily-puzzles/validate:
+  /daily-puzzles/{id}/submit:
     post:
       tags: [DailyPuzzles]
       security: []
-      summary: Validate puzzle answer
+      summary: Submit an answer for a puzzle
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+          description: Puzzle database id
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [puzzleId, answer]
+              required: [answer]
               properties:
-                puzzleId: { type: string, description: Puzzle id }
-                answer: { type: string, description: Submitted answer }
+                answer: { type: string, description: Submitted one-line JS expression }
       responses:
         "200":
-          description: Validation result
+          description: Submission result
           content:
             application/json:
               schema:
                 type: object
-                required: [isCorrect, puzzleId]
+                required: [correct]
                 properties:
-                  isCorrect: { type: boolean, description: Whether answer matched accepted answers }
-                  puzzleId: { type: string, description: Puzzle id }
+                  correct: { type: boolean, description: Whether the answer matched accepted answers }
         "400": { $ref: "#/components/responses/BadRequest" }
         "404": { $ref: "#/components/responses/NotFound" }
         "500": { $ref: "#/components/responses/InternalError" }
@@ -932,7 +944,11 @@ components:
         exercise: { $ref: "#/components/schemas/ExerciseClientDto" }
     DailyPuzzleClient:
       type: object
-      required: [id, prompt]
+      required: [id, prompt, orderIndex, totalCount, prevId, nextId]
       properties:
-        id: { type: string, description: Puzzle id }
+        id: { type: integer, description: Puzzle database id }
         prompt: { type: string, description: Puzzle prompt }
+        orderIndex: { type: integer, description: Zero-based rotation index }
+        totalCount: { type: integer, description: Total number of puzzles in the DB }
+        prevId: { type: integer, nullable: true, description: Id of the previous puzzle, null if first }
+        nextId: { type: integer, nullable: true, description: Id of the next puzzle, null if last }

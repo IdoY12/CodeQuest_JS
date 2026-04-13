@@ -1,0 +1,7 @@
+model DailyPuzzle {
+  id              Int      @id @default(autoincrement())
+  prompt          String
+  acceptedAnswers String[]
+  orderIndex      Int      @unique
+  createdAt       DateTime @default(now())
+}

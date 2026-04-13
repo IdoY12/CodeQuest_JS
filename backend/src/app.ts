@@ -13,9 +13,7 @@ import express from "express";
 import helmet from "helmet";
 import { resolveExpressCorsOrigin } from "@project/server-kit/cors";
 import { authRouter } from "./routers/auth.js";
-import { dailyChallengeRouter } from "./routers/dailyChallenge.js";
 import { dailyPuzzlesRouter } from "./routers/dailyPuzzles.js";
-import { duelRouter } from "./routers/duels.js";
 import { learningRouter } from "./routers/learning.js";
 import { userRouter } from "./routers/user.js";
 import { requestLogger } from "./middlewares/requestLogger.js";
@@ -46,8 +44,6 @@ app.get("/health", (_req, res) => res.json({ ok: true, service: "codequest-backe
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 app.use("/api/learning", learningRouter);
-app.use("/api/duels", duelRouter);
-app.use("/api/daily-challenge", dailyChallengeRouter);
 app.use("/api/daily-puzzles", dailyPuzzlesRouter);
 
 app.use((error: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

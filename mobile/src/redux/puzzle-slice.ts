@@ -1,12 +1,12 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
 interface PuzzleState {
-  lastDailyPuzzleSolvedDate: string | null;
+  lastCodePuzzleSolvedDate: string | null;
   puzzleSolvedIdByDate: Record<string, string>;
 }
 
 const initialState: PuzzleState = {
-  lastDailyPuzzleSolvedDate: null,
+  lastCodePuzzleSolvedDate: null,
   puzzleSolvedIdByDate: {},
 };
 
@@ -14,17 +14,17 @@ const puzzleSlice = createSlice({
   name: "puzzle",
   initialState,
   reducers: {
-    markDailyPuzzleSolved: (state, action: PayloadAction<{ dateKey: string; puzzleId: string }>) => {
-      state.lastDailyPuzzleSolvedDate = action.payload.dateKey;
+    markCodePuzzleSolved: (state, action: PayloadAction<{ dateKey: string; puzzleId: string }>) => {
+      state.lastCodePuzzleSolvedDate = action.payload.dateKey;
       state.puzzleSolvedIdByDate[action.payload.dateKey] = action.payload.puzzleId;
     },
     hydratePuzzle: (state, action: PayloadAction<Partial<PuzzleState>>) => {
       const p = action.payload;
-      if (p.lastDailyPuzzleSolvedDate !== undefined) state.lastDailyPuzzleSolvedDate = p.lastDailyPuzzleSolvedDate;
+      if (p.lastCodePuzzleSolvedDate !== undefined) state.lastCodePuzzleSolvedDate = p.lastCodePuzzleSolvedDate;
       if (p.puzzleSolvedIdByDate !== undefined) state.puzzleSolvedIdByDate = p.puzzleSolvedIdByDate;
     },
   },
 });
 
-export const { markDailyPuzzleSolved, hydratePuzzle } = puzzleSlice.actions;
+export const { markCodePuzzleSolved, hydratePuzzle } = puzzleSlice.actions;
 export default puzzleSlice.reducer;

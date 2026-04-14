@@ -6,30 +6,30 @@ import axios from "axios";
 import { colors } from "@/theme/theme";
 import { useAppDispatcher, useAppSelector } from "@/redux/hooks";
 import { addXp } from "@/redux/xp-slice";
-import { markDailyPuzzleSolved } from "@/redux/puzzle-slice";
+import { markCodePuzzleSolved } from "@/redux/puzzle-slice";
 import { addStudySeconds } from "@/redux/session-slice";
 import { API_BASE_URL } from "@/config/network";
-import type { DailyPuzzleScreenProps } from "@/types/homeNavigation.types";
-import { styles } from "./DailyPuzzleScreen.styles";
+import type { CodePuzzleScreenProps } from "@/types/homeNavigation.types";
+import { styles } from "./CodePuzzleScreen.styles";
 
 type Puzzle = {
   id: number;
   prompt: string;
   orderIndex: number;
-  totalCount: number;
-  prevId: number | null;
-  nextId: number | null;
 };
 
-export function DailyPuzzleScreen({ navigation }: DailyPuzzleScreenProps) {
+export function CodePuzzleScreen({ navigation }: CodePuzzleScreenProps) {
   const dispatch = useAppDispatcher();
   const isFocused = useIsFocused();
-  const [puzzle, setPuzzle] = useState<Puzzle | null>(null);
+  const [puzzles, setPuzzles] = useState<Puzzle[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [input, setInput] = useState("");
   const [message, setMessage] = useState<string | null>(null);
 
-  const solvedDate = useAppSelector((s) => s.puzzle.lastDailyPuzzleSolvedDate);
+  const puzzle = puzzles[currentIndex] ?? null;
+
+  const solvedDate = useAppSelector((s) => s.puzzle.lastCodePuzzleSolvedDate);
   const puzzleSolvedIdByDate = useAppSelector((s) => s.puzzle.puzzleSolvedIdByDate);
   const dateKey = new Date().toLocaleDateString("en-CA");
 
@@ -43,23 +43,29 @@ export function DailyPuzzleScreen({ navigation }: DailyPuzzleScreenProps) {
     return () => clearInterval(t);
   }, [dispatch, isFocused]);
 
-  const loadPuzzle = useCallback(async (url: string) => {
+  useEffect(() => {
+    let cancelled = false;
     setLoading(true);
     setMessage(null);
-    setInput("");
-    try {
-      const { data } = await axios.get<Puzzle>(url);
-      setPuzzle(data);
-    } catch {
-      setMessage("Failed to load puzzle. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+    axios
+      .get<Puzzle[]>(`${API_BASE_URL}/code-puzzles/all`)
+      .then(({ data }) => {
+        if (!cancelled) {
+          setPuzzles(data);
+          const todayIndex = Math.floor(Date.now() / (1000 * 60 * 60 * 24)) % data.length;
+          setCurrentIndex(todayIndex);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setMessage("Failed to load puzzles. Please try again.");
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
-
-  useEffect(() => {
-    void loadPuzzle(`${API_BASE_URL}/daily-puzzles/today`);
-  }, [loadPuzzle]);
 
   const onSubmit = useCallback(async () => {
     if (!puzzle) return;
@@ -73,7 +79,7 @@ export function DailyPuzzleScreen({ navigation }: DailyPuzzleScreenProps) {
     }
     try {
       const { data } = await axios.post<{ correct: boolean }>(
-        `${API_BASE_URL}/daily-puzzles/${puzzle.id}/submit`,
+        `${API_BASE_URL}/code-puzzles/${puzzle.id}/submit`,
         { answer: input },
       );
       if (!data.correct) {
@@ -81,7 +87,7 @@ export function DailyPuzzleScreen({ navigation }: DailyPuzzleScreenProps) {
         return;
       }
       dispatch(addXp(40));
-      dispatch(markDailyPuzzleSolved({ dateKey, puzzleId: String(puzzle.id) }));
+      dispatch(markCodePuzzleSolved({ dateKey, puzzleId: String(puzzle.id) }));
       setMessage("Puzzle solved! +40 XP.");
     } catch {
       setMessage("Failed to submit. Please try again.");
@@ -104,7 +110,7 @@ export function DailyPuzzleScreen({ navigation }: DailyPuzzleScreenProps) {
         <Text style={styles.title}>Daily Code Puzzle</Text>
         {puzzle && (
           <Text style={styles.counter}>
-            {puzzle.orderIndex + 1} / {puzzle.totalCount}
+            {puzzle.orderIndex + 1} / {puzzles.length}
           </Text>
         )}
         <Text style={styles.prompt}>{puzzle?.prompt ?? ""}</Text>
@@ -117,17 +123,17 @@ export function DailyPuzzleScreen({ navigation }: DailyPuzzleScreenProps) {
           placeholder="Type one-line expression"
           placeholderTextColor={colors.textMuted}
           multiline={false}
-          accessibilityLabel="Daily puzzle answer input"
+          accessibilityLabel="Code puzzle answer input"
         />
         <View style={styles.navRow}>
           <Pressable
-            style={[styles.navButton, puzzle?.prevId === null && styles.navButtonDisabled]}
+            style={[styles.navButton, currentIndex === 0 && styles.navButtonDisabled]}
             onPress={() => {
-              if (puzzle?.prevId !== null && puzzle?.prevId !== undefined) {
-                void loadPuzzle(`${API_BASE_URL}/daily-puzzles/${puzzle.prevId}`);
-              }
+              setCurrentIndex((i) => Math.max(0, i - 1));
+              setInput("");
+              setMessage(null);
             }}
-            disabled={puzzle?.prevId === null}
+            disabled={currentIndex === 0}
             accessibilityLabel="Previous puzzle"
           >
             <Text style={styles.navLabel}>← Prev</Text>
@@ -140,13 +146,13 @@ export function DailyPuzzleScreen({ navigation }: DailyPuzzleScreenProps) {
             <Text style={styles.navLabel}>Reset</Text>
           </Pressable>
           <Pressable
-            style={[styles.navButton, puzzle?.nextId === null && styles.navButtonDisabled]}
+            style={[styles.navButton, currentIndex === puzzles.length - 1 && styles.navButtonDisabled]}
             onPress={() => {
-              if (puzzle?.nextId !== null && puzzle?.nextId !== undefined) {
-                void loadPuzzle(`${API_BASE_URL}/daily-puzzles/${puzzle.nextId}`);
-              }
+              setCurrentIndex((i) => Math.min(puzzles.length - 1, i + 1));
+              setInput("");
+              setMessage(null);
             }}
-            disabled={puzzle?.nextId === null}
+            disabled={currentIndex === puzzles.length - 1}
             accessibilityLabel="Next puzzle"
           >
             <Text style={styles.navLabel}>Next →</Text>
@@ -155,7 +161,7 @@ export function DailyPuzzleScreen({ navigation }: DailyPuzzleScreenProps) {
         <Pressable
           style={styles.submitButton}
           onPress={() => void onSubmit()}
-          accessibilityLabel="Submit daily puzzle answer"
+          accessibilityLabel="Submit code puzzle answer"
         >
           <Text style={styles.submitLabel}>Submit Puzzle</Text>
         </Pressable>
@@ -163,7 +169,7 @@ export function DailyPuzzleScreen({ navigation }: DailyPuzzleScreenProps) {
         <Pressable
           style={styles.secondaryButton}
           onPress={() => navigation.goBack()}
-          accessibilityLabel="Close daily puzzle"
+          accessibilityLabel="Close code puzzle"
         >
           <Text style={styles.secondaryLabel}>Back to Home</Text>
         </Pressable>

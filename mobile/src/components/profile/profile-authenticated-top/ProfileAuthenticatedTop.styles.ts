@@ -18,7 +18,6 @@ export const t = StyleSheet.create({
   name: { marginTop: spacing.md, color: colors.textPrimary, fontSize: fontSize.lg, fontWeight: "800" },
   email: { color: colors.textSecondary, marginTop: spacing.xs },
   meta: { color: colors.success, marginTop: spacing.sm, fontWeight: "700" },
-  shield: { marginTop: spacing.sm, color: colors.textSecondary, fontSize: fontSize.sm },
   upCard: { backgroundColor: colors.card, borderRadius: radius.card, padding: spacing.md, borderColor: colors.border, borderWidth: 1, flexDirection: "row", gap: spacing.sm, alignItems: "center" },
   upTxt: { color: colors.textSecondary, fontWeight: "700" },
   statsRow: { flexDirection: "row", gap: spacing.md },

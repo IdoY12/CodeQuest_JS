@@ -60,7 +60,7 @@ export function HomeScreen({ navigation }: HomeMainScreenProps) {
         <View style={styles.card}>
           <Text style={styles.cardTitle}>🧩 Daily Code Puzzle</Text>
           <Text style={styles.subText}>Solve one expression puzzle each day for bonus XP.</Text>
-          <Pressable style={styles.secondary} onPress={() => navigation.navigate("DailyPuzzle")}>
+          <Pressable style={styles.secondary} onPress={() => navigation.navigate("CodePuzzle")}>
             <Text style={styles.secondaryText}>Open Puzzle</Text>
           </Pressable>
         </View>

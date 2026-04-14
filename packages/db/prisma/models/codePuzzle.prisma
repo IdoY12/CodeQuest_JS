@@ -1,4 +1,4 @@
-model DailyPuzzle {
+model CodePuzzle {
   id              Int      @id @default(autoincrement())
   prompt          String
   acceptedAnswers String[]

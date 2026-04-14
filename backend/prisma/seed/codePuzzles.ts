@@ -1,7 +1,7 @@
 /**
- * Seeds all daily puzzle rows from the canonical puzzle list.
+ * Seeds all code puzzle rows from the canonical puzzle list.
  *
- * Responsibility: upsert every DailyPuzzle row keyed by orderIndex.
+ * Responsibility: upsert every CodePuzzle row keyed by orderIndex.
  * Layer: backend prisma seed
  * Depends on: @prisma/client
  * Consumers: runMain.ts
@@ -33,9 +33,9 @@ const puzzles = [
   { orderIndex: 20, prompt: "Write a one-line expression that returns a FLATTENED version of nested array `arr`.", acceptedAnswers: ["arr.flat()"] },
 ];
 
-export async function seedDailyPuzzles(prisma: PrismaClient): Promise<void> {
+export async function seedCodePuzzles(prisma: PrismaClient): Promise<void> {
   for (const puzzle of puzzles) {
-    await prisma.dailyPuzzle.upsert({
+    await prisma.codePuzzle.upsert({
       where: { orderIndex: puzzle.orderIndex },
       update: { prompt: puzzle.prompt, acceptedAnswers: puzzle.acceptedAnswers },
       create: puzzle,

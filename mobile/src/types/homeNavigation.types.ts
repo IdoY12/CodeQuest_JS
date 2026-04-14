@@ -5,7 +5,7 @@ import type { MainTabParamList } from "./mainTab.types";
 
 export type HomeStackParamList = {
   HomeMain: undefined;
-  DailyPuzzle: undefined;
+  CodePuzzle: undefined;
 };
 
 export type HomeMainScreenProps = CompositeScreenProps<
@@ -13,7 +13,7 @@ export type HomeMainScreenProps = CompositeScreenProps<
   BottomTabScreenProps<MainTabParamList>
 >;
 
-export type DailyPuzzleScreenProps = CompositeScreenProps<
-  NativeStackScreenProps<HomeStackParamList, "DailyPuzzle">,
+export type CodePuzzleScreenProps = CompositeScreenProps<
+  NativeStackScreenProps<HomeStackParamList, "CodePuzzle">,
   BottomTabScreenProps<MainTabParamList>
 >;

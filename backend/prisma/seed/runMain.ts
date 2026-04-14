@@ -1,5 +1,5 @@
 /**
- * Prisma seed orchestrator: wipes, flat curriculum, duel content, daily puzzles.
+ * Prisma seed orchestrator: wipes, flat curriculum, duel content, code puzzles.
  *
  * Responsibility: call ordered seed steps and disconnect Prisma.
  * Layer: backend prisma seed
@@ -11,7 +11,7 @@ import { injectDatabaseUrlFromConfig } from "@project/db";
 import { persistDuelQuestions } from "./duel/persistDuelQuestions.js";
 import { runAllLessonBlocks } from "./lessons/runAllLessonBlocks.js";
 import { seedCleanup } from "./seedCleanup.js";
-import { seedDailyPuzzles } from "./dailyPuzzles.js";
+import { seedCodePuzzles } from "./codePuzzles.js";
 
 injectDatabaseUrlFromConfig();
 
@@ -21,8 +21,8 @@ async function main(): Promise<void> {
   await seedCleanup(prisma);
   await runAllLessonBlocks(prisma);
   await persistDuelQuestions(prisma);
-  await seedDailyPuzzles(prisma);
-  console.log("Seed complete: exercises, duel questions, daily puzzles.");
+  await seedCodePuzzles(prisma);
+  console.log("Seed complete: exercises, duel questions, code puzzles.");
 }
 
 main()

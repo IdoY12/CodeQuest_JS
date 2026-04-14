@@ -89,7 +89,7 @@ flowchart LR
 
 - Curriculum structure and server-driven learning APIs live in the **backend** (`backend/src/routers/learning.ts` and related controllers).
 - Some content is **seeded** into the database from `backend/prisma/seed/` (orchestrated by `backend/prisma/seed/runMain.ts`). Typechecking for seed scripts is included via `backend/tsconfig.prisma.json`.
-- Daily puzzle content is stored in the **`DailyPuzzle`** database table, seeded from `backend/prisma/seed/dailyPuzzles.ts`.
+- Code puzzle content is stored in the **`CodePuzzle`** Prisma model, seeded from `backend/prisma/seed/codePuzzles.ts`.
 
 ---
 
@@ -142,7 +142,7 @@ Path alias: `@/*` → `mobile/src/*` (see `mobile/tsconfig.json`).
 1. **`packages/db`** — Schema (`packages/db/prisma/`), migrations, and exported `connectDatabase`. Wrong schema changes ripple through backend, io, and seeds.
 2. **`packages/auth-jwt`** — Token shape and expiry constants; must stay aligned with backend auth routes and io verification.
 3. **`packages/server-kit`** — CORS and security validation; changes affect both deployable servers.
-4. **`packages/db`** migrations and `backend/prisma/seed/dailyPuzzles.ts` — daily puzzle data lives in the DB; schema changes require a new migration and re-seed.
+4. **`packages/db`** migrations and `backend/prisma/seed/codePuzzles.ts` — code puzzle data lives in the DB; schema changes require a new migration and re-seed.
 
 ---
 

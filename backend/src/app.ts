@@ -13,7 +13,7 @@ import express from "express";
 import helmet from "helmet";
 import { resolveExpressCorsOrigin } from "@project/server-kit/cors";
 import { authRouter } from "./routers/auth.js";
-import { dailyPuzzlesRouter } from "./routers/dailyPuzzles.js";
+import { codePuzzlesRouter } from "./routers/codePuzzles.js";
 import { learningRouter } from "./routers/learning.js";
 import { userRouter } from "./routers/user.js";
 import { requestLogger } from "./middlewares/requestLogger.js";
@@ -44,7 +44,7 @@ app.get("/health", (_req, res) => res.json({ ok: true, service: "codequest-backe
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 app.use("/api/learning", learningRouter);
-app.use("/api/daily-puzzles", dailyPuzzlesRouter);
+app.use("/api/code-puzzles", codePuzzlesRouter);
 
 app.use((error: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   if (error instanceof SyntaxError && typeof error === "object" && error !== null && "body" in error) {

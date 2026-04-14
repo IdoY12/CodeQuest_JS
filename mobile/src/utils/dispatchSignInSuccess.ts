@@ -43,5 +43,5 @@ export function dispatchSignInSuccess(
   dispatch(resetStreak());
   dispatch(resetLesson());
   dispatch(resetStats());
-  dispatch(hydratePuzzle({ lastDailyPuzzleSolvedDate: null, puzzleSolvedIdByDate: {} }));
+  dispatch(hydratePuzzle({ lastCodePuzzleSolvedDate: null, puzzleSolvedIdByDate: {} }));
 }

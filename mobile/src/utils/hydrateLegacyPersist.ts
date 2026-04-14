@@ -66,8 +66,8 @@ export async function hydrateLegacySessionProgress(
   );
   dispatch(
     hydratePuzzle({
-      lastDailyPuzzleSolvedDate: p.lastDailyPuzzleSolvedDate,
-      puzzleSolvedIdByDate: p.puzzleSolvedIdByDate,
-    } as never),
+      lastCodePuzzleSolvedDate: p.lastCodePuzzleSolvedDate as string | null,
+      puzzleSolvedIdByDate: p.puzzleSolvedIdByDate as Record<string, string>,
+    }),
   );
 }

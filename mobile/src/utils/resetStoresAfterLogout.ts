@@ -16,5 +16,5 @@ export function resetStoresAfterLogout(dispatch: AppDispatch): void {
   dispatch(resetStreak());
   dispatch(resetLesson());
   dispatch(resetStats());
-  dispatch(hydratePuzzle({ lastDailyPuzzleSolvedDate: null, puzzleSolvedIdByDate: {} }));
+  dispatch(hydratePuzzle({ lastCodePuzzleSolvedDate: null, puzzleSolvedIdByDate: {} }));
 }

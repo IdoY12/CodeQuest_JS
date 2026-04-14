@@ -12,9 +12,7 @@ tags:
   - name: Auth
   - name: User
   - name: Learning
-  - name: Duels
-  - name: DailyChallenge
-  - name: DailyPuzzles
+  - name: CodePuzzles
 paths:
   /health:
     get:
@@ -167,35 +165,6 @@ paths:
                   username: { type: string, description: Username }
                   avatarUrl: { type: string, nullable: true, format: uri, description: Avatar URL }
         "400": { $ref: "#/components/responses/BadRequest" }
-  /user/avatar/presigned-url:
-    get:
-      tags: [User]
-      summary: Create avatar upload URL
-      parameters:
-        - in: query
-          name: contentType
-          required: true
-          schema: { type: string, enum: [image/jpeg, image/png, image/webp] }
-          description: File MIME type
-        - in: query
-          name: fileSize
-          required: true
-          schema: { type: integer, minimum: 1, maximum: 5242880 }
-          description: File size in bytes
-      responses:
-        "200":
-          description: Presigned payload
-          content:
-            application/json:
-              schema:
-                type: object
-                required: [uploadUrl, publicUrl, maxSizeBytes]
-                properties:
-                  uploadUrl: { type: string, format: uri, description: Signed PUT URL }
-                  publicUrl: { type: string, format: uri, description: Public avatar URL }
-                  maxSizeBytes: { type: integer, description: Max upload size, example: 5242880 }
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "500": { $ref: "#/components/responses/InternalError" }
   /user/avatar:
     patch:
       tags: [User]
@@ -351,18 +320,6 @@ paths:
                   incompleteReminderCount: { type: integer, description: Count of incomplete reminders }
                   completeReminderSent: { type: boolean, description: Whether complete reminder was sent }
         "400": { $ref: "#/components/responses/BadRequest" }
-  /user/streak-history:
-    get:
-      tags: [User]
-      summary: Recent practice dates for streak UI
-      responses:
-        "200":
-          description: Date keys (YYYY-MM-DD), newest first, up to 7 entries from active UserProgress row
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { type: string, pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" }
   /user/change-password:
     post:
       tags: [User]
@@ -468,144 +425,23 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/UserProgressResume" }
         "500": { $ref: "#/components/responses/InternalError" }
-  /duels/stats:
+  /code-puzzles/all:
     get:
-      tags: [Duels]
-      summary: Get duel stats
-      responses:
-        "200":
-          description: Stats
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/DuelStats" }
-  /duels/history:
-    get:
-      tags: [Duels]
-      summary: Get duel session history
-      responses:
-        "200":
-          description: Sessions
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: "#/components/schemas/DuelSession" }
-  /duels/leaderboard:
-    get:
-      tags: [Duels]
-      summary: Get duel leaderboard
-      responses:
-        "200":
-          description: Leaderboard entries
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: "#/components/schemas/DuelLeaderboardEntry" }
-  /duels/questions:
-    get:
-      tags: [Duels]
-      summary: Get duel questions pool
-      responses:
-        "200":
-          description: Questions
-          content:
-            application/json:
-              schema:
-                type: array
-                items: { $ref: "#/components/schemas/DuelQuestion" }
-  /duels/matchmaking-status:
-    get:
-      tags: [Duels]
-      summary: Get matchmaking status snapshot
-      responses:
-        "200":
-          description: Matchmaking status
-          content:
-            application/json:
-              schema:
-                type: object
-                required: [playersOnline, estimatedWaitSeconds]
-                properties:
-                  playersOnline: { type: integer, description: Current online players estimate }
-                  estimatedWaitSeconds: { type: integer, description: Estimated wait time in seconds }
-  /daily-challenge:
-    get:
-      tags: [DailyChallenge]
+      tags: [CodePuzzles]
       security: []
-      summary: Get current daily challenge
+      summary: Get all code puzzles sorted by orderIndex
       responses:
         "200":
-          description: Challenge payload
+          description: Array of all puzzles
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/DailyChallengeGetResponse" }
-        "503": { $ref: "#/components/responses/ServiceUnavailable" }
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/CodePuzzleClient" }
         "500": { $ref: "#/components/responses/InternalError" }
-  /daily-challenge/submit:
+  /code-puzzles/{id}/submit:
     post:
-      tags: [DailyChallenge]
-      summary: Submit daily challenge answer
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [exerciseId, answer]
-              properties:
-                exerciseId: { type: string, description: Challenge exercise id }
-                answer: { type: string, description: Submitted answer }
-      responses:
-        "200":
-          description: Submission result
-          content:
-            application/json:
-              schema:
-                type: object
-                required: [isCorrect, xpAwarded]
-                properties:
-                  isCorrect: { type: boolean, description: Whether answer was correct }
-                  xpAwarded: { type: integer, description: Awarded XP }
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "404": { $ref: "#/components/responses/NotFound" }
-        "500": { $ref: "#/components/responses/InternalError" }
-  /daily-puzzles/today:
-    get:
-      tags: [DailyPuzzles]
-      security: []
-      summary: Get today's puzzle (deterministic by daysSinceEpoch % totalCount)
-      responses:
-        "200":
-          description: Today's puzzle
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/DailyPuzzleClient" }
-        "503": { $ref: "#/components/responses/ServiceUnavailable" }
-        "500": { $ref: "#/components/responses/InternalError" }
-  /daily-puzzles/{id}:
-    get:
-      tags: [DailyPuzzles]
-      security: []
-      summary: Get a specific puzzle by database id (used for prev/next navigation)
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema: { type: integer }
-          description: Puzzle database id
-      responses:
-        "200":
-          description: Puzzle payload
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/DailyPuzzleClient" }
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "404": { $ref: "#/components/responses/NotFound" }
-        "500": { $ref: "#/components/responses/InternalError" }
-  /daily-puzzles/{id}/submit:
-    post:
-      tags: [DailyPuzzles]
+      tags: [CodePuzzles]
       security: []
       summary: Submit an answer for a puzzle
       parameters:
@@ -696,10 +532,6 @@ components:
       type: string
       description: Exercise type enum from Prisma
       enum: [CONCEPT_CARD, MULTIPLE_CHOICE, FIND_THE_BUG, DRAG_DROP, CODE_FILL, TAP_TOKEN]
-    DuelCategory:
-      type: string
-      description: Duel category enum from Prisma
-      enum: [OUTPUT, SCOPE, ASYNC, TYPES, METHODS]
     RegisterRequest:
       type: object
       required: [email, username, password]
@@ -883,69 +715,10 @@ components:
       properties:
         experienceLevel: { $ref: "#/components/schemas/ExperienceLevel" }
         currentExerciseIndex: { type: integer, description: Index of next exercise in ordered list for this level }
-    DuelStats:
+    CodePuzzleClient:
       type: object
-      required: [rating, wins, losses]
-      properties:
-        rating: { type: integer, description: Duel rating }
-        wins: { type: integer, description: Duel wins }
-        losses: { type: integer, description: Duel losses }
-    DuelSession:
-      type: object
-      required: [id, player1Id, player2Id, winnerId, player1Score, player2Score, roundsPlayed, roundReplay, startedAt, endedAt]
-      properties:
-        id: { type: string, description: Session id }
-        player1Id: { type: string, description: Player 1 id }
-        player2Id: { type: string, description: Player 2 id }
-        winnerId: { type: string, nullable: true, description: Winner id }
-        player1Score: { type: integer, description: Player 1 score }
-        player2Score: { type: integer, description: Player 2 score }
-        roundsPlayed: { type: integer, description: Rounds played }
-        roundReplay: { nullable: true, description: Replay JSON blob }
-        startedAt: { type: string, format: date-time, description: Start time }
-        endedAt: { type: string, format: date-time, nullable: true, description: End time }
-    DuelLeaderboardEntry:
-      type: object
-      required: [id, userId, rating, wins, losses, user]
-      properties:
-        id: { type: string, description: Duel rating row id }
-        userId: { type: string, description: User id }
-        rating: { type: integer, description: Rating value }
-        wins: { type: integer, description: Win count }
-        losses: { type: integer, description: Loss count }
-        user:
-          type: object
-          required: [username, avatarId]
-          properties:
-            username: { type: string, description: Username }
-            avatarId: { type: string, description: Avatar id }
-    DuelQuestion:
-      type: object
-      required: [id, questionText, codeSnippet, correctAnswer, type, difficulty, category, options, explanation]
-      properties:
-        id: { type: string, description: Question id }
-        questionText: { type: string, description: Question text }
-        codeSnippet: { type: string, description: Snippet text }
-        correctAnswer: { type: string, description: Correct answer }
-        type: { $ref: "#/components/schemas/ExerciseType" }
-        difficulty: { $ref: "#/components/schemas/Difficulty" }
-        category: { $ref: "#/components/schemas/DuelCategory" }
-        options: { nullable: true, description: Optional options JSON }
-        explanation: { type: string, description: Explanation text }
-    DailyChallengeGetResponse:
-      type: object
-      required: [challengeDate, bonusXp, exercise]
-      properties:
-        challengeDate: { type: string, description: Date key for challenge (YYYY-MM-DD) }
-        bonusXp: { type: integer, description: Additional XP bonus }
-        exercise: { $ref: "#/components/schemas/ExerciseClientDto" }
-    DailyPuzzleClient:
-      type: object
-      required: [id, prompt, orderIndex, totalCount, prevId, nextId]
+      required: [id, prompt, orderIndex]
       properties:
         id: { type: integer, description: Puzzle database id }
         prompt: { type: string, description: Puzzle prompt }
-        orderIndex: { type: integer, description: Zero-based rotation index }
-        totalCount: { type: integer, description: Total number of puzzles in the DB }
-        prevId: { type: integer, nullable: true, description: Id of the previous puzzle, null if first }
-        nextId: { type: integer, nullable: true, description: Id of the next puzzle, null if last }
+        orderIndex: { type: integer, description: Zero-based order index }

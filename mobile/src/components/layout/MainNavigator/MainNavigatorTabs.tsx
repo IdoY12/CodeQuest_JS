@@ -4,7 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Text, View } from "react-native";
 import { useAppSelector } from "@/redux/hooks";
 import { HomeScreen } from "@/components/home/HomeScreen/HomeScreen";
-import { DailyPuzzleScreen } from "@/components/daily-puzzle/DailyPuzzleScreen/DailyPuzzleScreen";
+import { CodePuzzleScreen } from "@/components/code-puzzle/CodePuzzleScreen/CodePuzzleScreen";
 import { LearnNavigator } from "@/components/layout/LearnNavigator/LearnNavigator";
 import { DuelNavigator } from "@/components/layout/DuelNavigator/DuelNavigator";
 import { ProfileScreen } from "@/components/profile/ProfileScreen";
@@ -34,7 +34,7 @@ function HomeNavigator() {
       }}
     >
       <HomeStack.Screen name="HomeMain" component={HomeScreen} options={{ headerShown: false, title: "Home" }} />
-      <HomeStack.Screen name="DailyPuzzle" component={DailyPuzzleScreen} options={{ title: "Daily Puzzle" }} />
+      <HomeStack.Screen name="CodePuzzle" component={CodePuzzleScreen} options={{ title: "Daily Puzzle" }} />
     </HomeStack.Navigator>
   );
 }

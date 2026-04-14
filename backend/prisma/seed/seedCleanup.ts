@@ -1,5 +1,5 @@
 /**
- * Deletes existing curriculum, duel, and daily puzzle rows before re-seeding.
+ * Deletes existing curriculum, duel, and code puzzle rows before re-seeding.
  *
  * Responsibility: ordered wipe so FK constraints remain satisfied.
  * Layer: backend prisma seed
@@ -14,5 +14,5 @@ export async function seedCleanup(prisma: PrismaClient): Promise<void> {
   await prisma.exerciseOption.deleteMany();
   await prisma.exercise.deleteMany();
   await prisma.duelQuestion.deleteMany();
-  await prisma.dailyPuzzle.deleteMany();
+  await prisma.codePuzzle.deleteMany();
 }

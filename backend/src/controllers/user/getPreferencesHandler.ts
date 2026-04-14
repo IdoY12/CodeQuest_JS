@@ -7,9 +7,8 @@
  */
 
 import type { Response } from "express";
-import { prisma } from "@project/db";
+import { prisma, getProgressForActiveUser, resolveExperienceLevel } from "@project/db";
 import type { AuthenticatedRequest } from "../../@types/auth.js";
-import { getProgressForActiveUser, pathKeyFromExperience } from "@project/db";
 
 export async function getPreferences(req: AuthenticatedRequest, res: Response) {
   const progress = await getProgressForActiveUser(prisma, req.user!.userId);
@@ -22,6 +21,6 @@ export async function getPreferences(req: AuthenticatedRequest, res: Response) {
     userLevel: progress.experienceLevel,
     dailyGoalMinutes: progress.dailyCommitmentMinutes,
     notificationsEnabled: progress.notificationsEnabled,
-    pathKey: pathKeyFromExperience(progress.experienceLevel),
+    pathKey: resolveExperienceLevel(progress.experienceLevel),
   });
 }

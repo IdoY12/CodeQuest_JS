@@ -5,7 +5,7 @@ import { DATABASE_UNAVAILABLE_MESSAGE, isDatabaseUnavailableError } from "../../
 import { comparePassword } from "../../utils/passwordHashing.js";
 import { signAccessToken, signRefreshToken } from "../../utils/sessionJwtTokens.js";
 import { loginBodySchema } from "./authBodySchemas.js";
-import { pathKeyFromExperience } from "@project/db";
+import { resolveExperienceLevel } from "@project/db";
 import {
   ensureDuelRatingRow,
   ensureUserProgressForLogin,
@@ -28,8 +28,8 @@ export async function authLoginHandler(request: Request, response: Response): Pr
       response.status(401).json({ error: "Invalid credentials" });
       return;
     }
-    const valid = await comparePassword(password, user.hashedPassword);
-    if (!valid) {
+    const isPasswordValid = await comparePassword(password, user.hashedPassword);
+    if (!isPasswordValid) {
       logWarn("[AUTH]", "login:invalid-password", { userId: user.id });
       response.status(401).json({ error: "Invalid credentials" });
       return;
@@ -37,7 +37,7 @@ export async function authLoginHandler(request: Request, response: Response): Pr
     const progress = await ensureUserProgressForLogin(user);
     await touchUserLastActive(user.id);
     await ensureDuelRatingRow(user.id);
-    const pathKey = pathKeyFromExperience(progress.experienceLevel);
+    const pathKey = resolveExperienceLevel(progress.experienceLevel);
     const accessToken = signAccessToken({
       userId: user.id,
       email: user.email,

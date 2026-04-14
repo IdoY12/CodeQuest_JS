@@ -25,14 +25,6 @@
     "./verifyRefreshToken": {
       "types": "./dist/verifyRefreshToken.d.ts",
       "import": "./dist/verifyRefreshToken.js"
-    },
-    "./accessTokenJwtExpiry": {
-      "types": "./dist/accessTokenJwtExpiry.d.ts",
-      "import": "./dist/accessTokenJwtExpiry.js"
-    },
-    "./refreshTokenJwtExpiry": {
-      "types": "./dist/refreshTokenJwtExpiry.d.ts",
-      "import": "./dist/refreshTokenJwtExpiry.js"
     }
   },
   "scripts": {

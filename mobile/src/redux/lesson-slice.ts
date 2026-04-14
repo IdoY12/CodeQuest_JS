@@ -6,7 +6,6 @@ export const blockProgressKey = (level: string, blockIndex: number) => `${level}
 interface LessonState {
   currentExperienceLevel: string;
   lessonExerciseIndex: number;
-  lessonAccuracy: number;
   /** Maps blockProgressKey → last question index the user reached (0-based). */
   blockProgress: Record<string, number>;
 }
@@ -14,7 +13,6 @@ interface LessonState {
 const initialState: LessonState = {
   currentExperienceLevel: "JUNIOR",
   lessonExerciseIndex: 0,
-  lessonAccuracy: 0,
   blockProgress: {},
 };
 
@@ -27,9 +25,6 @@ const lessonSlice = createSlice({
     },
     setExerciseIndex: (state, action: PayloadAction<number>) => {
       state.lessonExerciseIndex = action.payload;
-    },
-    setLessonAccuracy: (state, action: PayloadAction<number>) => {
-      state.lessonAccuracy = action.payload;
     },
     saveBlockProgress: (state, action: PayloadAction<{ level: string; blockIndex: number; exerciseIndex: number }>) => {
       const { level, blockIndex, exerciseIndex } = action.payload;
@@ -49,7 +44,6 @@ const lessonSlice = createSlice({
 export const {
   setCurrentExperienceLevel,
   setExerciseIndex,
-  setLessonAccuracy,
   saveBlockProgress,
   resetBlockProgress,
   hydrateLesson,

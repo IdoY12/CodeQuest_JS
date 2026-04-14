@@ -16,16 +16,16 @@ export type ExerciseViewProps = {
   onLessonExerciseComplete: (answer: string, context: LessonExerciseCompletionContext) => void;
 };
 
-export function ExerciseView(p: ExerciseViewProps) {
-  const { exercise } = p;
-  const t = exercise.type;
-  const s = { exercise, accessToken: p.accessToken, onLessonExerciseComplete: p.onLessonExerciseComplete };
+export function ExerciseView(props: ExerciseViewProps) {
+  const { exercise } = props;
+  const exerciseType = exercise.type;
+  const sharedProps = { exercise, accessToken: props.accessToken, onLessonExerciseComplete: props.onLessonExerciseComplete };
   let body: ReactNode;
-  if (t === "CONCEPT_CARD") body = <EvConcept {...s} />;
-  else if (t === "MULTIPLE_CHOICE") body = <EvMcqTap variant="mcq" {...s} />;
-  else if (t === "FIND_THE_BUG") body = <EvFindBug {...s} lineList={exerciseLineList(exercise.codeSnippet)} />;
-  else if (t === "DRAG_DROP") body = <EvDragDrop {...s} />;
-  else if (t === "CODE_FILL") body = <EvCodeFill {...s} />;
-  else body = <EvMcqTap variant="tap_token" {...s} />;
+  if (exerciseType === "CONCEPT_CARD") body = <EvConcept {...sharedProps} />;
+  else if (exerciseType === "MULTIPLE_CHOICE") body = <EvMcqTap variant="mcq" {...sharedProps} />;
+  else if (exerciseType === "FIND_THE_BUG") body = <EvFindBug {...sharedProps} lineList={exerciseLineList(exercise.codeSnippet)} />;
+  else if (exerciseType === "DRAG_DROP") body = <EvDragDrop {...sharedProps} />;
+  else if (exerciseType === "CODE_FILL") body = <EvCodeFill {...sharedProps} />;
+  else body = <EvMcqTap variant="tap_token" {...sharedProps} />;
   return <View style={v.root}>{body}</View>;
 }

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { AppState } from "react-native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { useAppDispatcher, useAppSelector } from "@/redux/hooks";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { addStudySeconds } from "@/redux/session-slice";
 import { addXp } from "@/redux/xp-slice";
 import { applyDuelResult } from "@/redux/duel-slice";
@@ -12,7 +12,7 @@ import { DUEL_ACTIVE_ROUND_SECONDS } from "@/constants/duelUiConstants";
 
 type Nav = NativeStackNavigationProp<DuelStackParamList, "ActiveDuel">;
 export function useDuelActiveDuelScreen(navigation: Nav) {
-  const dispatch = useAppDispatcher();
+  const dispatch = useAppDispatch();
   const { round, score, sessionId, submitAnswer, playerReady, duelEnd, opponent } = useDuelSocket();
   const userId = useAppSelector((s) => s.session.userId);
   const username = useAppSelector((s) => s.profile.username);

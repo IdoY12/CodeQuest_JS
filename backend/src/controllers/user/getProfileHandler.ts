@@ -9,7 +9,7 @@
 import type { Response } from "express";
 import { prisma } from "@project/db";
 import type { AuthenticatedRequest } from "../../@types/auth.js";
-import { getProgressForActiveUser, pathKeyFromExperience } from "@project/db";
+import { getProgressForActiveUser, resolveExperienceLevel } from "@project/db";
 
 export async function getProfile(req: AuthenticatedRequest, res: Response) {
   const user = await prisma.user.findUnique({
@@ -37,7 +37,7 @@ export async function getProfile(req: AuthenticatedRequest, res: Response) {
         notificationsEnabled: progress.notificationsEnabled,
         onboardingCompleted: progress.onboardingCompleted,
         currentExerciseIndex: progress.currentExerciseIndex,
-        pathKey: pathKeyFromExperience(progress.experienceLevel),
+        pathKey: resolveExperienceLevel(progress.experienceLevel),
       }
     : null;
 

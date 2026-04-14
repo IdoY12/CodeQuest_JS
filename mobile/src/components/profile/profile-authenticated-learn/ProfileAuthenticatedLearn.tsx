@@ -1,4 +1,3 @@
-import React from "react";
 import { Pressable, Text, View } from "react-native";
 import type { UseProfileScreenReturn } from "@/hooks/useProfileScreen";
 import { profileSectionCardStyles } from "@/theme/profileSectionCard";

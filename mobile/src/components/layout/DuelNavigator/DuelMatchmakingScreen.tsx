@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppSelector } from "@/redux/hooks";
 import { useDuelSocket } from "@/hooks/useDuelSocket";
 import { logDuel, logNav } from "@/utils/logger";
 import type { MatchmakingScreenProps } from "@/types/duelNavigation.types";
 import { styles } from "./DuelNavigator.styles";
+
+const QUEUE_TIMER_INTERVAL_MS = 1000;
+const MOCK_MATCH_TIMEOUT_MS = 20000;
+const MATCH_COUNTDOWN_TICK_MS = 700;
+const FALLBACK_PLAYERS_ONLINE = 143;
 
 export function DuelMatchmakingScreen({ navigation }: MatchmakingScreenProps) {
   const { playersOnline, sessionId, opponent, joinQueue, leaveQueue, startLocalMockMatch } = useDuelSocket();
@@ -25,10 +30,10 @@ export function DuelMatchmakingScreen({ navigation }: MatchmakingScreenProps) {
     hasJoinedQueueRef.current = true;
     joinQueue({ userId, username, rating: duelRating, token: accessToken });
     logDuel("queue:join", { userId });
-    const interval = setInterval(() => setSeconds((v) => v + 1), 1000);
+    const interval = setInterval(() => setSeconds((v) => v + 1), QUEUE_TIMER_INTERVAL_MS);
     const timeout = setTimeout(() => {
       if (!sessionId) startLocalMockMatch();
-    }, 20000);
+    }, MOCK_MATCH_TIMEOUT_MS);
     return () => {
       clearInterval(interval);
       clearTimeout(timeout);
@@ -39,7 +44,7 @@ export function DuelMatchmakingScreen({ navigation }: MatchmakingScreenProps) {
   }, [accessToken, duelRating, joinQueue, leaveQueue, startLocalMockMatch, userId, username]);
   useEffect(() => {
     if (sessionId && opponent) {
-      const timer = setInterval(() => setCountdown((value) => Math.max(0, value - 1)), 700);
+      const timer = setInterval(() => setCountdown((value) => Math.max(0, value - 1)), MATCH_COUNTDOWN_TICK_MS);
       return () => clearInterval(timer);
     }
     return undefined;
@@ -50,7 +55,7 @@ export function DuelMatchmakingScreen({ navigation }: MatchmakingScreenProps) {
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <Text style={styles.searching}>Searching for an opponent...</Text>
-      <Text style={styles.sub}>⚡ {playersOnline || 143} players online</Text>
+      <Text style={styles.sub}>⚡ {playersOnline || FALLBACK_PLAYERS_ONLINE} players online</Text>
       <Text style={styles.sub}>Estimated wait: {seconds}s</Text>
       {opponent ? <Text style={styles.vs}>VS {opponent.username} · {countdown}</Text> : null}
       <Pressable style={styles.secondaryBtn} onPress={() => navigation.goBack()}>

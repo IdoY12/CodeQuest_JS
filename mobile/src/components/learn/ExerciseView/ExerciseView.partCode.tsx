@@ -1,4 +1,3 @@
-import React from "react";
 import { Pressable, Text, TextInput, View } from "react-native";
 import { colors } from "@/theme/theme";
 import type Exercise from "@/models/Exercise";

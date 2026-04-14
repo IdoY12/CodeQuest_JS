@@ -3,14 +3,14 @@ import { Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { commitmentOptions, levels } from "@/constants/profilePreferences";
-import { useAppDispatcher, useAppSelector } from "@/redux/hooks";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { updatePreferences } from "@/redux/profile-slice";
 import { logNav } from "@/utils/logger";
 import { AuthenticatedProfileScreen } from "../authenticated-profile-screen/AuthenticatedProfileScreen";
 import { styles } from "./ProfileScreen.styles";
 
 function GuestProfileBody() {
-  const dispatch = useAppDispatcher();
+  const dispatch = useAppDispatch();
   const navigation = useNavigation();
   const xp = useAppSelector((s) => s.xp.xpTotal);
   const level = useAppSelector((s) => s.xp.level);

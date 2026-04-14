@@ -9,4 +9,3 @@
 
 export { resolveExpressCorsOrigin } from "./resolveExpressCorsOrigin.js";
 export { resolveSocketIoCors } from "./resolveSocketIoCors.js";
-export { parseCommaSeparatedOrigin } from "./parseCommaSeparatedOrigin.js";

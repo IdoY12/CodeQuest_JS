@@ -1,4 +1,3 @@
-import React from "react";
 import { ActivityIndicator, Image, Pressable, Text, View } from "react-native";
 import { colors } from "@/theme/theme";
 import type { UseProfileScreenReturn } from "@/hooks/useProfileScreen";

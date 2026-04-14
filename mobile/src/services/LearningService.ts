@@ -28,8 +28,6 @@ export default class LearningService extends AuthAware {
     const { data } = await this.axiosInstance.post<ExerciseSubmitResult>("/learning/submit-exercise", {
       exerciseId,
       answer,
-      timeTakenMs: 1000,
-      attempts: 1,
     });
     return data;
   }

@@ -31,9 +31,9 @@ export async function pickQuestionForSession(session: SessionState) {
           ? "SENIOR"
           : "JUNIOR";
 
-  let q = await pickRandomDuelQuestion(targetDifficulty);
-  if (!q) {
-    q = await pickRandomDuelQuestion();
+  let question = await pickRandomDuelQuestion(targetDifficulty);
+  if (!question) {
+    question = await pickRandomDuelQuestion();
   }
-  return q;
+  return question;
 }

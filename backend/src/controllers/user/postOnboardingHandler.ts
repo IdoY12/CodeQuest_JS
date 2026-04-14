@@ -10,7 +10,7 @@ import type { Response } from "express";
 import { z } from "zod";
 import { prisma } from "@project/db";
 import type { AuthenticatedRequest } from "../../@types/auth.js";
-import { pathKeyFromExperience } from "@project/db";
+import { resolveExperienceLevel } from "@project/db";
 import { logError, logInfo, logWarn } from "../../utils/logger.js";
 
 export async function postOnboarding(req: AuthenticatedRequest, res: Response) {
@@ -54,7 +54,7 @@ export async function postOnboarding(req: AuthenticatedRequest, res: Response) {
     logInfo("[ONBOARDING]", "submit:success", { userId: req.user?.userId, experienceLevel: level });
     return res.json({
       onboardingCompleted: updated.onboardingCompleted,
-      pathKey: pathKeyFromExperience(updated.experienceLevel),
+      pathKey: resolveExperienceLevel(updated.experienceLevel),
       goal: updated.goal,
       experienceLevel: updated.experienceLevel,
       dailyCommitmentMinutes: updated.dailyCommitmentMinutes,

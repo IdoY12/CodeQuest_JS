@@ -17,8 +17,6 @@ export async function learningSubmitExerciseHandler(
       .object({
         exerciseId: z.string().min(3),
         answer: z.string(),
-        timeTakenMs: z.number().int().positive().default(1000),
-        attempts: z.number().int().positive().default(1),
       })
       .safeParse(request.body);
     if (!parsed.success) {
@@ -29,8 +27,6 @@ export async function learningSubmitExerciseHandler(
       userId: request.user!.userId,
       exerciseId: parsed.data.exerciseId,
       answer: parsed.data.answer,
-      timeTakenMs: parsed.data.timeTakenMs,
-      attempts: parsed.data.attempts,
     });
     if (!result) {
       response.status(404).json({ error: "Exercise not found" });

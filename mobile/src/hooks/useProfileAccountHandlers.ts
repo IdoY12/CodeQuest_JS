@@ -1,6 +1,6 @@
 import React from "react";
 import { Alert } from "react-native";
-import { useAppDispatcher } from "@/redux/hooks";
+import { useAppDispatch } from "@/redux/hooks";
 import { toggleHaptics, toggleSounds } from "@/redux/profile-slice";
 import type UserService from "@/services/UserService";
 import { changePasswordRequest, deleteAccountRequest, updateUsername } from "@/utils/profileAccountMutations";
@@ -10,7 +10,7 @@ import type { ProfileDraftState } from "./useProfileDraftState";
 import type { ProfileReduxState } from "./useProfileRedux";
 
 export function useProfileAccountHandlers(r: ProfileReduxState, d: ProfileDraftState, user: UserService | null) {
-  const dispatch = useAppDispatcher();
+  const dispatch = useAppDispatch();
   const onSavePreferences = React.useCallback(async () => {
     if (!r.accessToken || !user || d.saving) return;
     d.setSaving(true);

@@ -15,7 +15,7 @@ import { startRound } from "../session.js";
 import type { DuelNamespace } from "../types.js";
 
 export function registerPlayerReady(socket: Socket, duel: DuelNamespace) {
-  socket.on("player_ready", async (payload: { session_id: string; userId?: string }) => {
+  socket.on("player_ready", async (payload: { session_id: string }) => {
     try {
       const session = sessions.get(payload.session_id);
       if (!session) return;

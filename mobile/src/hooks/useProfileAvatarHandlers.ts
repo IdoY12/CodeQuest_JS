@@ -1,13 +1,13 @@
 import React from "react";
 import { Alert } from "react-native";
-import { useAppDispatcher } from "@/redux/hooks";
+import { useAppDispatch } from "@/redux/hooks";
 import type UserService from "@/services/UserService";
 import { handleAvatarUploadError, runAvatarUpload } from "@/utils/profileAvatarUpload";
 import type { ProfileDraftState } from "./useProfileDraftState";
 import type { ProfileReduxState } from "./useProfileRedux";
 
 export function useProfileAvatarHandlers(r: ProfileReduxState, d: ProfileDraftState, user: UserService | null) {
-  const dispatch = useAppDispatcher();
+  const dispatch = useAppDispatch();
   const pickImageAndUpload = React.useCallback(
     async (source: "camera" | "library") => {
       if (!r.accessToken || !user || d.uploadingAvatar) return;

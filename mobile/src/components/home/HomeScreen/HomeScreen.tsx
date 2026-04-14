@@ -1,4 +1,3 @@
-import React from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useHomeScreen } from "@/hooks/useHomeScreen";
@@ -8,7 +7,7 @@ import { guardDuelAccess } from "@/utils/formatHelpers";
 import { styles } from "./HomeScreen.styles";
 
 export function HomeScreen({ navigation }: HomeMainScreenProps) {
-  const h = useHomeScreen();
+  const home = useHomeScreen();
   const isGuest = useAppSelector((s) => s.session.isGuest);
   const onDuelPress = () =>
     guardDuelAccess(
@@ -19,35 +18,35 @@ export function HomeScreen({ navigation }: HomeMainScreenProps) {
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-        <Text style={styles.greeting}>Good morning, {h.username} 👋</Text>
+        <Text style={styles.greeting}>Good morning, {home.username} 👋</Text>
         <Text style={styles.date}>{new Date().toDateString()}</Text>
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Practice time today</Text>
           <Text style={styles.subText}>
-            {h.practiceMinutesToday} / {h.dailyGoalMinutes} min
+            {home.practiceMinutesToday} / {home.dailyGoalMinutes} min
           </Text>
           <View style={styles.progressTrack}>
-            <View style={[styles.progressFill, { width: `${h.dailyGoalProgressPct}%` }]} />
+            <View style={[styles.progressFill, { width: `${home.dailyGoalProgressPct}%` }]} />
           </View>
         </View>
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>🔥 {h.streak}-day streak!</Text>
+          <Text style={styles.cardTitle}>🔥 {home.streak}-day streak!</Text>
           <Text style={styles.subText}>
             Complete at least one exercise every day to keep your streak alive.
           </Text>
           <View style={styles.row}>
-            {h.streakDays.map((done, idx) => (
+            {home.streakDays.map((done, idx) => (
               <View key={idx} style={[styles.dot, done && styles.dotDone, idx === 6 && styles.dotToday]} />
             ))}
-            {h.streak > 7 && <Text style={styles.date}>Day {h.streak}</Text>}
+            {home.streak > 7 && <Text style={styles.date}>Day {home.streak}</Text>}
           </View>
         </View>
         <View style={styles.card}>
           <Text style={styles.cardTitle}>
-            Level {h.level} · {h.xp} / {h.nextLevelXp} XP
+            Level {home.level} · {home.xp} / {home.nextLevelXp} XP
           </Text>
           <View style={styles.progressTrack}>
-            <View style={[styles.progressFill, { width: `${h.currentLevelProgress}%` }]} />
+            <View style={[styles.progressFill, { width: `${home.currentLevelProgress}%` }]} />
           </View>
         </View>
         <View style={styles.heroCard}>
@@ -58,8 +57,8 @@ export function HomeScreen({ navigation }: HomeMainScreenProps) {
           </Pressable>
         </View>
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>🧩 Daily Code Puzzle</Text>
-          <Text style={styles.subText}>Solve one expression puzzle each day for bonus XP.</Text>
+          <Text style={styles.cardTitle}>🧩 Code Puzzle</Text>
+          <Text style={styles.subText}>Solve expression puzzles and earn bonus XP.</Text>
           <Pressable style={styles.secondary} onPress={() => navigation.navigate("CodePuzzle")}>
             <Text style={styles.secondaryText}>Open Puzzle</Text>
           </Pressable>

@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { colors, fontSize, radius, spacing } from "@/theme/theme";
+import { colors, fontSize, spacing } from "@/theme/theme";
 
 export const lessonScreenStyles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },

@@ -34,7 +34,7 @@ function HomeNavigator() {
       }}
     >
       <HomeStack.Screen name="HomeMain" component={HomeScreen} options={{ headerShown: false, title: "Home" }} />
-      <HomeStack.Screen name="CodePuzzle" component={CodePuzzleScreen} options={{ title: "Daily Puzzle" }} />
+      <HomeStack.Screen name="CodePuzzle" component={CodePuzzleScreen} options={{ title: "Code Puzzle" }} />
     </HomeStack.Navigator>
   );
 }

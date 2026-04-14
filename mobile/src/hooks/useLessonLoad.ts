@@ -4,7 +4,7 @@ import { useIsFocused } from "@react-navigation/native";
 import { logNav } from "@/utils/logger";
 import type Exercise from "@/models/Exercise";
 import type { Experience } from "@/redux/profile-slice";
-import { useAppDispatcher, useAppSelector } from "@/redux/hooks";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import {
   blockProgressKey,
   saveBlockProgress,
@@ -20,7 +20,7 @@ import { runLessonExerciseLoad } from "@/utils/runLessonExerciseLoad";
 import { tryPostPracticeLog } from "@/utils/tryPostPracticeLog";
 
 export function useLessonLoad(experienceLevel: Experience, accessToken: string | null, blockIndex: number) {
-  const dispatch = useAppDispatcher();
+  const dispatch = useAppDispatch();
   const user = useAuthenticatedService(UserService);
   const savedLocalIndex = useAppSelector(
     (s) => s.lesson.blockProgress?.[blockProgressKey(experienceLevel, blockIndex)] ?? 0,

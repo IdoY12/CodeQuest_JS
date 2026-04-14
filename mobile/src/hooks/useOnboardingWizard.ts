@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { logError, logNav, logOnboarding } from "@/utils/logger";
-import { useAppDispatcher, useAppSelector } from "@/redux/hooks";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import type { Commitment, Experience, Goal } from "@/redux/profile-slice";
 import { completeOnboarding, setOnboarding } from "@/redux/profile-slice";
 import { setOnboardingCompleted } from "@/redux/session-slice";
@@ -8,7 +8,7 @@ import { useAuthenticatedService } from "@/hooks/useAuthenticatedService";
 import UserService from "@/services/UserService";
 
 export function useOnboardingWizard() {
-  const dispatch = useAppDispatcher();
+  const dispatch = useAppDispatch();
   const user = useAuthenticatedService(UserService);
   const accessToken = useAppSelector((s) => s.session.accessToken);
   const [step, setStep] = useState(1);

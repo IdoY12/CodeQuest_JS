@@ -1,4 +1,3 @@
-import React from "react";
 import { Pressable, Text } from "react-native";
 import type { DuelRound } from "@/utils/duelSocketState";
 import { styles } from "./DuelNavigator.styles";

@@ -7,69 +7,69 @@ import { ObPath } from "./OnboardingFlow.wB";
 import { o } from "./OnboardingFlow.styles";
 
 export function OnboardingFlow() {
-  const w = useOnboardingWizard();
+  const wizard = useOnboardingWizard();
   return (
     <SafeAreaView style={o.container} edges={["top", "bottom"]}>
-      {w.step === 1 && (
+      {wizard.step === 1 && (
         <ObStep
           title="What's your level?"
           onContinue={() => {
-            logOnboarding("step:complete", { step: 1, level: w.level });
-            w.setStep(2);
+            logOnboarding("step:complete", { step: 1, level: wizard.level });
+            wizard.setStep(2);
           }}
-          enabled={!!w.level}
+          enabled={!!wizard.level}
         >
           {ONBOARDING_LEVELS.map((opt) => (
             <ObChoice
               key={opt.key}
-              selected={w.level === opt.key}
+              selected={wizard.level === opt.key}
               title={opt.title}
               subtitle={opt.subtitle}
-              onPress={() => w.setLevel(opt.key)}
+              onPress={() => wizard.setLevel(opt.key)}
             />
           ))}
         </ObStep>
       )}
-      {w.step === 2 && (
+      {wizard.step === 2 && (
         <ObStep
           title="What is your goal?"
           onContinue={() => {
-            logOnboarding("step:complete", { step: 2, goal: w.goal });
-            w.setStep(3);
+            logOnboarding("step:complete", { step: 2, goal: wizard.goal });
+            wizard.setStep(3);
           }}
-          enabled={!!w.goal}
+          enabled={!!wizard.goal}
         >
           {ONBOARDING_GOALS.map((opt) => (
             <ObChoice
               key={opt.key}
-              selected={w.goal === opt.key}
+              selected={wizard.goal === opt.key}
               title={opt.title}
               subtitle={opt.subtitle}
-              onPress={() => w.setGoal(opt.key)}
+              onPress={() => wizard.setGoal(opt.key)}
             />
           ))}
         </ObStep>
       )}
-      {w.step === 3 && (
+      {wizard.step === 3 && (
         <ObStep
           title="How many minutes do you plan to study per day?"
           onContinue={() => {
-            logOnboarding("step:complete", { step: 3, commitment: w.commitment });
-            w.submitOnboarding();
+            logOnboarding("step:complete", { step: 3, commitment: wizard.commitment });
+            wizard.submitOnboarding();
           }}
           enabled
-          continueLabel={w.submitting ? "Saving..." : "Get Started"}
+          continueLabel={wizard.submitting ? "Saving..." : "Get Started"}
         >
           {ONBOARDING_COMMITMENTS.map((opt) => (
             <ObChoice
               key={opt.key}
-              selected={w.commitment === opt.key}
+              selected={wizard.commitment === opt.key}
               title={opt.title}
               subtitle={opt.subtitle}
-              onPress={() => w.setCommitment(opt.key)}
+              onPress={() => wizard.setCommitment(opt.key)}
             />
           ))}
-          <ObPath pathText={w.pathText} submitting={w.submitting} error={w.error} />
+          <ObPath pathText={wizard.pathText} submitting={wizard.submitting} error={wizard.error} />
         </ObStep>
       )}
     </SafeAreaView>

@@ -34,10 +34,10 @@ export async function codePuzzleSubmitHandler(request: Request, response: Respon
       return;
     }
     const normalizedInput = normalizeAnswer(answer);
-    const correct = puzzle.acceptedAnswers.some(
+    const isAnswerCorrect = puzzle.acceptedAnswers.some(
       (accepted) => normalizeAnswer(accepted) === normalizedInput,
     );
-    const body: CodePuzzleSubmitDto = { correct };
+    const body: CodePuzzleSubmitDto = { correct: isAnswerCorrect };
     response.json(body);
   } catch (error) {
     logError("[TASKS]", error, { phase: "code-puzzle-submit" });

@@ -3,7 +3,7 @@ import { Alert, Pressable, ScrollView, Text, View } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuthScreen } from "@/hooks/useAuthScreen";
-import { useAppDispatcher } from "@/redux/hooks";
+import { useAppDispatch } from "@/redux/hooks";
 import { colors } from "@/theme/theme";
 import { AuthCredentials } from "../auth-credentials/AuthCredentials";
 import { styles } from "./AuthScreen.styles";
@@ -49,7 +49,7 @@ function AuthFooter({ isLogin, setIsLogin }: { isLogin: boolean; setIsLogin: Dis
 }
 
 export function AuthScreen() {
-  const dispatch = useAppDispatcher();
+  const dispatch = useAppDispatch();
   const a = useAuthScreen(dispatch);
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>

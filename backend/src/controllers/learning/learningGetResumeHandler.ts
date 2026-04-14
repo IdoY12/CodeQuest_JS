@@ -5,7 +5,7 @@ import { activeExperienceLevelOf } from "@project/db";
 import type { ExperienceLevel } from "@prisma/client";
 import { logError, logInfo } from "../../utils/logger.js";
 
-export type LearningResumeResponse = {
+type LearningResumeResponse = {
   experienceLevel: string;
   currentExerciseIndex: number;
 };

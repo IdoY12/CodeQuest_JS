@@ -1,12 +1,12 @@
 import type { ExperienceLevel, PrismaClient } from "@prisma/client";
 
-export function pathKeyFromExperience(level: ExperienceLevel | null | undefined): ExperienceLevel {
+export function resolveExperienceLevel(level: ExperienceLevel | null | undefined): ExperienceLevel {
   return level ?? "JUNIOR";
 }
 
 export async function activeExperienceLevelOf(prisma: PrismaClient, userId: string): Promise<ExperienceLevel> {
-  const u = await prisma.user.findUnique({ where: { id: userId }, select: { activeExperienceLevel: true } });
-  return u?.activeExperienceLevel ?? "JUNIOR";
+  const userRecord = await prisma.user.findUnique({ where: { id: userId }, select: { activeExperienceLevel: true } });
+  return userRecord?.activeExperienceLevel ?? "JUNIOR";
 }
 
 export async function getProgressForActiveUser(prisma: PrismaClient, userId: string) {

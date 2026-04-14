@@ -10,7 +10,7 @@ import type { Response } from "express";
 import { z } from "zod";
 import { prisma } from "@project/db";
 import type { AuthenticatedRequest } from "../../@types/auth.js";
-import { pathKeyFromExperience } from "@project/db";
+import { resolveExperienceLevel } from "@project/db";
 import { logInfo, logWarn } from "../../utils/logger.js";
 
 export async function patchPreferences(req: AuthenticatedRequest, res: Response) {
@@ -58,6 +58,6 @@ export async function patchPreferences(req: AuthenticatedRequest, res: Response)
     experienceLevel: updated.experienceLevel,
     dailyCommitmentMinutes: updated.dailyCommitmentMinutes,
     notificationsEnabled: updated.notificationsEnabled,
-    pathKey: pathKeyFromExperience(updated.experienceLevel),
+    pathKey: resolveExperienceLevel(updated.experienceLevel),
   });
 }

@@ -11,7 +11,7 @@ import {
   subscribeStoreToHybridStorage,
 } from "@/utils/appShellPersistence";
 import store from "@/redux/store";
-import { useAppDispatcher, useAppSelector } from "@/redux/hooks";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { hydrateStoreFromStorage } from "@/utils/hydrateStore";
 import { bootstrapSession } from "@/utils/bootstrapSession";
 import { logApp, logAuth } from "@/utils/logger";
@@ -20,7 +20,7 @@ import { runDailyGoalNotificationCheck } from "@/utils/dailyGoalNotificationChec
 export const appQueryClient = new QueryClient();
 
 export function useAppShell() {
-  const dispatch = useAppDispatcher();
+  const dispatch = useAppDispatch();
   const [isConnected, setIsConnected] = useState(true);
   const hasHydrated = useAppSelector((s) => s.session.hasHydrated);
   const isAuthenticated = useAppSelector((s) => s.session.isAuthenticated);

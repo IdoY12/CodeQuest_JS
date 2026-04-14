@@ -1,4 +1,3 @@
-import React from "react";
 import { Pressable, Text, View } from "react-native";
 import type Exercise from "@/models/Exercise";
 import { useExerciseSingleChoice } from "@/hooks/useExerciseSingleChoice";

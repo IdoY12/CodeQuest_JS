@@ -21,18 +21,17 @@ export function registerJoinQueue(socket: Socket, duel: DuelNamespace) {
       logInfo("[DUEL]", "queue:rejected-unauthenticated", { socketId: socket.id });
       return;
     }
-    const userId = authenticatedUserId;
-    const level = await activeExperienceLevelOf(prisma, userId);
+    const level = await activeExperienceLevelOf(prisma, authenticatedUserId);
     const [user, ratingFromDb, progress] = await Promise.all([
-      prisma.user.findUnique({ where: { id: userId } }).catch(() => null),
-      prisma.duelRating.findUnique({ where: { userId } }).catch(() => null),
+      prisma.user.findUnique({ where: { id: authenticatedUserId } }).catch(() => null),
+      prisma.duelRating.findUnique({ where: { userId: authenticatedUserId } }).catch(() => null),
       prisma.userProgress
-        .findUnique({ where: { userId_experienceLevel: { userId, experienceLevel: level } } })
+        .findUnique({ where: { userId_experienceLevel: { userId: authenticatedUserId, experienceLevel: level } } })
         .catch(() => null),
     ]);
     const entry: QueueEntry = {
       socketId: socket.id,
-      userId,
+      userId: authenticatedUserId,
       username: user?.username ?? payload.username ?? "Anonymous",
       avatarId: user?.avatarId ?? "avatar-braces",
       rating: ratingFromDb?.rating ?? payload.rating ?? 1000,

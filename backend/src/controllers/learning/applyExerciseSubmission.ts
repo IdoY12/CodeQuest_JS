@@ -6,8 +6,6 @@ type SubmitInput = {
   userId: string;
   exerciseId: string;
   answer: string;
-  timeTakenMs: number;
-  attempts: number;
 };
 
 export async function applyExerciseSubmission(input: SubmitInput): Promise<ExerciseSubmitResponseDto | null> {

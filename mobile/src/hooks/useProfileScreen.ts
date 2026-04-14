@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { useAppDispatcher } from "@/redux/hooks";
+import { useAppDispatch } from "@/redux/hooks";
 import type { AppDispatch } from "@/redux/store";
 import { logNav } from "@/utils/logger";
 import type UserService from "@/services/UserService";
@@ -46,19 +46,19 @@ function useProfileLifecycle(
 }
 
 export function useProfileScreen() {
-  const dispatch = useAppDispatcher();
+  const dispatch = useAppDispatch();
   const user = useAuthenticatedService(UserServiceClass);
-  const r = useProfileRedux();
-  const d = useProfileDraftState(r);
-  useProfileLifecycle(user, r.accessToken, dispatch, r.username, d.setDraftUsername, d.setScreenLoading, {
-    setDraftGoal: d.setDraftGoal,
-    setDraftLevel: d.setDraftLevel,
-    setDraftCommitment: d.setDraftCommitment,
-    setDraftNotifications: d.setDraftNotifications,
+  const profileRedux = useProfileRedux();
+  const profileDraft = useProfileDraftState(profileRedux);
+  useProfileLifecycle(user, profileRedux.accessToken, dispatch, profileRedux.username, profileDraft.setDraftUsername, profileDraft.setScreenLoading, {
+    setDraftGoal: profileDraft.setDraftGoal,
+    setDraftLevel: profileDraft.setDraftLevel,
+    setDraftCommitment: profileDraft.setDraftCommitment,
+    setDraftNotifications: profileDraft.setDraftNotifications,
   });
-  const { onSavePreferences, ...handlers } = useProfileAccountHandlers(r, d, user);
-  const { onAvatarPress } = useProfileAvatarHandlers(r, d, user);
-  return { ...r, ...d, onSavePreferences, onAvatarPress, ...handlers };
+  const { onSavePreferences, ...handlers } = useProfileAccountHandlers(profileRedux, profileDraft, user);
+  const { onAvatarPress } = useProfileAvatarHandlers(profileRedux, profileDraft, user);
+  return { ...profileRedux, ...profileDraft, onSavePreferences, onAvatarPress, ...handlers };
 }
 
 export type UseProfileScreenReturn = ReturnType<typeof useProfileScreen>;

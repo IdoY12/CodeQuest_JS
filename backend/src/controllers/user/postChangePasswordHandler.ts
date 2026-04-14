@@ -21,8 +21,8 @@ export async function postChangePassword(req: AuthenticatedRequest, res: Respons
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
   const user = await prisma.user.findUnique({ where: { id: req.user!.userId } });
   if (!user) return res.status(404).json({ error: "User not found" });
-  const valid = await comparePassword(parsed.data.currentPassword, user.hashedPassword);
-  if (!valid) return res.status(401).json({ error: "Current password is incorrect" });
+  const isPasswordValid = await comparePassword(parsed.data.currentPassword, user.hashedPassword);
+  if (!isPasswordValid) return res.status(401).json({ error: "Current password is incorrect" });
   await prisma.user.update({
     where: { id: req.user!.userId },
     data: {

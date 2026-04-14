@@ -1,10 +1,10 @@
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Pressable, Text, TextInput, View } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import axios from "axios";
 import { colors } from "@/theme/theme";
-import { useAppDispatcher, useAppSelector } from "@/redux/hooks";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { addXp } from "@/redux/xp-slice";
 import { markCodePuzzleSolved } from "@/redux/puzzle-slice";
 import { addStudySeconds } from "@/redux/session-slice";
@@ -18,8 +18,12 @@ type Puzzle = {
   orderIndex: number;
 };
 
+const STUDY_TIMER_INTERVAL_MS = 1000;
+const MS_PER_DAY = 1000 * 60 * 60 * 24;
+const CODE_PUZZLE_XP_REWARD = 40;
+
 export function CodePuzzleScreen({ navigation }: CodePuzzleScreenProps) {
-  const dispatch = useAppDispatcher();
+  const dispatch = useAppDispatch();
   const isFocused = useIsFocused();
   const [puzzles, setPuzzles] = useState<Puzzle[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -39,7 +43,7 @@ export function CodePuzzleScreen({ navigation }: CodePuzzleScreenProps) {
 
   useEffect(() => {
     if (!isFocused) return;
-    const t = setInterval(() => dispatch(addStudySeconds(1)), 1000);
+    const t = setInterval(() => dispatch(addStudySeconds(1)), STUDY_TIMER_INTERVAL_MS);
     return () => clearInterval(t);
   }, [dispatch, isFocused]);
 
@@ -52,7 +56,7 @@ export function CodePuzzleScreen({ navigation }: CodePuzzleScreenProps) {
       .then(({ data }) => {
         if (!cancelled) {
           setPuzzles(data);
-          const todayIndex = Math.floor(Date.now() / (1000 * 60 * 60 * 24)) % data.length;
+          const todayIndex = Math.floor(Date.now() / MS_PER_DAY) % data.length;
           setCurrentIndex(todayIndex);
         }
       })
@@ -86,9 +90,9 @@ export function CodePuzzleScreen({ navigation }: CodePuzzleScreenProps) {
         setMessage("Not quite. Try another valid one-line expression.");
         return;
       }
-      dispatch(addXp(40));
+      dispatch(addXp(CODE_PUZZLE_XP_REWARD));
       dispatch(markCodePuzzleSolved({ dateKey, puzzleId: String(puzzle.id) }));
-      setMessage("Puzzle solved! +40 XP.");
+      setMessage(`Puzzle solved! +${CODE_PUZZLE_XP_REWARD} XP.`);
     } catch {
       setMessage("Failed to submit. Please try again.");
     }
@@ -107,7 +111,7 @@ export function CodePuzzleScreen({ navigation }: CodePuzzleScreenProps) {
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <View style={styles.content}>
-        <Text style={styles.title}>Daily Code Puzzle</Text>
+        <Text style={styles.title}>Code Puzzle</Text>
         {puzzle && (
           <Text style={styles.counter}>
             {puzzle.orderIndex + 1} / {puzzles.length}

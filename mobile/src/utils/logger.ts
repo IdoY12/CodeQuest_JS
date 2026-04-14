@@ -23,10 +23,6 @@ export function logAuth(message: string, meta?: LogMeta) {
   write("[AUTH]", message, meta);
 }
 
-export function logApi(message: string, meta?: LogMeta) {
-  write("[API]", message, meta);
-}
-
 export function logNav(message: string, meta?: LogMeta) {
   write("[NAV]", message, meta);
 }

@@ -14,60 +14,60 @@ export async function hydrateLegacySessionProgress(
   mergeSessionTokens: (s: Record<string, unknown>) => Promise<Record<string, unknown>>,
 ): Promise<void> {
   if (!parsed.session || !parsed.progress) return;
-  const s = parsed.session;
-  const p = parsed.progress;
+  const legacySession = parsed.session;
+  const legacyProgress = parsed.progress;
   const sessionOnly = {
-    hasHydrated: s.hasHydrated,
-    authChecked: s.authChecked,
-    isAuthenticated: s.isAuthenticated,
-    isGuest: s.isGuest,
-    hasCompletedOnboarding: s.hasCompletedOnboarding,
-    accessToken: s.accessToken,
-    refreshToken: s.refreshToken,
-    userId: s.userId,
+    hasHydrated: legacySession.hasHydrated,
+    authChecked: legacySession.authChecked,
+    isAuthenticated: legacySession.isAuthenticated,
+    isGuest: legacySession.isGuest,
+    hasCompletedOnboarding: legacySession.hasCompletedOnboarding,
+    accessToken: legacySession.accessToken,
+    refreshToken: legacySession.refreshToken,
+    userId: legacySession.userId,
   };
-  if (s.isAuthenticated && s.accessToken) (sessionOnly as { isGuest: boolean }).isGuest = false;
-  else if (typeof s.isGuest !== "boolean") (sessionOnly as { isGuest: boolean }).isGuest = !s.isAuthenticated;
+  if (legacySession.isAuthenticated && legacySession.accessToken) (sessionOnly as { isGuest: boolean }).isGuest = false;
+  else if (typeof legacySession.isGuest !== "boolean") (sessionOnly as { isGuest: boolean }).isGuest = !legacySession.isAuthenticated;
   const legacySessionWithTokens = await mergeSessionTokens(sessionOnly as Record<string, unknown>);
   dispatch(hydrateSession(legacySessionWithTokens as never));
   dispatch(
     hydrateProfile({
-      username: s.username,
-      email: s.email,
-      avatarUrl: s.avatarUrl,
-      goal: s.goal,
-      experience: s.experience,
-      commitment: s.commitment,
-      path: s.path,
-      notificationsEnabled: s.notificationsEnabled,
-      soundsEnabled: s.soundsEnabled,
-      hapticsEnabled: s.hapticsEnabled,
+      username: legacySession.username,
+      email: legacySession.email,
+      avatarUrl: legacySession.avatarUrl,
+      goal: legacySession.goal,
+      experience: legacySession.experience,
+      commitment: legacySession.commitment,
+      path: legacySession.path,
+      notificationsEnabled: legacySession.notificationsEnabled,
+      soundsEnabled: legacySession.soundsEnabled,
+      hapticsEnabled: legacySession.hapticsEnabled,
     } as never),
   );
   dispatch(
     hydrateXp({
-      level: p.level,
-      xpTotal: p.xpTotal,
+      level: legacyProgress.level,
+      xpTotal: legacyProgress.xpTotal,
     } as never),
   );
   dispatch(
     hydrateStreak({
-      streakCurrent: p.streakCurrent,
-      streakDays: p.streakDays,
+      streakCurrent: legacyProgress.streakCurrent,
+      streakDays: legacyProgress.streakDays,
     } as never),
   );
   dispatch(
     hydrateStats({
-      duelWins: p.duelWins,
-      duelLosses: p.duelLosses,
-      duelRating: p.duelRating,
-      lessonsCompleted: p.lessonsCompleted,
+      duelWins: legacyProgress.duelWins,
+      duelLosses: legacyProgress.duelLosses,
+      duelRating: legacyProgress.duelRating,
+      lessonsCompleted: legacyProgress.lessonsCompleted,
     } as never),
   );
   dispatch(
     hydratePuzzle({
-      lastCodePuzzleSolvedDate: p.lastCodePuzzleSolvedDate as string | null,
-      puzzleSolvedIdByDate: p.puzzleSolvedIdByDate as Record<string, string>,
+      lastCodePuzzleSolvedDate: legacyProgress.lastCodePuzzleSolvedDate as string | null,
+      puzzleSolvedIdByDate: legacyProgress.puzzleSolvedIdByDate as Record<string, string>,
     }),
   );
 }

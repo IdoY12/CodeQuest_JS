@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useAppDispatcher } from "@/redux/hooks";
+import { useAppDispatch } from "@/redux/hooks";
 import { resetBlockProgress, setExerciseIndex as setSavedExerciseIndex } from "@/redux/lesson-slice";
 import { addXp as addXpAction } from "@/redux/xp-slice";
 import type { LessonExerciseCompletionContext } from "@/types/lessonExerciseCompletion.types";
@@ -24,7 +24,7 @@ export function useLessonExerciseCompleteHandler(
   blockIndex: number,
   load: Load,
 ) {
-  const dispatch = useAppDispatcher();
+  const dispatch = useAppDispatch();
   const addXp = useCallback((n: number) => dispatch(addXpAction(n)), [dispatch]);
   return useCallback(
     async (_answer: string, completion: LessonExerciseCompletionContext) => {

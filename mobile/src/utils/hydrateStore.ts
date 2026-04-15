@@ -9,11 +9,18 @@ import { hydrateStats } from "@/redux/duel-slice";
 import { hydratePuzzle } from "@/redux/puzzle-slice";
 import { logAuth, logError } from "@/utils/logger";
 import { readSecureSessionTokens, writeSecureSessionTokens } from "@/utils/secureSessionTokens";
-import { hydrateLegacySessionProgress } from "@/utils/hydrateLegacyPersist";
 
 export const REDUX_PERSIST_KEY = "codequest-redux-store";
 
-type OldPersist = { session?: Record<string, unknown>; progress?: Record<string, unknown> };
+type PersistedReduxSnapshot = {
+  session?: Record<string, unknown>;
+  profile?: Record<string, unknown>;
+  xp?: Record<string, unknown>;
+  streak?: Record<string, unknown>;
+  lesson?: Record<string, unknown>;
+  duel?: Record<string, unknown>;
+  puzzle?: Record<string, unknown>;
+};
 
 async function mergeHydratedSessionTokens<T extends Record<string, unknown>>(session: T) {
   // 1. Get the tokens from the "Vault" (The most reliable source for security).
@@ -26,7 +33,7 @@ async function mergeHydratedSessionTokens<T extends Record<string, unknown>>(ses
   const accessToken = secure.accessToken ?? (session.accessToken as string | null) ?? null;
   const refreshToken = secure.refreshToken ?? (session.refreshToken as string | null) ?? null;
 
-  // 3. Sync: Now that we found the best token, save it back to the vault 
+  // 3. Sync: Now that we found the best token, save it back to the vault
   // to make sure BOTH sources are now identical.
   await writeSecureSessionTokens(accessToken, refreshToken);
 
@@ -40,27 +47,18 @@ export async function hydrateStoreFromStorage(dispatch: AppDispatch): Promise<vo
 
     if (!raw) return;
 
-    const parsed = JSON.parse(raw) as OldPersist & {
-      profile?: Record<string, unknown>;
-      xp?: Record<string, unknown>;
-      streak?: Record<string, unknown>;
-      lesson?: Record<string, unknown>;
-      duel?: Record<string, unknown>;
-      puzzle?: Record<string, unknown>;
-    };
+    const parsed = JSON.parse(raw) as PersistedReduxSnapshot;
 
-    if (parsed.profile && parsed.session) {
-      const sessionWithTokens = await mergeHydratedSessionTokens(parsed.session as Record<string, unknown>);
-      dispatch(hydrateSession(sessionWithTokens as never));
-      dispatch(hydrateProfile(parsed.profile as never));
-      if (parsed.xp) dispatch(hydrateXp(parsed.xp as never));
-      if (parsed.streak) dispatch(hydrateStreak(parsed.streak as never));
-      if (parsed.lesson) dispatch(hydrateLesson(parsed.lesson as never));
-      if (parsed.duel) dispatch(hydrateStats(parsed.duel as never));
-      if (parsed.puzzle) dispatch(hydratePuzzle(parsed.puzzle as never));
-    } else {
-      await hydrateLegacySessionProgress(dispatch, parsed, mergeHydratedSessionTokens);
-    }
+    if (!parsed.profile || !parsed.session) return;
+
+    const sessionWithTokens = await mergeHydratedSessionTokens(parsed.session);
+    dispatch(hydrateSession(sessionWithTokens as never));
+    dispatch(hydrateProfile(parsed.profile as never));
+    if (parsed.xp) dispatch(hydrateXp(parsed.xp as never));
+    if (parsed.streak) dispatch(hydrateStreak(parsed.streak as never));
+    if (parsed.lesson) dispatch(hydrateLesson(parsed.lesson as never));
+    if (parsed.duel) dispatch(hydrateStats(parsed.duel as never));
+    if (parsed.puzzle) dispatch(hydratePuzzle(parsed.puzzle as never));
   } catch (error) {
     logError("[APP]", error, { phase: "hydrate-redux" });
   } finally {

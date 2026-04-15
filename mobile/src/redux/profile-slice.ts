@@ -31,17 +31,8 @@ const profileSlice = createSlice({
   name: "profile",
   initialState,
   reducers: {
-    hydrateProfile: (
-      state,
-      a: PayloadAction<Partial<ProfileState> & { path?: Experience; experience?: Experience }>,
-    ) => {
-      const payload = { ...a.payload };
-      if (payload.experienceLevel === undefined) {
-        payload.experienceLevel = payload.experience ?? payload.path;
-      }
-      delete (payload as { path?: unknown }).path;
-      delete (payload as { experience?: unknown }).experience;
-      Object.assign(state, payload);
+    hydrateProfile: (state, a: PayloadAction<Partial<ProfileState>>) => {
+      Object.assign(state, a.payload);
     },
     resetProfile: () => initialState,
     setUserIdentity: (state, a: PayloadAction<Partial<Pick<ProfileState, "username" | "email" | "avatarUrl">>>) => {

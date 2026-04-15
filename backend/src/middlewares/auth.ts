@@ -16,15 +16,18 @@ export async function authMiddleware(
   next: NextFunction,
 ): Promise<void> {
   const authHeader = request.headers.authorization;
+
   if (!authHeader?.startsWith("Bearer ")) {
     logWarn("[AUTH]", "missing-bearer-token", { path: request.originalUrl });
     response.status(401).json({ error: "Missing bearer token" });
     return;
   }
   const token = authHeader.slice(7);
+
   try {
     const decoded = verifyAccessToken(token);
     const cachedVersion = readCachedTokenVersionForUser(decoded.userId);
+
     if (cachedVersion !== undefined && cachedVersion === decoded.tokenVersion) {
       request.user = {
         userId: decoded.userId,
@@ -39,11 +42,13 @@ export async function authMiddleware(
       where: { id: decoded.userId },
       select: { id: true, tokenVersion: true },
     });
+
     if (!user) {
       logWarn("[AUTH]", "user-not-found-for-token", { userId: decoded.userId, path: request.originalUrl });
       response.status(401).json({ error: "Invalid token" });
       return;
     }
+
     if (user.tokenVersion !== decoded.tokenVersion) {
       logWarn("[AUTH]", "token-version-mismatch", { userId: decoded.userId, path: request.originalUrl });
       response.status(401).json({ error: "Invalid token" });

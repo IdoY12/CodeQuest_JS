@@ -22,6 +22,7 @@ export async function getProgressSummary(req: AuthenticatedRequest, res: Respons
     ]);
     const streakKeys = streakHistoryAsStrings(progress?.streakHistoryJson);
     const streakDays = buildRecentStreakDays(streakKeys);
+
     return res.json({
       xpTotal: progress?.xpTotal ?? 0,
       level: progress?.level ?? 1,

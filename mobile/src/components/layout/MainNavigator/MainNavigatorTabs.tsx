@@ -41,6 +41,7 @@ function HomeNavigator() {
 
 export function MainTabs() {
   const isGuest = useAppSelector((s) => s.session.isGuest);
+
   return (
     <Tabs.Navigator
       screenOptions={{

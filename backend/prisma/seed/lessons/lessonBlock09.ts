@@ -26,7 +26,6 @@ export async function seedLessonBlock_09(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "const [a, b] = await Promise.all([fetchA(), fetchB()]);",
         correctAnswer: "Resolves when all resolve, or rejects as soon as any rejects",
         explanation: "Promise.all is all-or-nothing: it waits for everyone to resolve but fails fast if any single promise rejects.",
-        xpReward: 30,
         options: [
           "Runs promises sequentially and returns the last result",
           "Resolves when all resolve, or rejects as soon as any rejects",
@@ -40,7 +39,6 @@ export async function seedLessonBlock_09(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "const result = await Promise.race([fast(), slow()]);",
         correctAnswer: "The result of the first promise to settle (resolve or reject)",
         explanation: "Promise.race settles as soon as any input promise settles — whether that means resolving or rejecting.",
-        xpReward: 30,
         options: [
           "An array of the two fastest results",
           "The result of the first promise to settle (resolve or reject)",
@@ -54,7 +52,6 @@ export async function seedLessonBlock_09(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "const results = await Promise.allSettled([fetch('/a'), fetch('/b')]);",
         correctAnswer: "allSettled waits for all promises regardless of rejection",
         explanation: "allSettled never rejects — it returns an array of {status, value/reason} for every input promise.",
-        xpReward: 30,
         options: [
           "allSettled runs promises in series; all runs them in parallel",
           "allSettled waits for all promises regardless of rejection",
@@ -68,7 +65,6 @@ export async function seedLessonBlock_09(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "function* count() { yield 1; yield 2; yield 3; }\nconst g = count();\nconsole.log(g.next().value); // 1",
         correctAnswer: "It can pause execution and yield multiple values over time",
         explanation: "Generator functions use function* and yield to produce a sequence of values, pausing between each yield.",
-        xpReward: 30,
         options: [
           "It always runs asynchronously",
           "It can pause execution and yield multiple values over time",
@@ -82,7 +78,6 @@ export async function seedLessonBlock_09(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "const a = Symbol('id');\nconst b = Symbol('id');\nconsole.log(a === b); // false",
         correctAnswer: "Every call produces a unique value, even with the same description",
         explanation: "Symbols are unique primitives — two Symbols with the same description are never equal to each other.",
-        xpReward: 30,
         options: [
           "The value is a string prefixed with 'id'",
           "Every call produces a unique value, even with the same description",
@@ -96,7 +91,6 @@ export async function seedLessonBlock_09(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "const p = new Proxy(target, {\n  get(obj, key) { return key in obj ? obj[key] : 'default'; }\n});",
         correctAnswer: "Fundamental operations on an object (get, set, delete, etc.) via traps",
         explanation: "A Proxy wraps an object and intercepts fundamental operations through named handler traps.",
-        xpReward: 30,
         options: [
           "Only method calls on an object",
           "Network requests made by the object",
@@ -110,7 +104,6 @@ export async function seedLessonBlock_09(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "const add = a => b => a + b;\nconsole.log(add(2)(3)); // 5",
         correctAnswer: "Transforming a multi-argument function into a chain of single-argument functions",
         explanation: "A curried function takes one argument at a time, returning a new function for each until all arguments are supplied.",
-        xpReward: 30,
         options: [
           "Chaining .then() calls on a Promise",
           "Memoizing a function's results",
@@ -124,7 +117,6 @@ export async function seedLessonBlock_09(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "const multiply = (a, b) => a * b;\nconst double = multiply.bind(null, 2);\nconsole.log(double(5)); // 10",
         correctAnswer: "Pre-filling some arguments to produce a specialised function with fewer parameters",
         explanation: "Partial application fixes some of a function's arguments, returning a new function that requires only the remaining ones.",
-        xpReward: 30,
         options: [
           "Calling a function with fewer arguments than declared",
           "Pre-filling some arguments to produce a specialised function with fewer parameters",
@@ -138,7 +130,6 @@ export async function seedLessonBlock_09(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "function* range(start, end) {\n  for (let i = start; i < end; i++) {\n    ___ i;\n  }\n}",
         correctAnswer: "yield",
         explanation: "yield pauses the generator and returns the value to the caller; the next .next() call resumes from after the yield.",
-        xpReward: 30,
         options: ["yield", "return", "await", "emit"],
       },
       {
@@ -147,7 +138,6 @@ export async function seedLessonBlock_09(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "const s = Symbol('x');\nconst obj = { [s]: 1, a: 2 };\nconsole.log(Reflect.ownKeys(obj)); // [Symbol(x), 'a']",
         correctAnswer: "Symbol-keyed and non-enumerable string-keyed properties",
         explanation: "Reflect.ownKeys returns all own keys including Symbols and non-enumerable ones. Object.keys returns only own enumerable string keys.",
-        xpReward: 30,
         options: [
           "Inherited enumerable properties",
           "Symbol-keyed and non-enumerable string-keyed properties",

@@ -1,7 +1,7 @@
 /**
  * Duel question batch for Prisma seeding (duelBeginnerOutputQuestions).
  *
- * Responsibility: synthetic duel questions for one category/difficulty.
+ * Responsibility: synthetic duel questions for one difficulty band.
  * Layer: backend prisma seed
  * Depends on: @prisma/client types
  * Consumers: persistDuelQuestions.ts
@@ -46,6 +46,5 @@ export function buildBeginnerOutputQuestions(): Prisma.DuelQuestionCreateManyInp
     explanation: "Read the operator behavior and method result directly from the snippet.",
     type: "MULTIPLE_CHOICE",
     difficulty: "JUNIOR",
-    category: "OUTPUT",
   }));
 }

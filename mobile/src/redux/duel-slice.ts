@@ -44,4 +44,5 @@ const duelSlice = createSlice({
 });
 
 export const { applyDuelResult, hydrateStats, resetStats } = duelSlice.actions;
+
 export default duelSlice.reducer;

@@ -24,6 +24,7 @@ export function DuelActiveAnswerZone({
       </Pressable>
     ));
   }
+
   return round.options.map((option) => (
     <Pressable
       key={option}

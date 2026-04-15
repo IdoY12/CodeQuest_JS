@@ -8,12 +8,15 @@ type Mode = "u" | "p" | "d" | null;
 
 export function ProfileModal({ p }: { p: UseProfileScreenReturn }) {
   const mode: Mode = p.usernameModalVisible ? "u" : p.passwordModalVisible ? "p" : p.deleteModalVisible ? "d" : null;
+
   const close = () => {
     if (mode === "u") p.setUsernameModalVisible(false);
     else if (mode === "p") p.setPasswordModalVisible(false);
     else if (mode === "d") p.setDeleteModalVisible(false);
   };
+
   const delDis = p.confirmDeleteText !== "DELETE" || p.busyAction === "delete";
+
   return (
     <Modal visible={!!mode} transparent animationType="fade" onRequestClose={close}>
       <View style={m.backdrop}>

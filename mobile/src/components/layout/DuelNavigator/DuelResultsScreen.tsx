@@ -8,10 +8,12 @@ import { styles } from "./DuelNavigator.styles";
 export function DuelResultsScreen({ route, navigation }: DuelResultsScreenProps) {
   const { won, score } = route.params;
   const replay = route.params.replay ?? [];
+
   useEffect(() => {
     logNav("screen:enter", { screen: "DuelResultsScreen" });
     return () => logNav("screen:leave", { screen: "DuelResultsScreen" });
   }, []);
+
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <ScrollView contentContainerStyle={styles.duelContent}>

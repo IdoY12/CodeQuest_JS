@@ -14,5 +14,6 @@ import { parseVerifiedPayload } from "./parseVerifiedPayload.js";
 
 export function verifyRefreshToken(token: string, refreshSecret: string): AuthTokenPayload {
   const decoded = jwt.verify(token, refreshSecret, { algorithms: [JWT_SIGNING_ALGORITHM] });
+
   return parseVerifiedPayload(decoded);
 }

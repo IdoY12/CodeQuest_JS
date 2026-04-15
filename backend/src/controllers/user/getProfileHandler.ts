@@ -26,22 +26,22 @@ export async function getProfile(req: AuthenticatedRequest, res: Response) {
       },
     },
   });
+
   if (!user) return res.status(404).json({ error: "User not found" });
 
   const progress = await getProgressForActiveUser(prisma, req.user!.userId);
   const progressOut = progress
     ? {
         goal: progress.goal,
-        experienceLevel: progress.experienceLevel,
+        experienceLevel: resolveExperienceLevel(progress.experienceLevel),
         dailyCommitmentMinutes: progress.dailyCommitmentMinutes,
         notificationsEnabled: progress.notificationsEnabled,
-        onboardingCompleted: progress.onboardingCompleted,
         currentExerciseIndex: progress.currentExerciseIndex,
-        pathKey: resolveExperienceLevel(progress.experienceLevel),
       }
     : null;
 
   const { duelRating, ...rest } = user;
+
   return res.json({
     ...rest,
     progress: progressOut,

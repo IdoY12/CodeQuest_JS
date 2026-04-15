@@ -26,7 +26,6 @@ export async function seedLessonBlock_01(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "console.log(typeof null);",
         correctAnswer: '"object"',
         explanation: "A historical JavaScript bug — typeof null returns 'object', not 'null'.",
-        xpReward: 20,
         options: ['"null"', '"object"', '"undefined"', '"boolean"'],
       },
       {
@@ -35,7 +34,6 @@ export async function seedLessonBlock_01(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "// choose the correct keyword",
         correctAnswer: "let",
         explanation: "let allows reassignment. const does not allow the binding to be reassigned.",
-        xpReward: 20,
         options: ["const", "let", "final", "immutable"],
       },
       {
@@ -44,7 +42,6 @@ export async function seedLessonBlock_01(prisma: PrismaClient, order: GlobalExer
         codeSnippet: 'console.log(Boolean(""));',
         correctAnswer: "false",
         explanation: "An empty string is one of JavaScript's falsy values.",
-        xpReward: 20,
         options: ["true", "false", "null", "undefined"],
       },
       {
@@ -53,7 +50,6 @@ export async function seedLessonBlock_01(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "let score = 100;\nconsole.log(typeof score);",
         correctAnswer: '"number"',
         explanation: "The number literal 100 has type 'number'.",
-        xpReward: 20,
         options: ['"string"', '"number"', '"integer"', '"boolean"'],
       },
       {
@@ -62,7 +58,6 @@ export async function seedLessonBlock_01(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "const MAX = 100;\nMAX = 200;",
         correctAnswer: "It throws a TypeError",
         explanation: "const bindings cannot be reassigned after initialisation.",
-        xpReward: 20,
         options: ["MAX silently stays 100", "MAX becomes 200", "It throws a TypeError", "MAX becomes undefined"],
       },
       {
@@ -71,7 +66,6 @@ export async function seedLessonBlock_01(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "console.log(typeof undefined);",
         correctAnswer: '"undefined"',
         explanation: "undefined is its own primitive type with the type string 'undefined'.",
-        xpReward: 20,
         options: ['"null"', '"void"', '"undefined"', '"object"'],
       },
       {
@@ -80,7 +74,6 @@ export async function seedLessonBlock_01(prisma: PrismaClient, order: GlobalExer
         codeSnippet: 'const candidates = [0, "false", 1, true];',
         correctAnswer: "0",
         explanation: '0 is falsy. The string "false" is a non-empty string and therefore truthy.',
-        xpReward: 20,
         options: ["0", '"false"', "1", "true"],
       },
       {
@@ -89,7 +82,6 @@ export async function seedLessonBlock_01(prisma: PrismaClient, order: GlobalExer
         codeSnippet: 'console.log(1 + "2");',
         correctAnswer: '"12"',
         explanation: "When + has a string operand, the other operand is coerced to a string and concatenated.",
-        xpReward: 20,
         options: ["3", '"12"', "NaN", "TypeError"],
       },
       {
@@ -98,7 +90,6 @@ export async function seedLessonBlock_01(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "console.log(typeof true);",
         correctAnswer: '"boolean"',
         explanation: "Boolean values have the primitive type 'boolean'.",
-        xpReward: 20,
         options: ['"boolean"', '"string"', '"number"', '"bool"'],
       },
       {
@@ -107,7 +98,6 @@ export async function seedLessonBlock_01(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "let a = 5;\nlet b = a;\nb = 10;\nconsole.log(a);",
         correctAnswer: "5",
         explanation: "Primitives are copied by value. Reassigning b does not affect a.",
-        xpReward: 20,
         options: ["5", "10", "undefined", "null"],
       },
     ],

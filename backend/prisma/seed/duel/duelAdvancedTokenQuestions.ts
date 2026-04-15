@@ -1,7 +1,7 @@
 /**
  * Duel question batch for Prisma seeding (duelAdvancedTokenQuestions).
  *
- * Responsibility: synthetic duel questions for one category/difficulty.
+ * Responsibility: synthetic duel questions for one difficulty band.
  * Layer: backend prisma seed
  * Depends on: @prisma/client types
  * Consumers: persistDuelQuestions.ts
@@ -41,6 +41,5 @@ export function buildAdvancedTokenQuestions(): Prisma.DuelQuestionCreateManyInpu
     explanation: "Token completion checks production API familiarity and modern syntax.",
     type: "TAP_TOKEN",
     difficulty: "SENIOR",
-    category: "METHODS",
   }));
 }

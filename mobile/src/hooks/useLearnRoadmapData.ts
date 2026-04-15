@@ -28,10 +28,12 @@ const BLOCKS_BY_LEVEL: Record<Experience, BlockRow[]> = {
 };
 
 export function useLearnRoadmapData() {
-  const activeExperience = useAppSelector((s) => s.profile.experience) ?? "JUNIOR";
+  const activeExperience = useAppSelector((s) => s.profile.experienceLevel) ?? "JUNIOR";
+
   useEffect(() => {
     logNav("screen:enter", { screen: "LearnRoadmapScreen" });
     return () => logNav("screen:leave", { screen: "LearnRoadmapScreen" });
   }, []);
+
   return { activeExperience, blocks: BLOCKS_BY_LEVEL[activeExperience] };
 }

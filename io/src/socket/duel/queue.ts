@@ -5,13 +5,17 @@ import type { DuelNamespace, QueueEntry } from "./types.js";
 
 export function pickRange(entry: QueueEntry): number {
   const waited = Date.now() - entry.joinedAt;
+
   if (waited > 60000) return 500;
+
   if (waited > 30000) return 300;
+
   return 200;
 }
 
 export function handleQueueJoin(socket: Socket, duel: DuelNamespace, entry: QueueEntry): void {
   logInfo("[DUEL]", "queue:join", { userId: entry.userId, socketId: socket.id, rating: entry.rating });
+
   const opponentIndex = queue.findIndex((candidate) => {
     if (candidate.socketId === entry.socketId) return false;
     const range = Math.max(pickRange(candidate), pickRange(entry));

@@ -3,7 +3,7 @@ import type { AppDispatch } from "@/redux/store";
 import store from "@/redux/store";
 import UserService from "@/services/UserService";
 import { logError } from "@/utils/logger";
-import { enterGuestMode, setAuthChecked, setOnboardingCompleted } from "@/redux/session-slice";
+import { enterGuestMode, setAuthChecked } from "@/redux/session-slice";
 import { setUserIdentity, updatePreferences, type Commitment } from "@/redux/profile-slice";
 import { hydrateXp } from "@/redux/xp-slice";
 import { hydrateStreak } from "@/redux/streak-slice";
@@ -15,28 +15,31 @@ export async function bootstrapSession(dispatch: AppDispatch): Promise<void> {
   dispatch(setAuthChecked(false));
   const token = store.getState().session.accessToken;
   const isAuthed = store.getState().session.isAuthenticated;
+
   if (!isAuthed || !token) {
     dispatch(enterGuestMode());
     dispatch(setAuthChecked(true));
     return;
   }
+
   const userService = new UserService(token);
+
   try {
     const me = await userService.getMe();
     dispatch(setUserIdentity({ email: me.email, username: me.username, avatarUrl: me.avatarUrl ?? null }));
     const userPreferences = await userService.getPreferencesGet();
-    dispatch(setOnboardingCompleted(userPreferences.hasCompletedOnboarding));
-    if (userPreferences.userGoal && userPreferences.userLevel && userPreferences.dailyGoalMinutes) {
+
+    if (userPreferences.userGoal && userPreferences.dailyGoalMinutes) {
       dispatch(
         updatePreferences({
           goal: userPreferences.userGoal,
-          experience: userPreferences.userLevel,
+          experienceLevel: userPreferences.experienceLevel,
           commitment: String(userPreferences.dailyGoalMinutes) as Commitment,
           notificationsEnabled: userPreferences.notificationsEnabled,
-          path: userPreferences.pathKey,
         }),
       );
     }
+
     const progress = await userService.getProgressSummary();
     dispatch(hydrateXp({ xpTotal: progress.xpTotal, level: progress.level }));
     dispatch(

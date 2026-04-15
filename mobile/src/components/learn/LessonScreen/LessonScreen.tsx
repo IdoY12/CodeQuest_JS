@@ -20,6 +20,7 @@ export function LessonScreen({ navigation, route }: LessonScreenProps) {
   const exercise = load.exercises[load.exerciseIndex];
   const onLessonExerciseComplete = useLessonExerciseCompleteHandler(navigation, experienceLevel, lessonTitle, blockIndex, load);
   const progress = load.exercises.length > 0 ? ((load.exerciseIndex + 1) / load.exercises.length) * 100 : 0;
+
   if (load.loading) {
     return (
       <SafeAreaView style={lessonScreenStyles.container} edges={["top", "bottom"]}>
@@ -30,6 +31,7 @@ export function LessonScreen({ navigation, route }: LessonScreenProps) {
       </SafeAreaView>
     );
   }
+
   if (!exercise) {
     return (
       <SafeAreaView style={lessonScreenStyles.container} edges={["top", "bottom"]}>
@@ -39,8 +41,10 @@ export function LessonScreen({ navigation, route }: LessonScreenProps) {
       </SafeAreaView>
     );
   }
+
   const complete = (answer: string, context: LessonExerciseCompletionContext) =>
     void onLessonExerciseComplete(answer, context);
+
   return (
     <SafeAreaView style={lessonScreenStyles.container} edges={["top", "bottom"]}>
       <ScrollView style={lessonScreenStyles.container} contentContainerStyle={lessonScreenStyles.content}>

@@ -35,8 +35,8 @@ export async function createLessonWithExercises(
   const experienceLevel = params.difficulty;
   const sectionLabel = `${params.chapterTitle} — ${params.title}`;
 
-  for (let i = 0; i < params.exercises.length; i += 1) {
-    const exercise = params.exercises[i];
+  await params.exercises.reduce<Promise<void>>(async (prev, exercise) => {
+    await prev;
     const idx = order[experienceLevel];
     order[experienceLevel] += 1;
     const created = await prisma.exercise.create({
@@ -45,12 +45,10 @@ export async function createLessonWithExercises(
         orderIndex: idx,
         sectionLabel,
         type: exercise.type,
-        difficulty: params.difficulty,
         prompt: exercise.prompt,
         codeSnippet: exercise.codeSnippet,
         correctAnswer: exercise.correctAnswer,
         explanation: exercise.explanation,
-        xpReward: exercise.xpReward,
       },
     });
 
@@ -63,5 +61,5 @@ export async function createLessonWithExercises(
         })),
       });
     }
-  }
+  }, Promise.resolve());
 }

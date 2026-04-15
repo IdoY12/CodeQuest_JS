@@ -12,5 +12,6 @@ import { parseCommaSeparatedOrigin } from "./parseCommaSeparatedOrigin.js";
 
 export function resolveExpressCorsOrigin(): string | string[] {
   const raw = config.get<string>("app.cors.origin");
+
   return parseCommaSeparatedOrigin(raw);
 }

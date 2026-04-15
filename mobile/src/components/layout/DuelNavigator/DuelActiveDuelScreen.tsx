@@ -9,6 +9,7 @@ import { styles } from "./DuelNavigator.styles";
 
 export function DuelActiveDuelScreen({ navigation }: ActiveDuelScreenProps) {
   const u = useDuelActiveDuelScreen(navigation);
+
   if (!u.round) {
     return (
       <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
@@ -16,7 +17,9 @@ export function DuelActiveDuelScreen({ navigation }: ActiveDuelScreenProps) {
       </SafeAreaView>
     );
   }
+
   const { round } = u;
+
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <ScrollView style={styles.container} contentContainerStyle={styles.duelContent} showsVerticalScrollIndicator={false}>

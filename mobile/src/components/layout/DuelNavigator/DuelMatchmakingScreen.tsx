@@ -21,19 +21,23 @@ export function DuelMatchmakingScreen({ navigation }: MatchmakingScreenProps) {
   const [seconds, setSeconds] = useState(0);
   const [countdown, setCountdown] = useState(3);
   const hasJoinedQueueRef = React.useRef(false);
+
   useEffect(() => {
     logNav("screen:enter", { screen: "MatchmakingScreen" });
     return () => logNav("screen:leave", { screen: "MatchmakingScreen" });
   }, []);
+
   useEffect(() => {
     if (!userId || hasJoinedQueueRef.current) return;
     hasJoinedQueueRef.current = true;
     joinQueue({ userId, username, rating: duelRating, token: accessToken });
     logDuel("queue:join", { userId });
+
     const interval = setInterval(() => setSeconds((v) => v + 1), QUEUE_TIMER_INTERVAL_MS);
     const timeout = setTimeout(() => {
       if (!sessionId) startLocalMockMatch();
     }, MOCK_MATCH_TIMEOUT_MS);
+
     return () => {
       clearInterval(interval);
       clearTimeout(timeout);
@@ -42,16 +46,20 @@ export function DuelMatchmakingScreen({ navigation }: MatchmakingScreenProps) {
       hasJoinedQueueRef.current = false;
     };
   }, [accessToken, duelRating, joinQueue, leaveQueue, startLocalMockMatch, userId, username]);
+
   useEffect(() => {
     if (sessionId && opponent) {
       const timer = setInterval(() => setCountdown((value) => Math.max(0, value - 1)), MATCH_COUNTDOWN_TICK_MS);
       return () => clearInterval(timer);
     }
+
     return undefined;
   }, [sessionId, opponent]);
+
   useEffect(() => {
     if (sessionId && opponent && countdown === 0) navigation.replace("ActiveDuel");
   }, [countdown, navigation, opponent, sessionId]);
+
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <Text style={styles.searching}>Searching for an opponent...</Text>

@@ -13,7 +13,9 @@ import { formatMeta } from "./formatMeta.js";
 export function writeLine(level: "INFO" | "ERROR" | "WARN", prefix: string, message: string, meta?: LogMeta) {
   const timestamp = new Date().toISOString();
   const line = `[${timestamp}] [${level}] ${prefix} ${message}${formatMeta(meta)}`;
+
   if (level === "ERROR") return void console.error(line);
+
   if (level === "WARN") return void console.warn(line);
   console.log(line);
 }

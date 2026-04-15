@@ -8,7 +8,6 @@ export default interface UserProfile {
     experienceLevel: "JUNIOR" | "MID" | "SENIOR" | null;
     dailyCommitmentMinutes: 10 | 15 | 25 | null;
     notificationsEnabled: boolean;
-    onboardingCompleted: boolean;
     currentExerciseIndex?: number;
   } | null;
   duelRating: {

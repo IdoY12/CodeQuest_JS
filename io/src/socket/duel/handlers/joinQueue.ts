@@ -16,11 +16,13 @@ import type { DuelNamespace, QueueEntry } from "../types.js";
 export function registerJoinQueue(socket: Socket, duel: DuelNamespace) {
   socket.on("join_queue", async (payload: { rating?: number; username?: string }) => {
     const authenticatedUserId = socket.data.authenticatedUserId;
+
     if (!authenticatedUserId) {
       socket.emit("queue_rejected", { reason: "authentication_required" });
       logInfo("[DUEL]", "queue:rejected-unauthenticated", { socketId: socket.id });
       return;
     }
+
     const level = await activeExperienceLevelOf(prisma, authenticatedUserId);
     const [user, ratingFromDb, progress] = await Promise.all([
       prisma.user.findUnique({ where: { id: authenticatedUserId } }).catch(() => null),

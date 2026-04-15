@@ -17,13 +17,16 @@ export function useExerciseDragDropLesson(
   const [serverResult, setServerResult] = useState<ExerciseSubmitResult | null>(null);
   const [curriculumChecked, setCurriculumChecked] = useState(false);
   const [curriculumCorrect, setCurriculumCorrect] = useState<boolean | null>(null);
+
   useEffect(() => {
     setServerResult(null);
     setCurriculumChecked(false);
     setCurriculumCorrect(null);
   }, [exercise.id]);
+
   // Allow re-checking after wrong attempts — user must hit Reset to rearrange first.
   const canCheck = d.orderedSelection.length === d.lineList.length && curriculumCorrect !== true;
+
   const runCheck = async () => {
     const result =
       accessToken && learning
@@ -33,9 +36,11 @@ export function useExerciseDragDropLesson(
     setCurriculumCorrect(result.isCorrect);
     setCurriculumChecked(true);
   };
+
   const goNext = () => {
     if (!serverResult) return;
     onLessonExerciseComplete(d.normalizedAnswer, { source: "curriculum", submitResult: serverResult });
   };
+
   return { drag: d, canCheck, runCheck, goNext, showResults: curriculumChecked, isCorrectNow: curriculumCorrect, serverResult };
 }

@@ -15,6 +15,7 @@ export async function updateDuelRatingsAfterMatch(session: SessionState, winnerI
   const loser = winnerIsP1 ? session.player2 : session.player1;
 
   const winnerRating = await prisma.duelRating.findUnique({ where: { userId: winner.userId } });
+
   if (!winnerRating) {
     await prisma.duelRating.create({ data: { userId: winner.userId, rating: 1050, wins: 1 } }).catch(() => null);
   } else {
@@ -27,6 +28,7 @@ export async function updateDuelRatingsAfterMatch(session: SessionState, winnerI
   }
 
   const loserRating = await prisma.duelRating.findUnique({ where: { userId: loser.userId } });
+
   if (!loserRating) {
     await prisma.duelRating.create({ data: { userId: loser.userId, rating: 980, losses: 1 } }).catch(() => null);
   } else {

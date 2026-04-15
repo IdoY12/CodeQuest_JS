@@ -51,6 +51,7 @@ app.use((error: unknown, _req: express.Request, res: express.Response, _next: ex
     return res.status(400).json({ error: "Malformed JSON payload" });
   }
   logError("[APP]", error, { phase: "express-handler" });
+
   return res.status(500).json({ error: "Internal server error" });
 });
 

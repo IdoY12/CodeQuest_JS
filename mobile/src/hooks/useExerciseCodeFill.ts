@@ -16,14 +16,17 @@ export function useExerciseCodeFill(
   const [serverResult, setServerResult] = useState<ExerciseSubmitResult | null>(null);
   const [curriculumChecked, setCurriculumChecked] = useState(false);
   const [curriculumCorrect, setCurriculumCorrect] = useState<boolean | null>(null);
+
   useEffect(() => {
     setInput("");
     setServerResult(null);
     setCurriculumChecked(false);
     setCurriculumCorrect(null);
   }, [exercise.id]);
+
   // Allow re-submitting until the correct answer is entered.
   const canCheck = input.trim().length > 0 && curriculumCorrect !== true;
+
   const runCheck = async () => {
     const answer = input.trim();
     const result =
@@ -34,9 +37,11 @@ export function useExerciseCodeFill(
     setCurriculumCorrect(result.isCorrect);
     setCurriculumChecked(true);
   };
+
   const goNext = () => {
     if (!serverResult) return;
     onLessonExerciseComplete(input.trim(), { source: "curriculum", submitResult: serverResult });
   };
+
   return { input, setInput, canCheck, runCheck, goNext, showResults: curriculumChecked, isCorrectNow: curriculumCorrect, serverResult };
 }

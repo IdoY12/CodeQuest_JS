@@ -26,7 +26,6 @@ export async function seedLessonBlock_05(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "const map = new Map();\nmap.set(1, 'one');\nmap.set('two', 2);",
         correctAnswer: "Insertion order for any key type",
         explanation: "Map preserves insertion order for all key types, including objects and numbers.",
-        xpReward: 25,
         options: [
           "String-only key access",
           "Insertion order for any key type",
@@ -40,7 +39,6 @@ export async function seedLessonBlock_05(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "const s = new Set([1, 2, 2, 3]);\nconsole.log(s.size);",
         correctAnswer: "Each value appears at most once",
         explanation: "A Set automatically discards duplicate values on insertion.",
-        xpReward: 25,
         options: [
           "Values are sorted automatically",
           "Values are all the same type",
@@ -54,7 +52,6 @@ export async function seedLessonBlock_05(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "console.log(Math.max(...[3, 1, 4]));",
         correctAnswer: "Expands the array into individual arguments",
         explanation: "... unpacks the array so Math.max receives three separate numeric arguments.",
-        xpReward: 25,
         options: [
           "Creates a shallow copy of the array",
           "Expands the array into individual arguments",
@@ -68,7 +65,6 @@ export async function seedLessonBlock_05(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "const [a, b] = [10, 20];\nconsole.log(a, b);",
         correctAnswer: "Assigns 10 to a and 20 to b",
         explanation: "Array destructuring unpacks values by position into the named variables.",
-        xpReward: 25,
         options: [
           "Creates an array [a, b]",
           "Assigns 10 to a and 20 to b",
@@ -82,7 +78,6 @@ export async function seedLessonBlock_05(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "console.log(Array.from('hello'));",
         correctAnswer: "['h','e','l','l','o']",
         explanation: "Array.from iterates any iterable — here it splits the string into individual characters.",
-        xpReward: 25,
         options: ["['hello']", "['h','e','l','l','o']", "5", "[104,101,108,108,111]"],
       },
       {
@@ -91,7 +86,6 @@ export async function seedLessonBlock_05(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "function f(a, ...args) { console.log(args); }\nf(1, 2, 3, 4);",
         correctAnswer: "All arguments after a",
         explanation: "Rest parameters collect all remaining arguments into a real array, here [2, 3, 4].",
-        xpReward: 25,
         options: [
           "All arguments including a",
           "All arguments after a",
@@ -105,7 +99,6 @@ export async function seedLessonBlock_05(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "console.log([...new Set([1, 1, 2, 2, 3])]);",
         correctAnswer: "[1, 2, 3]",
         explanation: "new Set removes duplicates; spreading it back into an array gives the unique values.",
-        xpReward: 25,
         options: ["[1, 2, 3]", "[1, 1, 2, 2, 3]", "Set(3)", "[3]"],
       },
       {
@@ -114,7 +107,6 @@ export async function seedLessonBlock_05(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "console.log([1, 2, 3, 4].reduce((acc, n) => acc + n, 0));",
         correctAnswer: "10",
         explanation: "reduce accumulates: starting from 0 it adds 1+2+3+4 = 10.",
-        xpReward: 25,
         options: ["10", "24", "0", "[1, 2, 3, 4]"],
       },
       {
@@ -123,7 +115,6 @@ export async function seedLessonBlock_05(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "const user = { name: 'Sam', age: 25 };\nconst { ___ } = user;\nconsole.log(name);",
         correctAnswer: "name",
         explanation: "Object destructuring extracts a property using its key name.",
-        xpReward: 25,
         options: ["name", "user.name", "'name'", "this.name"],
       },
       {
@@ -132,7 +123,6 @@ export async function seedLessonBlock_05(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "const wm = new WeakMap();\nwm.set({}, 'value');",
         correctAnswer: "Objects only",
         explanation: "WeakMap keys must be objects, allowing the garbage collector to reclaim keys with no other references.",
-        xpReward: 25,
         options: ["Strings only", "Objects only", "Numbers and strings", "Any primitive"],
       },
     ],

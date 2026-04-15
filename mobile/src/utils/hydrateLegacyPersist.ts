@@ -21,13 +21,14 @@ export async function hydrateLegacySessionProgress(
     authChecked: legacySession.authChecked,
     isAuthenticated: legacySession.isAuthenticated,
     isGuest: legacySession.isGuest,
-    hasCompletedOnboarding: legacySession.hasCompletedOnboarding,
     accessToken: legacySession.accessToken,
     refreshToken: legacySession.refreshToken,
     userId: legacySession.userId,
   };
+
   if (legacySession.isAuthenticated && legacySession.accessToken) (sessionOnly as { isGuest: boolean }).isGuest = false;
   else if (typeof legacySession.isGuest !== "boolean") (sessionOnly as { isGuest: boolean }).isGuest = !legacySession.isAuthenticated;
+
   const legacySessionWithTokens = await mergeSessionTokens(sessionOnly as Record<string, unknown>);
   dispatch(hydrateSession(legacySessionWithTokens as never));
   dispatch(

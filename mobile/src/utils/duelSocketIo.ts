@@ -61,6 +61,7 @@ export function bindDuelSocketEvents(socket: Socket) {
 export function connectDuelSocket(url: string, authToken: string | null): Socket {
   const tokenKey = authToken ?? "";
   if (duelRefs.socket && duelRefs.lastAuthTokenKey === tokenKey) return duelRefs.socket;
+
   if (duelRefs.socket) {
     duelRefs.socket.removeAllListeners();
     duelRefs.socket.disconnect();

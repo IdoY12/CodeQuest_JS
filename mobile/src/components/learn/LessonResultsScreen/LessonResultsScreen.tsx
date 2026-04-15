@@ -18,11 +18,14 @@ export function LessonResultsScreen({ navigation, route }: Props) {
   const lessonTitle = route.params?.lessonTitle ?? "Lesson";
   const level = useAppSelector((s) => s.xp.level);
   const xp = useAppSelector((s) => s.xp.xpTotal);
+
   useEffect(() => {
     logNav("screen:enter", { screen: "LessonResultsScreen" });
     return () => logNav("screen:leave", { screen: "LessonResultsScreen" });
   }, []);
+
   const stars = accuracy > 90 ? 3 : accuracy > 70 ? 2 : 1;
+
   return (
     <SafeAreaView style={lessonResultsStyles.container} edges={["top", "bottom"]}>
       <View style={lessonResultsStyles.content}>

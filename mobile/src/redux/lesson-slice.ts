@@ -1,4 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import type Exercise from "@/models/Exercise";
 
 /** Stable key used to store/retrieve progress for one level × block combination. */
 export const blockProgressKey = (level: string, blockIndex: number) => `${level}_block${blockIndex}`;
@@ -8,12 +9,15 @@ interface LessonState {
   lessonExerciseIndex: number;
   /** Maps blockProgressKey → last question index the user reached (0-based). */
   blockProgress: Record<string, number>;
+  /** Session cache: full curriculum list per level (avoids repeat GET /learning/exercises). */
+  exercisesByExperienceLevel: Partial<Record<string, Exercise[]>>;
 }
 
 const initialState: LessonState = {
   currentExperienceLevel: "JUNIOR",
   lessonExerciseIndex: 0,
   blockProgress: {},
+  exercisesByExperienceLevel: {},
 };
 
 const lessonSlice = createSlice({
@@ -34,6 +38,9 @@ const lessonSlice = createSlice({
       const { level, blockIndex } = action.payload;
       delete state.blockProgress[blockProgressKey(level, blockIndex)];
     },
+    setCachedExercisesForLevel: (state, action: PayloadAction<{ experienceLevel: string; exercises: Exercise[] }>) => {
+      state.exercisesByExperienceLevel[action.payload.experienceLevel] = action.payload.exercises;
+    },
     hydrateLesson: (state, action: PayloadAction<Partial<LessonState>>) => {
       Object.assign(state, action.payload);
     },
@@ -46,7 +53,9 @@ export const {
   setExerciseIndex,
   saveBlockProgress,
   resetBlockProgress,
+  setCachedExercisesForLevel,
   hydrateLesson,
   resetLesson,
 } = lessonSlice.actions;
+
 export default lessonSlice.reducer;

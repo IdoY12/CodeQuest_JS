@@ -20,6 +20,7 @@
   "dependencies": {
     "@project/auth-jwt": "file:../packages/auth-jwt",
     "@project/db": "file:../packages/db",
+    "@project/xp-constants": "file:../packages/xp-constants",
     "@project/server-kit": "file:../packages/server-kit",
     "config": "^4.4.1",
     "socket.io": "^4.8.3"

@@ -26,6 +26,7 @@ export function useLessonExerciseCompleteHandler(
 ) {
   const dispatch = useAppDispatch();
   const addXp = useCallback((n: number) => dispatch(addXpAction(n)), [dispatch]);
+
   return useCallback(
     async (_answer: string, completion: LessonExerciseCompletionContext) => {
       await orchestrateLessonAnswer({
@@ -42,6 +43,7 @@ export function useLessonExerciseCompleteHandler(
         setCorrectCount: load.setCorrectCount,
         setExerciseIndex: load.setExerciseIndex,
       });
+
       if (load.exerciseIndex + 1 >= load.exercises.length) {
         dispatch(setSavedExerciseIndex(0));
         dispatch(resetBlockProgress({ level: experienceLevel, blockIndex }));

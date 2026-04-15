@@ -14,6 +14,7 @@ const monorepoRoot = path.join(backendRoot, "..");
 // Resolve Prisma CLI under hoisted npm workspaces (root or package-local node_modules).
 const requireFromBackend = createRequire(path.join(backendRoot, "package.json"));
 let prismaCli: string;
+
 try {
   prismaCli = requireFromBackend.resolve("prisma/build/index.js", {
     paths: [backendRoot, monorepoRoot],

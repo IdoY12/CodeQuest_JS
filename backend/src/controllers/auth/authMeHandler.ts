@@ -9,6 +9,7 @@ export async function authMeHandler(request: AuthenticatedRequest, response: Res
       where: { id: userId },
       select: { id: true, email: true, username: true, avatarId: true, avatarUrl: true, tokenVersion: true },
     });
+
     if (!user) {
       response.status(401).json({ error: "Invalid token" });
       return;

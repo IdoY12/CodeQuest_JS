@@ -18,12 +18,12 @@ export async function createRegisteredUserWithDefaults(input: RegisterInput): Pr
       data: {
         userId: createdUser.id,
         experienceLevel: "JUNIOR",
-        onboardingCompleted: false,
         notificationsEnabled: true,
         dailyCommitmentMinutes: 15,
       },
     });
     await transaction.duelRating.create({ data: { userId: createdUser.id } });
+
     return createdUser;
   });
 }

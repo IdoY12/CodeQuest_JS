@@ -17,5 +17,4 @@ export { patchPreferences } from "./patchPreferencesHandler.js";
 export { patchProfile } from "./patchProfileHandler.js";
 export { postChangePassword } from "./postChangePasswordHandler.js";
 export { postDailyGoalStatusMarkNotified } from "./postDailyGoalStatusMarkNotifiedHandler.js";
-export { postOnboarding } from "./postOnboardingHandler.js";
 export { postPracticeLog } from "./postPracticeLogHandler.js";

@@ -1,3 +1,4 @@
+import { XP_POINTS_PER_LEVEL } from "@project/xp-constants";
 import type Exercise from "@/models/Exercise";
 import type ExerciseSubmitResult from "@/models/ExerciseSubmitResult";
 
@@ -16,7 +17,7 @@ export function evaluateExerciseLocally(exercise: Exercise, answer: string): Exe
   const isCorrect = normalise(answer) === normalise(exercise.correctAnswer);
   return {
     isCorrect,
-    xpEarned: isCorrect ? exercise.xpReward : 0,
+    xpEarned: isCorrect ? XP_POINTS_PER_LEVEL : 0,
     correctAnswer: exercise.correctAnswer,
     explanation: exercise.explanation ?? undefined,
   };

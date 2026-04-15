@@ -11,6 +11,7 @@ import type { DuelStackParamList } from "@/types/duelNavigation.types";
 import { DUEL_ACTIVE_ROUND_SECONDS } from "@/constants/duelUiConstants";
 
 type Nav = NativeStackNavigationProp<DuelStackParamList, "ActiveDuel">;
+
 export function useDuelActiveDuelScreen(navigation: Nav) {
   const dispatch = useAppDispatch();
   const { round, score, sessionId, submitAnswer, playerReady, duelEnd, opponent } = useDuelSocket();
@@ -23,13 +24,16 @@ export function useDuelActiveDuelScreen(navigation: Nav) {
   const [myScore, setMyScore] = useState(0);
   const [oppScore, setOppScore] = useState(0);
   const [overlayVisible, setOverlayVisible] = useState(false);
+
   useEffect(() => {
     logNav("screen:enter", { screen: "ActiveDuelScreen" });
     return () => logNav("screen:leave", { screen: "ActiveDuelScreen" });
   }, []);
+
   useEffect(() => {
     setMyScore(score.me);
     setOppScore(score.opp);
+
     if (round) {
       setOverlayVisible(true);
       const t = setTimeout(() => setOverlayVisible(false), 1600);
@@ -37,15 +41,18 @@ export function useDuelActiveDuelScreen(navigation: Nav) {
     }
     return undefined;
   }, [score]);
+
   useEffect(() => {
     if (round) {
       setRoundNumber(round.roundNumber);
       setSelected(null);
     }
   }, [round]);
+
   useEffect(() => {
     if (sessionId && userId) playerReady(sessionId);
   }, [playerReady, sessionId, userId]);
+
   useEffect(() => {
     if (!duelEnd) return;
     logDuel("duel:end", { won: duelEnd.won, xpEarned: duelEnd.xpEarned });
@@ -53,6 +60,7 @@ export function useDuelActiveDuelScreen(navigation: Nav) {
     dispatch(applyDuelResult({ won: duelEnd.won, ratingDelta: duelEnd.ratingDelta }));
     navigation.replace("DuelResults", { won: duelEnd.won, score: `${myScore}-${oppScore}`, replay: duelEnd.roundReplay });
   }, [dispatch, duelEnd, myScore, navigation, oppScore]);
+
   useEffect(() => {
     setTimeLeft(DUEL_ACTIVE_ROUND_SECONDS);
     const i = setInterval(() => {
@@ -63,11 +71,13 @@ export function useDuelActiveDuelScreen(navigation: Nav) {
     }, 1000);
     return () => clearInterval(i);
   }, [dispatch, round, roundNumber]);
+
   const submit = (answer: string) => {
     if (!sessionId || !userId) return;
     submitAnswer({ sessionId, roundNumber, answer, timeTakenMs: (DUEL_ACTIVE_ROUND_SECONDS - timeLeft) * 1000 });
     setSelected(answer);
   };
+
   return {
     round,
     username,

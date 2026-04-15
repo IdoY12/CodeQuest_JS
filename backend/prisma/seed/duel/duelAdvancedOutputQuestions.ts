@@ -1,7 +1,7 @@
 /**
  * Duel question batch for Prisma seeding (duelAdvancedOutputQuestions).
  *
- * Responsibility: synthetic duel questions for one category/difficulty.
+ * Responsibility: synthetic duel questions for one difficulty band.
  * Layer: backend prisma seed
  * Depends on: @prisma/client types
  * Consumers: persistDuelQuestions.ts
@@ -46,6 +46,5 @@ export function buildAdvancedOutputQuestions(): Prisma.DuelQuestionCreateManyInp
     explanation: "Advanced questions test event loop order, this binding, and references.",
     type: "MULTIPLE_CHOICE",
     difficulty: "SENIOR",
-    category: "ASYNC",
   }));
 }

@@ -3,7 +3,6 @@ import { API_BASE_URL } from "@/config/network";
 import type AvatarPatchResponse from "@/models/AvatarPatchResponse";
 import type ChangePasswordResponse from "@/models/ChangePasswordResponse";
 import type DailyGoalStatus from "@/models/DailyGoalStatus";
-import type OnboardingResponse from "@/models/OnboardingResponse";
 import type PracticeLogResponse from "@/models/PracticeLogResponse";
 import type ProgressSummary from "@/models/ProgressSummary";
 import type UserPreferences from "@/models/UserPreferences";
@@ -89,19 +88,6 @@ export default class UserService extends AuthAware {
     });
     if (!response.ok) throw new Error(`Avatar upload failed (${response.status})`);
     return response.json() as Promise<{ publicUrl: string }>;
-  }
-
-  async postOnboarding(
-    goal: string,
-    experienceLevel: string,
-    dailyCommitmentMinutes: number,
-  ): Promise<OnboardingResponse> {
-    const { data } = await this.axiosInstance.post<OnboardingResponse>("/user/onboarding", {
-      goal,
-      experienceLevel,
-      dailyCommitmentMinutes,
-    });
-    return data;
   }
 
   async postPracticeLog(dateKey: string, practicedSeconds: number): Promise<PracticeLogResponse> {

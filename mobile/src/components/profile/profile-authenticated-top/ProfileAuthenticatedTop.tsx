@@ -18,6 +18,7 @@ export function ProfileAuthenticatedTop({ p }: { p: UseProfileScreenReturn }) {
       </View>
     );
   }
+
   return (
     <>
       <View style={t.hero}>

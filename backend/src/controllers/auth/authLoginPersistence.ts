@@ -11,6 +11,7 @@ export async function touchUserLastActive(userId: string): Promise<void> {
 
 export async function ensureUserProgressForLogin(user: User): Promise<UserProgress> {
   let level = await activeExperienceLevelOf(prisma, user.id);
+
   if (!user.activeExperienceLevel) {
     await prisma.user.update({
       where: { id: user.id },
@@ -22,6 +23,7 @@ export async function ensureUserProgressForLogin(user: User): Promise<UserProgre
   const progress = await prisma.userProgress.findUniqueOrThrow({
     where: { userId_experienceLevel: { userId: user.id, experienceLevel: level } },
   });
+
   return progress;
 }
 

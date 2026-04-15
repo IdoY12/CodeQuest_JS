@@ -12,7 +12,7 @@ export function useProfileRedux() {
   const duelLosses = useAppSelector((s) => s.duel.duelLosses);
   const duelRating = useAppSelector((s) => s.duel.duelRating);
   const goal = useAppSelector((s) => s.profile.goal);
-  const experience = useAppSelector((s) => s.profile.experience);
+  const experienceLevel = useAppSelector((s) => s.profile.experienceLevel);
   const commitment = useAppSelector((s) => s.profile.commitment);
   const notificationsEnabled = useAppSelector((s) => s.profile.notificationsEnabled);
   const soundsEnabled = useAppSelector((s) => s.profile.soundsEnabled);
@@ -20,9 +20,11 @@ export function useProfileRedux() {
   const accessToken = useAppSelector((s) => s.session.accessToken);
   const refreshToken = useAppSelector((s) => s.session.refreshToken);
   const studySecondsToday = useAppSelector((s) => s.session.studySecondsToday);
+
   const studyMinutesToday = Math.floor(studySecondsToday / 60);
   const duelTotal = duelWins + duelLosses;
   const duelWinRate = duelTotal > 0 ? `${Math.round((duelWins / duelTotal) * 100)}%` : "0%";
+
   return {
     username,
     email,
@@ -35,7 +37,7 @@ export function useProfileRedux() {
     duelLosses,
     duelRating,
     goal,
-    experience,
+    experienceLevel,
     commitment,
     notificationsEnabled,
     soundsEnabled,

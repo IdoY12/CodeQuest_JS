@@ -21,12 +21,15 @@ export function applyCorrectDuelAnswer(
   timeTakenMs: number,
 ): void {
   session.answered = true;
+
   if (session.roundTimeout) {
     clearTimeout(session.roundTimeout);
     session.roundTimeout = null;
   }
+
   const player1TimeMs = answeredByPlayer1 ? timeTakenMs : 0;
   const player2TimeMs = answeredByPlayer1 ? 0 : timeTakenMs;
+
   if (answeredByPlayer1) {
     session.score.player1 += 1;
   } else {
@@ -47,6 +50,7 @@ export function applyCorrectDuelAnswer(
     player_ids: { player1: session.player1.userId, player2: session.player2.userId },
     response_times: { player1_ms: player1TimeMs, player2_ms: player2TimeMs },
   });
+
   if (session.round >= DUEL_ROUND_COUNT) {
     void endSession(duel, session);
     return;

@@ -21,11 +21,13 @@ export function ExerciseView(props: ExerciseViewProps) {
   const exerciseType = exercise.type;
   const sharedProps = { exercise, accessToken: props.accessToken, onLessonExerciseComplete: props.onLessonExerciseComplete };
   let body: ReactNode;
+
   if (exerciseType === "CONCEPT_CARD") body = <EvConcept {...sharedProps} />;
   else if (exerciseType === "MULTIPLE_CHOICE") body = <EvMcqTap variant="mcq" {...sharedProps} />;
   else if (exerciseType === "FIND_THE_BUG") body = <EvFindBug {...sharedProps} lineList={exerciseLineList(exercise.codeSnippet)} />;
   else if (exerciseType === "DRAG_DROP") body = <EvDragDrop {...sharedProps} />;
   else if (exerciseType === "CODE_FILL") body = <EvCodeFill {...sharedProps} />;
   else body = <EvMcqTap variant="tap_token" {...sharedProps} />;
+
   return <View style={v.root}>{body}</View>;
 }

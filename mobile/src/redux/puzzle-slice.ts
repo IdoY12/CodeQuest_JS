@@ -27,4 +27,5 @@ const puzzleSlice = createSlice({
 });
 
 export const { markCodePuzzleSolved, hydratePuzzle } = puzzleSlice.actions;
+
 export default puzzleSlice.reducer;

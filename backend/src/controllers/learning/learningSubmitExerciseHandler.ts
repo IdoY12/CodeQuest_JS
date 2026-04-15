@@ -19,6 +19,7 @@ export async function learningSubmitExerciseHandler(
         answer: z.string(),
       })
       .safeParse(request.body);
+
     if (!parsed.success) {
       response.status(400).json({ error: parsed.error.flatten() });
       return;
@@ -28,6 +29,7 @@ export async function learningSubmitExerciseHandler(
       exerciseId: parsed.data.exerciseId,
       answer: parsed.data.answer,
     });
+
     if (!result) {
       response.status(404).json({ error: "Exercise not found" });
       return;

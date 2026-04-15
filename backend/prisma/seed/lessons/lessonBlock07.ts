@@ -26,7 +26,6 @@ export async function seedLessonBlock_07(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "class Config {\n  static #instance = null;\n  static getInstance() {\n    return (this.#instance ??= new Config());\n  }\n}",
         correctAnswer: "Only one instance of a class exists in the application",
         explanation: "Singleton restricts instantiation to a single object, useful for shared resources like config or DB connections.",
-        xpReward: 30,
         options: [
           "A class can be extended exactly once",
           "Only one instance of a class exists in the application",
@@ -40,7 +39,6 @@ export async function seedLessonBlock_07(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "emitter.on('change', handler);\nemitter.emit('change', data);",
         correctAnswer: "A subject notifies dependent observers when its state changes",
         explanation: "Observer defines a one-to-many dependency: when the subject changes, all registered observers are notified.",
-        xpReward: 30,
         options: [
           "One object controls the creation of others",
           "A subject notifies dependent observers when its state changes",
@@ -54,7 +52,6 @@ export async function seedLessonBlock_07(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "// Bad: UserService handles auth AND email\n// Good: separate AuthService and EmailService",
         correctAnswer: "A class should have only one reason to change",
         explanation: "SRP states that a class/module should encapsulate one concern, making it easier to modify without side effects.",
-        xpReward: 30,
         options: [
           "A module should only be imported once",
           "A class should have only one public method",
@@ -68,7 +65,6 @@ export async function seedLessonBlock_07(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "// Without DI\nclass Service { db = new Database(); }\n// With DI\nclass Service { constructor(db) { this.db = db; } }",
         correctAnswer: "Providing a class's dependencies from outside rather than creating them internally",
         explanation: "DI decouples classes from their dependencies, making code easier to test and swap implementations.",
-        xpReward: 30,
         options: [
           "Hard-coding dependencies inside a class",
           "Providing a class's dependencies from outside rather than creating them internally",
@@ -82,7 +78,6 @@ export async function seedLessonBlock_07(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "function createUser(type) {\n  if (type === 'admin') return new Admin();\n  return new Guest();\n}",
         correctAnswer: "Centralising and abstracting the creation of objects",
         explanation: "A factory centralises object creation logic, hiding which specific class is instantiated from the caller.",
-        xpReward: 30,
         options: [
           "Ensuring a class is only instantiated once",
           "Centralising and abstracting the creation of objects",
@@ -96,7 +91,6 @@ export async function seedLessonBlock_07(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "// UI layer, service layer, and data layer are separate modules",
         correctAnswer: "Different responsibilities live in separate, independent modules",
         explanation: "Separation of concerns keeps distinct responsibilities isolated so each part can be understood, tested, and changed independently.",
-        xpReward: 30,
         options: [
           "Each file should export only one function",
           "Different responsibilities live in separate, independent modules",
@@ -110,7 +104,6 @@ export async function seedLessonBlock_07(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "// Extend via subclass or composition; don't edit existing tested code",
         correctAnswer: "Open for extension, closed for modification",
         explanation: "OCP encourages adding new behaviour through extension rather than editing already-tested code.",
-        xpReward: 30,
         options: [
           "Files should be open for reading but closed for writing",
           "Open for extension, closed for modification",
@@ -124,7 +117,6 @@ export async function seedLessonBlock_07(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "// A Square extending Rectangle must behave as a Rectangle wherever one is expected",
         correctAnswer: "Subclasses must be substitutable for their parent without breaking behaviour",
         explanation: "LSP requires that objects of a subclass can replace parent-class objects without altering program correctness.",
-        xpReward: 30,
         options: [
           "Parent classes must never reference child classes",
           "Subclasses must be substitutable for their parent without breaking behaviour",
@@ -138,7 +130,6 @@ export async function seedLessonBlock_07(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "// You define handlers; the framework decides when to call them",
         correctAnswer: "A framework controls program flow instead of your application code",
         explanation: "IoC shifts flow control from application code to a container or framework, enabling pluggable, decoupled architectures.",
-        xpReward: 30,
         options: [
           "Reversing the order of function calls",
           "A framework controls program flow instead of your application code",
@@ -152,7 +143,6 @@ export async function seedLessonBlock_07(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "const counter = (() => {\n  let count = 0;\n  return { increment: () => ++count, get: () => count };\n})();",
         correctAnswer: "The module pattern uses closure to enforce truly private state",
         explanation: "The module pattern wraps state in a closure so internal variables are inaccessible from outside. A plain namespace exposes all its properties.",
-        xpReward: 30,
         options: [
           "Module pattern requires class syntax",
           "Namespaces can hold functions; modules cannot",

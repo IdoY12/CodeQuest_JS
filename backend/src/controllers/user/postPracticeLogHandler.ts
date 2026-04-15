@@ -22,6 +22,7 @@ export async function postPracticeLog(req: AuthenticatedRequest, res: Response) 
       practicedSeconds: z.number().int().min(1).max(60 * 60),
     })
     .safeParse(req.body);
+
   if (!parsed.success) {
     logWarn("[TASKS]", "practice-log:validation-failed", { userId: req.user?.userId, errors: parsed.error.flatten() });
     return res.status(400).json({ error: parsed.error.flatten() });
@@ -30,6 +31,7 @@ export async function postPracticeLog(req: AuthenticatedRequest, res: Response) 
   const userId = req.user!.userId;
   const { dateKey, practicedSeconds } = parsed.data;
   const progress = await getProgressForActiveUser(prisma, userId);
+
   if (!progress) {
     return res.status(404).json({ error: "Progress not found" });
   }
@@ -54,5 +56,6 @@ export async function postPracticeLog(req: AuthenticatedRequest, res: Response) 
   });
 
   logInfo("[TASKS]", "practice-log:write-success", { userId: req.user?.userId, practicedSeconds: nextSeconds });
+
   return res.json({ practicedSeconds: nextSeconds });
 }

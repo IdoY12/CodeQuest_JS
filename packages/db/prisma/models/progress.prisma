@@ -15,7 +15,6 @@ model UserProgress {
   goal                   String?
   dailyCommitmentMinutes Int?
   notificationsEnabled   Boolean           @default(true)
-  onboardingCompleted    Boolean           @default(false)
   xpTotal                Int               @default(0)
   level                  Int               @default(1)
   streakCurrent          Int               @default(0)

@@ -29,14 +29,17 @@ export default abstract class AuthAware {
         config._retry = true;
         const secure = await readSecureSessionTokens();
         const refreshToken = secure.refreshToken;
+
         if (!refreshToken) {
           resetStoresAfterLogout(store.dispatch);
           throw error;
         }
+
         try {
           const refreshResponse = await axios.post<{ accessToken: string }>(`${API_BASE_URL}/auth/refresh`, { refreshToken });
           const nextAccessToken = refreshResponse.data.accessToken;
           await writeSecureSessionTokens(nextAccessToken, refreshToken);
+
           if (config.headers && typeof config.headers.set === "function") {
             config.headers.set("Authorization", `Bearer ${nextAccessToken}`);
           } else {

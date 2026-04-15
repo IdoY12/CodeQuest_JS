@@ -33,7 +33,9 @@ const blocks = [
 
 export async function runAllLessonBlocks(prisma: PrismaClient): Promise<void> {
   const order = createGlobalOrderCounters();
-  for (const block of blocks) {
+
+  await blocks.reduce<Promise<void>>(async (prev, block) => {
+    await prev;
     await block(prisma, order);
-  }
+  }, Promise.resolve());
 }

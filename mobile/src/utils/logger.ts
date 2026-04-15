@@ -2,6 +2,7 @@ type LogMeta = Record<string, unknown> | undefined;
 
 function formatMeta(meta?: LogMeta) {
   if (!meta) return "";
+
   try {
     return ` ${JSON.stringify(meta)}`;
   } catch {

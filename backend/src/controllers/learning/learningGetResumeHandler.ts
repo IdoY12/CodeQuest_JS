@@ -24,6 +24,7 @@ export async function learningGetResumeHandler(
     const progress = await prisma.userProgress.findUnique({
       where: { userId_experienceLevel: { userId: request.user!.userId, experienceLevel } },
     });
+
     if (!progress) {
       response.json({ experienceLevel, currentExerciseIndex: 0 } satisfies LearningResumeResponse);
       return;

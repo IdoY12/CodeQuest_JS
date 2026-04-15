@@ -15,6 +15,7 @@ export function HomeScreen({ navigation }: HomeMainScreenProps) {
       () => navigation.getParent()?.getParent()?.navigate("Auth" as never),
       () => navigation.navigate("DuelTab"),
     );
+
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>

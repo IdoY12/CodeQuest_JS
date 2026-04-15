@@ -15,18 +15,22 @@ import { MIN_JWT_SECRET_LENGTH, PLACEHOLDER_JWT_SECRETS, normalizeSecret } from 
 export function validateBackendProductionSecuritySettings(): void {
   if (!config.get<boolean>("app.validateSecurity")) return;
 
-  for (const [key, value] of [
-    ["app.jwtAccessSecret", config.get<string>("app.jwtAccessSecret")],
-    ["app.jwtRefreshSecret", config.get<string>("app.jwtRefreshSecret")],
-  ] as const) {
+  (
+    [
+      ["app.jwtAccessSecret", config.get<string>("app.jwtAccessSecret")],
+      ["app.jwtRefreshSecret", config.get<string>("app.jwtRefreshSecret")],
+    ] as const
+  ).forEach(([key, value]) => {
     if (!value?.trim()) throw new Error(`Missing required configuration: ${key}`);
+
     if (value.length < MIN_JWT_SECRET_LENGTH) {
       throw new Error(`${key} must be at least ${MIN_JWT_SECRET_LENGTH} characters`);
     }
+
     if (PLACEHOLDER_JWT_SECRETS.has(normalizeSecret(value))) {
       throw new Error(`${key} must not use a known placeholder; set strong secrets via environment`);
     }
-  }
+  });
 
   assertPostgresUrl(config.get<string>("database.url"), "database.url");
   assertNonWildcardOrigin(config.get<string>("app.cors.origin"), "set CORS_ORIGIN");

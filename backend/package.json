@@ -28,6 +28,7 @@
     "@prisma/client": "^6.19.0",
     "@project/auth-jwt": "file:../packages/auth-jwt",
     "@project/db": "file:../packages/db",
+    "@project/xp-constants": "file:../packages/xp-constants",
     "@project/server-kit": "file:../packages/server-kit",
     "bcrypt": "^6.0.0",
     "config": "^4.4.1",
@@ -35,6 +36,7 @@
     "express": "^5.2.1",
     "express-rate-limit": "^8.2.1",
     "helmet": "^8.1.0",
+    "ioredis": "^5.10.1",
     "node-cache": "^5.1.2",
     "zod": "^4.3.6"
   },

@@ -5,6 +5,7 @@ import { signAccessToken, verifyRefreshToken } from "../../utils/sessionJwtToken
 
 export async function authRefreshHandler(request: Request, response: Response): Promise<void> {
   const refreshTokenValue = String(request.body?.refreshToken ?? "");
+
   if (!refreshTokenValue) {
     response.status(400).json({ error: "Missing refresh token" });
     return;
@@ -15,6 +16,7 @@ export async function authRefreshHandler(request: Request, response: Response): 
       where: { id: payload.userId },
       select: { id: true, email: true, tokenVersion: true },
     });
+
     if (!user || user.tokenVersion !== payload.tokenVersion) {
       response.status(401).json({ error: "Invalid refresh token" });
       return;

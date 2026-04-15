@@ -18,7 +18,9 @@ export async function patchProfile(req: AuthenticatedRequest, res: Response) {
       username: z.string().min(2).max(30).optional(),
     })
     .safeParse(req.body);
+
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+
   if (!parsed.data.username) {
     return res.status(400).json({ error: "No profile fields provided" });
   }
@@ -26,5 +28,6 @@ export async function patchProfile(req: AuthenticatedRequest, res: Response) {
     where: { id: req.user!.userId },
     data: { username: parsed.data.username },
   });
+
   return res.json({ id: user.id, username: user.username, avatarUrl: user.avatarUrl });
 }

@@ -11,24 +11,19 @@ export type DraftSetters = {
   setDraftNotifications: (n: boolean) => void;
 };
 
-export function pathFromExperience(level: LevelKey): LevelKey {
-  return level;
-}
-
 export function applyProgressToStore(
   dispatch: AppDispatch,
   goal: GoalKey,
-  exp: LevelKey,
+  experienceLevel: LevelKey,
   minutes: 10 | 15 | 25,
   notificationsEnabled: boolean,
 ): void {
   dispatch(
     updatePreferences({
       goal,
-      experience: exp,
+      experienceLevel,
       commitment: String(minutes) as Commitment,
       notificationsEnabled,
-      path: pathFromExperience(exp),
     }),
   );
 }
@@ -36,12 +31,12 @@ export function applyProgressToStore(
 export function syncDraftsFromProgress(
   setters: DraftSetters,
   goal: GoalKey,
-  exp: LevelKey,
+  experienceLevel: LevelKey,
   minutes: 10 | 15 | 25,
   notificationsEnabled: boolean,
 ): void {
   setters.setDraftGoal(goal);
-  setters.setDraftLevel(exp);
+  setters.setDraftLevel(experienceLevel);
   setters.setDraftCommitment(String(minutes) as CommitmentKey);
   setters.setDraftNotifications(notificationsEnabled);
 }
@@ -54,7 +49,9 @@ export async function fetchAndApplyProfile(
 ): Promise<void> {
   try {
     const profile = await user.getProfile();
+
     if (!isActive()) return;
+
     dispatch(
       setUserIdentity({
         username: profile.username,
@@ -63,7 +60,9 @@ export async function fetchAndApplyProfile(
       }),
     );
     const p = profile.progress;
+
     if (!p?.goal || !p.experienceLevel || !p.dailyCommitmentMinutes) return;
+
     applyProgressToStore(dispatch, p.goal, p.experienceLevel, p.dailyCommitmentMinutes, p.notificationsEnabled);
     syncDraftsFromProgress(setters, p.goal, p.experienceLevel, p.dailyCommitmentMinutes, p.notificationsEnabled);
   } catch (error) {

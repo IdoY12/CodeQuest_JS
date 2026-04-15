@@ -10,6 +10,7 @@ import { styles } from "./AuthenticatedProfileScreen.styles";
 
 export function AuthenticatedProfileScreen() {
   const p = useProfileScreen();
+
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>

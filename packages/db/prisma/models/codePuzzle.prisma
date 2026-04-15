@@ -3,5 +3,4 @@ model CodePuzzle {
   prompt          String
   acceptedAnswers String[]
   orderIndex      Int      @unique
-  createdAt       DateTime @default(now())
 }

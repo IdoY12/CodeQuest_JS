@@ -13,6 +13,7 @@ export type LogMeta = Record<string, unknown> | undefined;
 
 export function formatMeta(meta?: LogMeta): string {
   if (!meta) return "";
+
   try {
     return ` ${JSON.stringify(redactValue(meta))}`;
   } catch {

@@ -37,7 +37,9 @@ async function mergeHydratedSessionTokens<T extends Record<string, unknown>>(ses
 export async function hydrateStoreFromStorage(dispatch: AppDispatch): Promise<void> {
   try {
     const raw = await AsyncStorage.getItem(REDUX_PERSIST_KEY);
+
     if (!raw) return;
+
     const parsed = JSON.parse(raw) as OldPersist & {
       profile?: Record<string, unknown>;
       xp?: Record<string, unknown>;
@@ -46,6 +48,7 @@ export async function hydrateStoreFromStorage(dispatch: AppDispatch): Promise<vo
       duel?: Record<string, unknown>;
       puzzle?: Record<string, unknown>;
     };
+
     if (parsed.profile && parsed.session) {
       const sessionWithTokens = await mergeHydratedSessionTokens(parsed.session as Record<string, unknown>);
       dispatch(hydrateSession(sessionWithTokens as never));

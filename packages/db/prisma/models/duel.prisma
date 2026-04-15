@@ -5,11 +5,8 @@ model DuelQuestion {
   correctAnswer String
   type          ExerciseType
   difficulty    Difficulty
-  category      DuelCategory
   options       Json?
   explanation   String       @default("")
-
-  @@index([category])
 }
 
 model DuelSession {

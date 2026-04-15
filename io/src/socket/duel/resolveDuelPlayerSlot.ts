@@ -13,6 +13,8 @@ export type DuelPlayerSlot = "player1" | "player2";
 
 export function resolveDuelPlayerSlot(session: SessionState, socketId: string): DuelPlayerSlot | null {
   if (socketId === session.player1.socketId) return "player1";
+
   if (socketId === session.player2.socketId) return "player2";
+
   return null;
 }

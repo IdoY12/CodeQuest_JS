@@ -1,7 +1,7 @@
 /**
  * Duel question batch for Prisma seeding (duelBeginnerBugQuestions).
  *
- * Responsibility: synthetic duel questions for one category/difficulty.
+ * Responsibility: synthetic duel questions for one difficulty band.
  * Layer: backend prisma seed
  * Depends on: @prisma/client types
  * Consumers: persistDuelQuestions.ts
@@ -38,6 +38,5 @@ export function buildBeginnerBugQuestions(): Prisma.DuelQuestionCreateManyInput[
     explanation: "Spot the line that introduces invalid logic or runtime behavior.",
     type: "FIND_THE_BUG",
     difficulty: "JUNIOR",
-    category: "METHODS",
   }));
 }

@@ -18,14 +18,19 @@ export function registerPlayerReady(socket: Socket, duel: DuelNamespace) {
   socket.on("player_ready", async (payload: { session_id: string }) => {
     try {
       const session = sessions.get(payload.session_id);
+
       if (!session) return;
+
       const slot = resolveDuelPlayerSlot(session, socket.id);
+
       if (!slot) {
         logInfo("[DUEL]", "player_ready:rejected-non-participant", { socketId: socket.id });
         return;
       }
+
       const userId = slot === "player1" ? session.player1.userId : session.player2.userId;
       session.readyUserIds.add(userId);
+
       if (session.readyUserIds.size >= 2 && session.round === 0) {
         await startRound(duel, session);
       }

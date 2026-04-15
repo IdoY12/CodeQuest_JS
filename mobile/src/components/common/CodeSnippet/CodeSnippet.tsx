@@ -45,11 +45,9 @@ function highlightJavaScript(code: string): Array<Array<{ text: string; color: s
     const matches: Array<{ start: number; end: number; color: string }> = [];
 
     const collect = (regex: RegExp, color: string) => {
-      let match = regex.exec(line);
-      while (match) {
-        matches.push({ start: match.index, end: match.index + match[0].length, color });
-        match = regex.exec(line);
-      }
+      [...line.matchAll(regex)].forEach((match) => {
+        matches.push({ start: match.index!, end: match.index! + match[0].length, color });
+      });
     };
 
     collect(new RegExp(stringRegex), "#FCA5A5");
@@ -57,17 +55,20 @@ function highlightJavaScript(code: string): Array<Array<{ text: string; color: s
     collect(new RegExp(keywordRegex), "#FCD34D");
     matches.sort((a, b) => a.start - b.start);
 
-    for (const match of matches) {
-      if (match.start < cursor) continue;
+    matches.forEach((match) => {
+      if (match.start < cursor) return;
+
       if (match.start > cursor) {
         tokens.push({ text: line.slice(cursor, match.start), color: "#D1D5DB" });
       }
       tokens.push({ text: line.slice(match.start, match.end), color: match.color });
       cursor = match.end;
-    }
+    });
+
     if (cursor < line.length) {
       tokens.push({ text: line.slice(cursor), color: "#D1D5DB" });
     }
+
     return tokens.length > 0 ? tokens : [{ text: line || " ", color: "#D1D5DB" }];
   });
 }

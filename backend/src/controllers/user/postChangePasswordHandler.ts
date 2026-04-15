@@ -18,10 +18,15 @@ export async function postChangePassword(req: AuthenticatedRequest, res: Respons
   const parsed = z
     .object({ currentPassword: z.string().min(6), newPassword: z.string().min(6) })
     .safeParse(req.body);
+
   if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+
   const user = await prisma.user.findUnique({ where: { id: req.user!.userId } });
+
   if (!user) return res.status(404).json({ error: "User not found" });
+
   const isPasswordValid = await comparePassword(parsed.data.currentPassword, user.hashedPassword);
+
   if (!isPasswordValid) return res.status(401).json({ error: "Current password is incorrect" });
   await prisma.user.update({
     where: { id: req.user!.userId },
@@ -31,5 +36,6 @@ export async function postChangePassword(req: AuthenticatedRequest, res: Respons
     },
   });
   invalidateCachedTokenVersionForUser(req.user!.userId);
+
   return res.json({ ok: true });
 }

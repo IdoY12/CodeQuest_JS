@@ -17,6 +17,7 @@ export function EvDragDrop({ exercise, accessToken, onLessonExerciseComplete }: 
     accessToken,
     onLessonExerciseComplete,
   );
+
   return (
     <View style={v.exerciseCard}>
       <Text style={v.explanation}>Build the answer above. Tap a selected line to remove it.</Text>

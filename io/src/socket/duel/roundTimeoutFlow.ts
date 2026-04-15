@@ -22,6 +22,7 @@ export function attachRoundTimeout(
 ): ReturnType<typeof setTimeout> {
   return setTimeout(async () => {
     if (session.roundNonce !== nonce) return;
+
     if (session.answered) return;
     io.to(session.roomId).emit("round_result", {
       winner_user_id: null,
@@ -38,10 +39,12 @@ export function attachRoundTimeout(
       player1TimeMs: 0,
       player2TimeMs: 0,
     });
+
     if (session.round >= DUEL_ROUND_COUNT) {
       await endSession(io, session);
       return;
     }
+
     if (session.roundNonce === nonce) {
       await scheduleNextRound();
     }

@@ -33,14 +33,17 @@ export function useLessonLoad(experienceLevel: Experience, accessToken: string |
   const isFocused = useIsFocused();
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
   const trackedRef = useRef(0);
+
   const flushPractice = useCallback(async () => {
     if (!accessToken || trackedRef.current <= 0 || !user) return;
     const seconds = drainRefInt(trackedRef);
     const ok = await tryPostPracticeLog(user, seconds);
+
     if (!ok) {
       trackedRef.current += seconds;
       return;
     }
+
     try {
       const progress = await user.getProgressSummary();
       dispatch(hydrateStreak({ streakCurrent: progress.streakCurrent, streakDays: progress.streakDays }));
@@ -48,10 +51,12 @@ export function useLessonLoad(experienceLevel: Experience, accessToken: string |
       // Streak will refresh on next bootstrap; don't block the lesson flow.
     }
   }, [accessToken, dispatch, user]);
+
   useEffect(() => {
     logNav("screen:enter", { screen: "LessonScreen", experienceLevel });
     return () => logNav("screen:leave", { screen: "LessonScreen", experienceLevel });
   }, [experienceLevel]);
+
   useEffect(() => {
     dispatch(setCurrentExperienceLevel(experienceLevel));
     let active = true;
@@ -68,11 +73,13 @@ export function useLessonLoad(experienceLevel: Experience, accessToken: string |
     // trigger a reload when Redux writes the progress back during the lesson.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken, blockIndex, dispatch, experienceLevel]);
+
   useEffect(() => {
     if (loading || exercises.length === 0) return;
     dispatch(setSavedExerciseIndex(exerciseIndex));
     dispatch(saveBlockProgress({ level: experienceLevel, blockIndex, exerciseIndex }));
   }, [blockIndex, dispatch, exerciseIndex, experienceLevel, exercises.length, loading]);
+
   useEffect(() => {
     const sub = AppState.addEventListener("change", (next) => {
       if (appStateRef.current === "active" && next !== "active") void flushPractice();
@@ -80,6 +87,7 @@ export function useLessonLoad(experienceLevel: Experience, accessToken: string |
     });
     return () => sub.remove();
   }, [flushPractice]);
+
   useEffect(() => {
     if (!isFocused || loading || !exercises[exerciseIndex]) return;
     const t = setInterval(() => {
@@ -93,6 +101,7 @@ export function useLessonLoad(experienceLevel: Experience, accessToken: string |
       void flushPractice();
     };
   }, [dispatch, exerciseIndex, exercises, flushPractice, isFocused, loading]);
+
   return {
     exercises,
     loading,

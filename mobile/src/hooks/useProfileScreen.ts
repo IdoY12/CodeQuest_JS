@@ -24,9 +24,12 @@ function useProfileLifecycle(
     logNav("screen:enter", { screen: "ProfileScreen" });
     return () => logNav("screen:leave", { screen: "ProfileScreen" });
   }, []);
+
   useEffect(() => setDraftUsername(username), [username, setDraftUsername]);
+
   const draftsRef = useRef(drafts);
   draftsRef.current = drafts;
+
   useEffect(() => {
     if (!accessToken || !user) {
       setScreenLoading(false);
@@ -50,14 +53,17 @@ export function useProfileScreen() {
   const user = useAuthenticatedService(UserServiceClass);
   const profileRedux = useProfileRedux();
   const profileDraft = useProfileDraftState(profileRedux);
+
   useProfileLifecycle(user, profileRedux.accessToken, dispatch, profileRedux.username, profileDraft.setDraftUsername, profileDraft.setScreenLoading, {
     setDraftGoal: profileDraft.setDraftGoal,
     setDraftLevel: profileDraft.setDraftLevel,
     setDraftCommitment: profileDraft.setDraftCommitment,
     setDraftNotifications: profileDraft.setDraftNotifications,
   });
+
   const { onSavePreferences, ...handlers } = useProfileAccountHandlers(profileRedux, profileDraft, user);
   const { onAvatarPress } = useProfileAvatarHandlers(profileRedux, profileDraft, user);
+
   return { ...profileRedux, ...profileDraft, onSavePreferences, onAvatarPress, ...handlers };
 }
 

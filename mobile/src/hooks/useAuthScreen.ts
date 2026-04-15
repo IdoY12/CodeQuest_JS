@@ -16,21 +16,24 @@ export function useAuthScreen(dispatch: AppDispatch) {
     () => email.includes("@") && password.length >= 6 && (isLogin || username.length >= 2),
     [email, password, username, isLogin],
   );
+
   useEffect(() => {
     logNav("screen:enter", { screen: "AuthScreen" });
     return () => logNav("screen:leave", { screen: "AuthScreen" });
   }, []);
+
   const onSubmit = useCallback(async () => {
     if (!canSubmit || loading) return;
     logAuth("submit:start", { mode: isLogin ? "login" : "register", email });
     setLoading(true);
     setError(null);
+
     try {
       const response = isLogin
         ? await authService.login(email, password)
         : await authService.register(email, username, password);
       dispatchSignInSuccess(dispatch, response.user, response.accessToken, response.refreshToken);
-      logAuth("submit:success", { mode: isLogin ? "login" : "register", userId: response.user.id, onboardingCompleted: response.user.onboardingCompleted });
+      logAuth("submit:success", { mode: isLogin ? "login" : "register", userId: response.user.id });
     } catch (submitError) {
       logError("[AUTH]", submitError, { mode: isLogin ? "login" : "register" });
       setError(submitError instanceof Error ? submitError.message : "Unable to continue");
@@ -38,6 +41,7 @@ export function useAuthScreen(dispatch: AppDispatch) {
       setLoading(false);
     }
   }, [canSubmit, dispatch, email, isLogin, loading, password, username]);
+
   return {
     email,
     setEmail,

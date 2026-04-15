@@ -12,10 +12,12 @@ import { getProgressForActiveUser, prisma } from "@project/db";
 
 export async function getDailyGoalStatus(req: AuthenticatedRequest, res: Response) {
   const dateKey = String(req.params.dateKey);
+
   if (!/^\d{4}-\d{2}-\d{2}$/.test(dateKey)) {
     return res.status(400).json({ error: "Invalid date key format" });
   }
   const progress = await getProgressForActiveUser(prisma, req.user!.userId);
+
   if (!progress) return res.status(404).json({ error: "Progress not found" });
 
   const sameDay = progress.practiceLogDateKey === dateKey;
@@ -26,6 +28,7 @@ export async function getDailyGoalStatus(req: AuthenticatedRequest, res: Respons
   const completeSent = sameDay ? progress.practiceLogCompleteSent : false;
   const canSendIncomplete = progress.notificationsEnabled && remainingMinutes > 0 && incompleteCount < 2;
   const canSendComplete = progress.notificationsEnabled && remainingMinutes === 0 && !completeSent;
+
   return res.json({
     dateKey,
     goalMinutes,

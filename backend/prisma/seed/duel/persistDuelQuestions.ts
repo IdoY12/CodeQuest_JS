@@ -14,12 +14,18 @@ import { buildAdvancedTokenQuestions } from "./duelAdvancedTokenQuestions.js";
 import { buildBeginnerBugQuestions } from "./duelBeginnerBugQuestions.js";
 import { buildBeginnerOutputQuestions } from "./duelBeginnerOutputQuestions.js";
 import { buildBeginnerTokenQuestions } from "./duelBeginnerTokenQuestions.js";
+import { buildMidBugQuestions } from "./duelMidBugQuestions.js";
+import { buildMidOutputQuestions } from "./duelMidOutputQuestions.js";
+import { buildMidTokenQuestions } from "./duelMidTokenQuestions.js";
 
 export async function persistDuelQuestions(prisma: PrismaClient): Promise<void> {
   const duelQuestions = [
     ...buildBeginnerOutputQuestions(),
     ...buildBeginnerBugQuestions(),
     ...buildBeginnerTokenQuestions(),
+    ...buildMidOutputQuestions(),
+    ...buildMidBugQuestions(),
+    ...buildMidTokenQuestions(),
     ...buildAdvancedOutputQuestions(),
     ...buildAdvancedBugQuestions(),
     ...buildAdvancedTokenQuestions(),

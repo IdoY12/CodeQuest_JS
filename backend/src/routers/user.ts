@@ -1,5 +1,5 @@
 /**
- * Authenticated user profile, progress, onboarding, and account management routes.
+ * Authenticated user profile, progress, preferences, and account management routes.
  *
  * Responsibility: mount user handlers behind authMiddleware.
  * Layer: backend HTTP
@@ -19,7 +19,6 @@ import {
   patchProfile,
   postChangePassword,
   postDailyGoalStatusMarkNotified,
-  postOnboarding,
   postPracticeLog,
   putAvatarDirectUpload,
 } from "../controllers/user/index.js";
@@ -35,7 +34,6 @@ userRouter.patch("/profile", patchProfile);
 userRouter.put("/avatar/upload", raw({ type: "image/*", limit: "5mb" }), putAvatarDirectUpload);
 userRouter.patch("/avatar", patchAvatar);
 userRouter.get("/progress-summary", getProgressSummary);
-userRouter.post("/onboarding", postOnboarding);
 userRouter.get("/preferences", getPreferences);
 userRouter.patch("/preferences", patchPreferences);
 userRouter.post("/practice-log", postPracticeLog);

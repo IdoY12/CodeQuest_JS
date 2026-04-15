@@ -1,3 +1,4 @@
+import { XP_POINTS_PER_LEVEL } from "@project/xp-constants";
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
 interface XpState {
@@ -16,7 +17,7 @@ const xpSlice = createSlice({
   reducers: {
     addXp: (state, action: PayloadAction<number>) => {
       state.xpTotal += action.payload;
-      state.level = Math.max(1, Math.floor(state.xpTotal / 250) + 1);
+      state.level = Math.max(1, Math.floor(state.xpTotal / XP_POINTS_PER_LEVEL) + 1);
     },
     hydrateXp: (state, action: PayloadAction<Partial<XpState>>) => {
       Object.assign(state, action.payload);
@@ -26,4 +27,5 @@ const xpSlice = createSlice({
 });
 
 export const { addXp, hydrateXp, resetXp } = xpSlice.actions;
+
 export default xpSlice.reducer;

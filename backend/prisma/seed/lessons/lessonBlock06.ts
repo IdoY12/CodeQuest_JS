@@ -26,7 +26,6 @@ export async function seedLessonBlock_06(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "async function getData() {\n  return 42;\n}",
         correctAnswer: "It always returns a Promise",
         explanation: "Any async function always returns a Promise, even when you return a plain value.",
-        xpReward: 25,
         options: [
           "It returns the value directly",
           "It always returns a Promise",
@@ -40,7 +39,6 @@ export async function seedLessonBlock_06(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "async function load() {\n  const data = await fetchData();\n}",
         correctAnswer: "Pauses the current function until the Promise resolves",
         explanation: "await suspends only the current async function, allowing the event loop to process other work.",
-        xpReward: 25,
         options: [
           "Blocks the entire JavaScript thread",
           "Pauses the current function until the Promise resolves",
@@ -54,7 +52,6 @@ export async function seedLessonBlock_06(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "fetch('/api').catch(err => console.error(err));",
         correctAnswer: "Rejected Promises or thrown errors",
         explanation: ".catch handles rejections and any errors thrown earlier in the Promise chain.",
-        xpReward: 25,
         options: [
           "Resolved Promise values",
           "Rejected Promises or thrown errors",
@@ -68,7 +65,6 @@ export async function seedLessonBlock_06(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "async function run() {\n  const result = fetch('/api/data');\n  console.log(result);\n}",
         correctAnswer: "A Promise object, not the resolved value",
         explanation: "Without await, you receive the Promise itself. Forgetting await is a common async bug.",
-        xpReward: 25,
         options: [
           "The API response data",
           "A Promise object, not the resolved value",
@@ -82,7 +78,6 @@ export async function seedLessonBlock_06(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "Promise.resolve(5).then(v => v * 2)",
         correctAnswer: "10",
         explanation: "Promise.resolve(5) creates a resolved promise; .then multiplies by 2, producing 10.",
-        xpReward: 25,
         options: ["5", "10", "Promise(10)", "undefined"],
       },
       {
@@ -91,7 +86,6 @@ export async function seedLessonBlock_06(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "setTimeout(() => console.log('async'), 0);\nconsole.log('sync');",
         correctAnswer: "fn runs after all synchronous code completes",
         explanation: "Even with delay 0, setTimeout schedules fn in the macrotask queue, after synchronous code and microtasks.",
-        xpReward: 25,
         options: [
           "fn runs immediately",
           "fn runs before any Promises resolve",
@@ -105,7 +99,6 @@ export async function seedLessonBlock_06(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "async function load() {\n  try {\n    await riskyOp();\n  } catch (e) { }\n}",
         correctAnswer: "Both try/catch and .catch() on the returned Promise",
         explanation: "Errors can be caught with try/catch inside the function, or with .catch() on the Promise it returns.",
-        xpReward: 25,
         options: [
           "Only try/catch inside the function",
           "Only .catch() on the call site",
@@ -119,7 +112,6 @@ export async function seedLessonBlock_06(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "try {\n  throw new Error('oops');\n} catch (e) {\n  console.log(e.message);\n}",
         correctAnswer: "Any thrown value within the try block",
         explanation: "try/catch catches any thrown value — Error objects, strings, numbers — from within the try block.",
-        xpReward: 25,
         options: [
           "Only network errors",
           "Only TypeError instances",
@@ -133,7 +125,6 @@ export async function seedLessonBlock_06(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "___ function loadUser() {\n  const user = await fetchUser();\n  return user;\n}",
         correctAnswer: "async",
         explanation: "The async keyword enables await inside a function and makes it return a Promise.",
-        xpReward: 25,
         options: ["async", "await", "Promise", "defer"],
       },
       {
@@ -142,7 +133,6 @@ export async function seedLessonBlock_06(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "fetch('/missing'); // no .catch",
         correctAnswer: "A Promise that rejects with no .catch or try/catch",
         explanation: "Any rejected Promise without an error handler triggers an unhandled rejection warning.",
-        xpReward: 25,
         options: [
           "Using async/await instead of .then()",
           "A Promise that rejects with no .catch or try/catch",

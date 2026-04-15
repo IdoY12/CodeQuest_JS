@@ -16,6 +16,7 @@ type Base = {
 export function EvCodeFill({ exercise, accessToken, onLessonExerciseComplete }: Base) {
   const u = useExerciseCodeFill(exercise, accessToken, onLessonExerciseComplete);
   const tokens = exercise.options.length > 0 ? exercise.options.map((o) => o.text) : [...CODE_FILL_DEFAULT_TOKENS];
+
   return (
     <View style={v.exerciseCard}>
       <TextInput

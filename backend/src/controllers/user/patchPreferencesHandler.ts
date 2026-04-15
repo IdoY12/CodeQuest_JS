@@ -23,6 +23,7 @@ export async function patchPreferences(req: AuthenticatedRequest, res: Response)
       notificationsEnabled: z.boolean(),
     })
     .safeParse(req.body);
+
   if (!parsed.success) {
     logWarn("[AUTH]", "preferences:update-validation-failed", { userId: req.user?.userId, errors: parsed.error.flatten() });
     return res.status(400).json({ error: parsed.error.flatten() });
@@ -42,22 +43,18 @@ export async function patchPreferences(req: AuthenticatedRequest, res: Response)
       goal: parsed.data.goal,
       dailyCommitmentMinutes: parsed.data.dailyCommitmentMinutes,
       notificationsEnabled: parsed.data.notificationsEnabled,
-      onboardingCompleted: true,
     },
     update: {
       goal: parsed.data.goal,
       dailyCommitmentMinutes: parsed.data.dailyCommitmentMinutes,
       notificationsEnabled: parsed.data.notificationsEnabled,
-      onboardingCompleted: true,
     },
   });
 
   return res.json({
-    hasCompletedOnboarding: updated.onboardingCompleted,
     goal: updated.goal,
-    experienceLevel: updated.experienceLevel,
+    experienceLevel: resolveExperienceLevel(updated.experienceLevel),
     dailyCommitmentMinutes: updated.dailyCommitmentMinutes,
     notificationsEnabled: updated.notificationsEnabled,
-    pathKey: resolveExperienceLevel(updated.experienceLevel),
   });
 }

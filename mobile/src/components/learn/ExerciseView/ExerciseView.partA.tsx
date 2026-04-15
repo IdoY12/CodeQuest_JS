@@ -18,8 +18,10 @@ type Base = {
 export function EvConcept({ exercise, accessToken, onLessonExerciseComplete }: Base) {
   const learning = useAuthenticatedService(LearningService);
   const [busy, setBusy] = useState(false);
+
   const submitCurriculum = async () => {
     setBusy(true);
+
     try {
       const result =
         accessToken && learning
@@ -30,6 +32,7 @@ export function EvConcept({ exercise, accessToken, onLessonExerciseComplete }: B
       setBusy(false);
     }
   };
+
   return (
     <View style={v.exerciseCard}>
       <Text style={v.explanation}>{exercise.explanation ?? ""}</Text>

@@ -1,7 +1,7 @@
 /**
  * Duel question batch for Prisma seeding (duelBeginnerTokenQuestions).
  *
- * Responsibility: synthetic duel questions for one category/difficulty.
+ * Responsibility: synthetic duel questions for one difficulty band.
  * Layer: backend prisma seed
  * Depends on: @prisma/client types
  * Consumers: persistDuelQuestions.ts
@@ -41,6 +41,5 @@ export function buildBeginnerTokenQuestions(): Prisma.DuelQuestionCreateManyInpu
     explanation: "Choose the token that makes the code valid and correct.",
     type: "TAP_TOKEN",
     difficulty: "JUNIOR",
-    category: "TYPES",
   }));
 }

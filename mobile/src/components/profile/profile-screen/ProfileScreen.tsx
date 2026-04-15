@@ -14,39 +14,42 @@ function GuestProfileBody() {
   const navigation = useNavigation();
   const xp = useAppSelector((s) => s.xp.xpTotal);
   const level = useAppSelector((s) => s.xp.level);
-  const experience = useAppSelector((s) => s.profile.experience) ?? "JUNIOR";
+  const experienceLevel = useAppSelector((s) => s.profile.experienceLevel) ?? "JUNIOR";
   const commitment = useAppSelector((s) => s.profile.commitment);
   const goal = useAppSelector((s) => s.profile.goal) ?? "FUN";
   const notificationsEnabled = useAppSelector((s) => s.profile.notificationsEnabled);
+
   React.useEffect(() => {
     logNav("screen:enter", { screen: "GuestProfileScreen" });
     return () => logNav("screen:leave", { screen: "GuestProfileScreen" });
   }, []);
+
   const onSignIn = () => {
     navigation.getParent()?.navigate("Auth" as never);
   };
+
   const onSelectExperience = (nextExperience: "JUNIOR" | "MID" | "SENIOR") => {
     dispatch(
       updatePreferences({
         goal,
-        experience: nextExperience,
+        experienceLevel: nextExperience,
         commitment,
         notificationsEnabled,
-        path: nextExperience,
       }),
     );
   };
+
   const onSelectCommitment = (nextCommitment: "10" | "15" | "25") => {
     dispatch(
       updatePreferences({
         goal,
-        experience,
+        experienceLevel,
         commitment: nextCommitment,
         notificationsEnabled,
-        path: experience,
       }),
     );
   };
+
   return (
     <SafeAreaView style={styles.guestContainer} edges={["top", "bottom"]}>
       <View style={styles.guestMain}>
@@ -74,9 +77,9 @@ function GuestProfileBody() {
               <Pressable
                 key={item.key}
                 onPress={() => onSelectExperience(item.key)}
-                style={[styles.guestChip, experience === item.key && styles.guestChipOn]}
+                style={[styles.guestChip, experienceLevel === item.key && styles.guestChipOn]}
               >
-                <Text style={[styles.guestChipText, experience === item.key && styles.guestChipTextOn]}>{item.label}</Text>
+                <Text style={[styles.guestChipText, experienceLevel === item.key && styles.guestChipTextOn]}>{item.label}</Text>
               </Pressable>
             ))}
           </View>
@@ -100,6 +103,7 @@ function GuestProfileBody() {
 
 export function ProfileScreen() {
   const isGuest = useAppSelector((s) => s.session.isGuest);
+
   return (
     <View style={styles.root}>{isGuest ? <GuestProfileBody /> : <AuthenticatedProfileScreen />}</View>
   );

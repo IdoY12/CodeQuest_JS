@@ -5,7 +5,7 @@ import type { ProfileReduxState } from "./useProfileRedux";
 
 export function useProfileDraftState(r: ProfileReduxState) {
   const [draftGoal, setDraftGoal] = React.useState<(typeof goals)[number]["key"]>(r.goal ?? "FUN");
-  const [draftLevel, setDraftLevel] = React.useState<(typeof levels)[number]["key"]>(r.experience ?? "JUNIOR");
+  const [draftLevel, setDraftLevel] = React.useState<(typeof levels)[number]["key"]>(r.experienceLevel ?? "JUNIOR");
   const [draftCommitment, setDraftCommitment] = React.useState<(typeof commitmentOptions)[number]["key"]>(
     r.commitment ?? "15",
   );
@@ -23,9 +23,11 @@ export function useProfileDraftState(r: ProfileReduxState) {
   const [newPassword, setNewPassword] = React.useState("");
   const [confirmDeleteText, setConfirmDeleteText] = React.useState("");
   const [busyAction, setBusyAction] = React.useState<string | null>(null);
+
   const initials = profileInitials(r.username);
   const stats = profileStatsFromRedux(r);
   const supportRows = profileSupportRows();
+
   return {
     draftGoal,
     setDraftGoal,

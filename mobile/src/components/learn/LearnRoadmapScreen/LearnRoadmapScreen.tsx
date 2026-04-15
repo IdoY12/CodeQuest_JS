@@ -9,6 +9,7 @@ type Props = { navigation: LearnRoadmapNavigation };
 
 export function LearnRoadmapScreen({ navigation }: Props) {
   const { activeExperience, blocks } = useLearnRoadmapData();
+
   return (
     <SafeAreaView style={s.container} edges={["top", "bottom"]}>
       <FlatList

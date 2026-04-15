@@ -22,4 +22,5 @@ const streakSlice = createSlice({
 });
 
 export const { hydrateStreak, resetStreak } = streakSlice.actions;
+
 export default streakSlice.reducer;

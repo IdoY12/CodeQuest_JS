@@ -21,16 +21,24 @@ export function registerSubmitAnswer(socket: Socket, duel: DuelNamespace) {
     async (payload: { session_id: string; round_number: number; answer: string; time_taken_ms: number }) => {
       try {
         const session = sessions.get(payload.session_id);
+
         if (!session) return;
+
         if (session.answered) return;
+
         if (!session.currentQuestionId) return;
+
         const slot = resolveDuelPlayerSlot(session, socket.id);
+
         if (!slot) {
           logInfo("[DUEL]", "submit_answer:rejected-non-participant", { socketId: socket.id });
           return;
         }
+
         const question = await prisma.duelQuestion.findUnique({ where: { id: session.currentQuestionId } });
+
         if (!question) return;
+
         if (payload.answer !== question.correctAnswer) {
           socket.emit("answer_feedback", { isCorrect: false, lockout_ms: 1000 });
           return;

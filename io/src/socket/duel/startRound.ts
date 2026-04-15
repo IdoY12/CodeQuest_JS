@@ -16,13 +16,16 @@ import type { DuelNamespace, SessionState } from "./types.js";
 export async function startRound(io: DuelNamespace, sessionOrId: string | SessionState) {
   try {
     const session = typeof sessionOrId === "string" ? sessions.get(sessionOrId) : sessionOrId;
+
     if (!session) return;
+
     session.round += 1;
     session.answered = false;
     session.roundNonce += 1;
     const nonce = session.roundNonce;
 
     const question = await pickQuestionForSession(session);
+
     if (!question) {
       logInfo("[DUEL]", "question:none-available", { sessionId: session.sessionId });
       return;

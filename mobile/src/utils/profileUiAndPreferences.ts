@@ -58,10 +58,9 @@ export async function patchUserPreferences(
     dispatch(
       updatePreferences({
         goal: response.goal,
-        experience: response.experienceLevel,
+        experienceLevel: response.experienceLevel,
         commitment: String(response.dailyCommitmentMinutes) as CommitmentKey,
         notificationsEnabled: response.notificationsEnabled,
-        path: response.pathKey,
       }),
     );
     dispatch(setNotificationsEnabled(response.notificationsEnabled));

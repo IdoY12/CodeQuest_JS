@@ -1,3 +1,4 @@
+/// Used by `DuelQuestion.difficulty` (three-band pool: JUNIOR / MID / SENIOR).
 enum Difficulty {
   JUNIOR
   MID
@@ -17,12 +18,4 @@ enum ExperienceLevel {
   JUNIOR
   MID
   SENIOR
-}
-
-enum DuelCategory {
-  OUTPUT
-  SCOPE
-  ASYNC
-  TYPES
-  METHODS
 }

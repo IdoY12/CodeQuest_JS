@@ -11,14 +11,16 @@ import { SENSITIVE_KEY_SUBSTRINGS } from "./sensitiveKeyMatchers.js";
 
 export function redactValue(value: unknown): unknown {
   if (Array.isArray(value)) return value.map(redactValue);
+
   if (value && typeof value === "object") {
-    const result: Record<string, unknown> = {};
-    for (const [key, item] of Object.entries(value as Record<string, unknown>)) {
-      const lower = key.toLowerCase();
-      const sensitive = SENSITIVE_KEY_SUBSTRINGS.some((s) => lower.includes(s));
-      result[key] = sensitive ? "***MASKED***" : redactValue(item);
-    }
-    return result;
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([key, item]) => {
+        const lower = key.toLowerCase();
+        const isSensitive = SENSITIVE_KEY_SUBSTRINGS.some((s) => lower.includes(s));
+        return [key, isSensitive ? "***MASKED***" : redactValue(item)];
+      }),
+    );
   }
+
   return value;
 }

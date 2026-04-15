@@ -34,11 +34,13 @@ const puzzles = [
 ];
 
 export async function seedCodePuzzles(prisma: PrismaClient): Promise<void> {
-  for (const puzzle of puzzles) {
-    await prisma.codePuzzle.upsert({
-      where: { orderIndex: puzzle.orderIndex },
-      update: { prompt: puzzle.prompt, acceptedAnswers: puzzle.acceptedAnswers },
-      create: puzzle,
-    });
-  }
+  await Promise.all(
+    puzzles.map((puzzle) =>
+      prisma.codePuzzle.upsert({
+        where: { orderIndex: puzzle.orderIndex },
+        update: { prompt: puzzle.prompt, acceptedAnswers: puzzle.acceptedAnswers },
+        create: puzzle,
+      }),
+    ),
+  );
 }

@@ -14,10 +14,12 @@ export function DuelHomeScreen({ navigation }: DuelHomeScreenProps) {
   const duelWins = useAppSelector((s) => s.duel.duelWins);
   const duelLosses = useAppSelector((s) => s.duel.duelLosses);
   const isGuest = useAppSelector((s) => s.session.isGuest);
+
   useEffect(() => {
     logNav("screen:enter", { screen: "DuelHomeScreen" });
     return () => logNav("screen:leave", { screen: "DuelHomeScreen" });
   }, []);
+
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <Text style={styles.title}>Duel Rating: {duelRating} RP</Text>

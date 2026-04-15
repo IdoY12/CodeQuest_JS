@@ -201,24 +201,6 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/ProgressSummary" }
         "500": { $ref: "#/components/responses/InternalError" }
-  /user/onboarding:
-    post:
-      tags: [User]
-      summary: Submit onboarding
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: "#/components/schemas/OnboardingRequest" }
-      responses:
-        "200":
-          description: Onboarding result
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/OnboardingResponse" }
-        "400": { $ref: "#/components/responses/BadRequest" }
-        "401": { $ref: "#/components/responses/Unauthorized" }
-        "500": { $ref: "#/components/responses/InternalError" }
   /user/preferences:
     get:
       tags: [User]
@@ -518,16 +500,6 @@ components:
       description: User self-reported experience level
       enum: [JUNIOR, MID, SENIOR]
       example: JUNIOR
-    Difficulty:
-      type: string
-      description: Exercise difficulty enum from Prisma
-      enum: [JUNIOR, MID, SENIOR]
-      example: JUNIOR
-    PathType:
-      type: string
-      description: Learning path key aligned with experience level
-      enum: [JUNIOR, MID, SENIOR]
-      example: JUNIOR
     ExerciseType:
       type: string
       description: Exercise type enum from Prisma
@@ -557,15 +529,13 @@ components:
         tokenVersion: { type: integer, description: Current token version }
     AuthUser:
       type: object
-      required: [id, email, username, avatarId, avatarUrl, onboardingCompleted, pathKey, goal, experienceLevel, dailyCommitmentMinutes, notificationsEnabled]
+      required: [id, email, username, avatarId, avatarUrl, goal, experienceLevel, dailyCommitmentMinutes, notificationsEnabled]
       properties:
         id: { type: string, description: User id }
         email: { type: string, format: email, description: User email }
         username: { type: string, description: Username }
         avatarId: { type: string, description: Avatar id }
         avatarUrl: { type: string, nullable: true, format: uri, description: Avatar URL }
-        onboardingCompleted: { type: boolean, description: Onboarding completion status }
-        pathKey: { $ref: "#/components/schemas/PathType" }
         goal: { allOf: [{ $ref: "#/components/schemas/Goal" }], nullable: true, description: Goal selection }
         experienceLevel: { allOf: [{ $ref: "#/components/schemas/ExperienceLevel" }], nullable: true, description: Experience level }
         dailyCommitmentMinutes: { type: integer, nullable: true, description: Daily commitment minutes }
@@ -579,15 +549,13 @@ components:
         refreshToken: { type: string, description: JWT refresh token }
     UserProfileProgress:
       type: object
-      required: [goal, experienceLevel, dailyCommitmentMinutes, notificationsEnabled, onboardingCompleted, currentExerciseIndex, pathKey]
+      required: [goal, experienceLevel, dailyCommitmentMinutes, notificationsEnabled, currentExerciseIndex]
       properties:
         goal: { allOf: [{ $ref: "#/components/schemas/Goal" }], nullable: true, description: Goal selection }
-        experienceLevel: { allOf: [{ $ref: "#/components/schemas/ExperienceLevel" }], nullable: true, description: Experience selection }
+        experienceLevel: { $ref: "#/components/schemas/ExperienceLevel" }
         dailyCommitmentMinutes: { type: integer, nullable: true, description: Daily minutes }
         notificationsEnabled: { type: boolean, description: Notifications enabled }
-        onboardingCompleted: { type: boolean, description: Onboarding status }
         currentExerciseIndex: { type: integer, description: Next exercise index in ordered curriculum for this level }
-        pathKey: { $ref: "#/components/schemas/PathType" }
     UserProfileDuelRating:
       type: object
       required: [rating, wins, losses]
@@ -619,33 +587,14 @@ components:
         duelWins: { type: integer, description: Duel wins }
         duelLosses: { type: integer, description: Duel losses }
         duelRating: { type: integer, description: Duel rating }
-    OnboardingRequest:
-      type: object
-      required: [goal, experienceLevel, dailyCommitmentMinutes]
-      properties:
-        goal: { $ref: "#/components/schemas/Goal" }
-        experienceLevel: { $ref: "#/components/schemas/ExperienceLevel" }
-        dailyCommitmentMinutes: { type: integer, minimum: 10, maximum: 60, description: Daily commitment minutes }
-    OnboardingResponse:
-      type: object
-      required: [onboardingCompleted, pathKey, goal, experienceLevel, dailyCommitmentMinutes, notificationsEnabled]
-      properties:
-        onboardingCompleted: { type: boolean, description: Completion status }
-        pathKey: { $ref: "#/components/schemas/PathType" }
-        goal: { $ref: "#/components/schemas/Goal" }
-        experienceLevel: { $ref: "#/components/schemas/ExperienceLevel" }
-        dailyCommitmentMinutes: { type: integer, description: Daily commitment minutes }
-        notificationsEnabled: { type: boolean, description: Notification preference }
     UserPreferencesGetResponse:
       type: object
-      required: [hasCompletedOnboarding, userGoal, userLevel, dailyGoalMinutes, notificationsEnabled, pathKey]
+      required: [userGoal, experienceLevel, dailyGoalMinutes, notificationsEnabled]
       properties:
-        hasCompletedOnboarding: { type: boolean, description: Onboarding completion status }
         userGoal: { allOf: [{ $ref: "#/components/schemas/Goal" }], nullable: true, description: Goal }
-        userLevel: { allOf: [{ $ref: "#/components/schemas/ExperienceLevel" }], nullable: true, description: Level }
+        experienceLevel: { $ref: "#/components/schemas/ExperienceLevel" }
         dailyGoalMinutes: { type: integer, nullable: true, description: Daily goal in minutes }
         notificationsEnabled: { type: boolean, description: Notification preference }
-        pathKey: { $ref: "#/components/schemas/PathType" }
     UserPreferencesPatchRequest:
       type: object
       required: [goal, experienceLevel, dailyCommitmentMinutes, notificationsEnabled]
@@ -656,14 +605,12 @@ components:
         notificationsEnabled: { type: boolean, description: Notification preference }
     UserPreferencesPatchResponse:
       type: object
-      required: [hasCompletedOnboarding, goal, experienceLevel, dailyCommitmentMinutes, notificationsEnabled, pathKey]
+      required: [goal, experienceLevel, dailyCommitmentMinutes, notificationsEnabled]
       properties:
-        hasCompletedOnboarding: { type: boolean, description: Onboarding completion status }
         goal: { $ref: "#/components/schemas/Goal" }
         experienceLevel: { $ref: "#/components/schemas/ExperienceLevel" }
         dailyCommitmentMinutes: { type: integer, description: Daily commitment minutes }
         notificationsEnabled: { type: boolean, description: Notification preference }
-        pathKey: { $ref: "#/components/schemas/PathType" }
     DailyGoalStatus:
       type: object
       required: [dateKey, goalMinutes, practicedMinutes, remainingMinutes, notificationsEnabled, canSendIncomplete, canSendComplete]
@@ -692,7 +639,7 @@ components:
         prompt: { type: string, description: Prompt text }
         codeSnippet: { type: string, description: Code snippet }
         orderIndex: { type: integer, description: Sort order within level }
-        xpReward: { type: integer, description: XP reward }
+        xpReward: { type: integer, description: XP granted per correct answer (fixed product rule) }
         options: { type: array, items: { $ref: "#/components/schemas/ExerciseOptionClient" } }
     ExerciseSubmitResult:
       oneOf:

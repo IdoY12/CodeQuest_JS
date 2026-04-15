@@ -18,6 +18,7 @@ export async function endSession(io: DuelNamespace, session: SessionState) {
     clearTimeout(session.roundTimeout);
     session.roundTimeout = null;
   }
+
   const winnerIsP1 = session.score.player1 >= session.score.player2;
   const winner = winnerIsP1 ? session.player1 : session.player2;
 

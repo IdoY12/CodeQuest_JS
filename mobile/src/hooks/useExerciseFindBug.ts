@@ -19,6 +19,7 @@ export function useExerciseFindBug(
   // Tracks the line number that was SUBMITTED last — same separation of concerns as in
   // useExerciseSingleChoice so tapping a new line never prematurely colours it.
   const [lastCheckedAnswer, setLastCheckedAnswer] = useState<string | null>(null);
+
   useEffect(() => {
     setSelected(null);
     setCurriculumChecked(false);
@@ -26,8 +27,10 @@ export function useExerciseFindBug(
     setServerResult(null);
     setLastCheckedAnswer(null);
   }, [exercise.id]);
+
   // Allow re-checking until the user finds the correct line.
   const canCheck = Boolean(selected) && curriculumCorrect !== true;
+
   const runCheck = useCallback(async () => {
     if (!selected) return;
     setLastCheckedAnswer(selected);
@@ -39,10 +42,12 @@ export function useExerciseFindBug(
     setCurriculumCorrect(result.isCorrect);
     setCurriculumChecked(true);
   }, [accessToken, exercise, learning, selected]);
+
   const goNext = () => {
     if (!selected || !serverResult) return;
     onLessonExerciseComplete(selected, { source: "curriculum", submitResult: serverResult });
   };
+
   return {
     selected,
     setSelected,

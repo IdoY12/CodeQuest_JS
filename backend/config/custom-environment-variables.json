@@ -13,6 +13,9 @@
   "database": {
     "url": "DATABASE_URL"
   },
+  "redis": {
+    "url": "REDIS_URL"
+  },
   "s3": {
     "bucket": "S3_BUCKET",
     "connection": {

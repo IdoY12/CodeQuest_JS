@@ -16,10 +16,13 @@ export function validateIoProductionSecuritySettings(): void {
   if (!config.get<boolean>("app.validateSecurity")) return;
 
   const access = config.get<string>("app.jwtAccessSecret");
+
   if (!access?.trim()) throw new Error("Missing required configuration: app.jwtAccessSecret");
+
   if (access.length < MIN_JWT_SECRET_LENGTH) {
     throw new Error(`app.jwtAccessSecret must be at least ${MIN_JWT_SECRET_LENGTH} characters`);
   }
+
   if (PLACEHOLDER_JWT_SECRETS.has(normalizeSecret(access))) {
     throw new Error("app.jwtAccessSecret must not use a known placeholder");
   }

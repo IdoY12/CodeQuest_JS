@@ -13,6 +13,7 @@ type Base = {
 
 export function EvFindBug({ exercise, lineList, accessToken, onLessonExerciseComplete }: Base & { lineList: string[] }) {
   const u = useExerciseFindBug(exercise, accessToken, onLessonExerciseComplete);
+
   return (
     <View style={v.exerciseCard}>
       {lineList.map((line, idx) => {
@@ -20,8 +21,10 @@ export function EvFindBug({ exercise, lineList, accessToken, onLessonExerciseCom
         const lineExtraStyle = (() => {
           if (u.lastCheckedAnswer === lineNumber && u.isCorrectNow) return v.correct;
           if (u.selected === lineNumber) return x.lineSelected;
+
           return null;
         })();
+
         return (
           <Pressable
             key={`${line}-${idx}`}

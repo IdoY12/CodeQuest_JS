@@ -20,15 +20,18 @@ export async function authLoginHandler(request: Request, response: Response): Pr
     response.status(400).json({ error: parsed.error.flatten() });
     return;
   }
+
   try {
     const { email, password } = parsed.data;
     const user = await prisma.user.findUnique({ where: { email } });
+
     if (!user) {
       logWarn("[AUTH]", "login:user-not-found", { email });
       response.status(401).json({ error: "Invalid credentials" });
       return;
     }
     const isPasswordValid = await comparePassword(password, user.hashedPassword);
+
     if (!isPasswordValid) {
       logWarn("[AUTH]", "login:invalid-password", { userId: user.id });
       response.status(401).json({ error: "Invalid credentials" });
@@ -37,7 +40,6 @@ export async function authLoginHandler(request: Request, response: Response): Pr
     const progress = await ensureUserProgressForLogin(user);
     await touchUserLastActive(user.id);
     await ensureDuelRatingRow(user.id);
-    const pathKey = resolveExperienceLevel(progress.experienceLevel);
     const accessToken = signAccessToken({
       userId: user.id,
       email: user.email,
@@ -48,7 +50,7 @@ export async function authLoginHandler(request: Request, response: Response): Pr
       email: user.email,
       tokenVersion: user.tokenVersion,
     });
-    logInfo("[AUTH]", "login:success", { userId: user.id, onboardingCompleted: progress.onboardingCompleted });
+    logInfo("[AUTH]", "login:success", { userId: user.id });
     response.json({
       user: {
         id: user.id,
@@ -56,10 +58,8 @@ export async function authLoginHandler(request: Request, response: Response): Pr
         username: user.username,
         avatarId: user.avatarId,
         avatarUrl: user.avatarUrl,
-        onboardingCompleted: progress.onboardingCompleted,
-        pathKey,
         goal: progress.goal,
-        experienceLevel: progress.experienceLevel,
+        experienceLevel: resolveExperienceLevel(progress.experienceLevel),
         dailyCommitmentMinutes: progress.dailyCommitmentMinutes ?? 15,
         notificationsEnabled: progress.notificationsEnabled ?? true,
       },
@@ -68,6 +68,7 @@ export async function authLoginHandler(request: Request, response: Response): Pr
     });
   } catch (error) {
     logError("[AUTH]", error, { phase: "login" });
+
     if (isDatabaseUnavailableError(error)) {
       response.status(503).json({ error: DATABASE_UNAVAILABLE_MESSAGE });
       return;

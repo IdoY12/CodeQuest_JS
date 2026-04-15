@@ -7,6 +7,7 @@ export function duelScheduleLocalMockRound(timerRef: { current: ReturnType<typeo
     sessionId: duelRefs.state.sessionId ?? "local-session",
     opponent: duelRefs.state.opponent ?? { username: "GlobalRival", rating: 1210 },
   });
+
   if (timerRef.current) clearTimeout(timerRef.current);
   timerRef.current = setTimeout(() => {
     publishDuel({

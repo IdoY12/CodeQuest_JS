@@ -13,6 +13,5 @@ export interface SeedExercise {
   codeSnippet: string;
   correctAnswer: string;
   explanation: string;
-  xpReward: number;
   options?: string[];
 }

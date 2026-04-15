@@ -26,7 +26,6 @@ export async function seedLessonBlock_03(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "// Declaration\nfunction greet() {}\n// Expression\nconst greet2 = function() {};",
         correctAnswer: "Declarations are hoisted; expressions are not",
         explanation: "Function declarations are hoisted so they can be called before they appear in source. Expressions are not.",
-        xpReward: 20,
         options: [
           "Declarations are hoisted; expressions are not",
           "Expressions are always faster",
@@ -40,7 +39,6 @@ export async function seedLessonBlock_03(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "const arr = [1, 2, 3];\narr.push(5);",
         correctAnswer: "Adds 5 to the end of the array",
         explanation: "push appends the given value to the end of the array and returns the new length.",
-        xpReward: 20,
         options: [
           "Adds 5 to the beginning",
           "Removes the last element",
@@ -54,7 +52,6 @@ export async function seedLessonBlock_03(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "const double = n => n * 2;\nconsole.log(double(4));",
         correctAnswer: "8",
         explanation: "A concise arrow function implicitly returns the expression. 4 × 2 = 8.",
-        xpReward: 20,
         options: ["4", "8", "2", "undefined"],
       },
       {
@@ -63,7 +60,6 @@ export async function seedLessonBlock_03(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "console.log([1, 2, 3, 4].filter(n => n > 2));",
         correctAnswer: "[3, 4]",
         explanation: "filter returns a new array containing only elements for which the callback returns true.",
-        xpReward: 20,
         options: ["[1, 2]", "[3, 4]", "[2, 3, 4]", "[1]"],
       },
       {
@@ -72,7 +68,6 @@ export async function seedLessonBlock_03(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "const arr = [1, 2, 3];\nconst last = arr.pop();",
         correctAnswer: "Removes and returns the last element",
         explanation: "pop removes the last element from the array, mutates it, and returns the removed element.",
-        xpReward: 20,
         options: [
           "Adds an element to the end",
           "Removes and returns the last element",
@@ -86,7 +81,6 @@ export async function seedLessonBlock_03(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "console.log([1, 2, 3].map(n => n + 10));",
         correctAnswer: "[11, 12, 13]",
         explanation: "map creates a new array by applying the callback to each element.",
-        xpReward: 20,
         options: ["[1, 2, 3]", "[11, 12, 13]", "[10, 10, 10]", "[10, 11, 12]"],
       },
       {
@@ -95,7 +89,6 @@ export async function seedLessonBlock_03(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "console.log(['a', 'b', 'c'][1]);",
         correctAnswer: '"b"',
         explanation: "Arrays are zero-indexed, so index 1 is the second element.",
-        xpReward: 20,
         options: ['"a"', '"b"', '"c"', "undefined"],
       },
       {
@@ -104,7 +97,6 @@ export async function seedLessonBlock_03(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "console.log([5, 12, 3].find(n => n > 10));",
         correctAnswer: "12",
         explanation: "find returns the first element that satisfies the condition — a single value, not an array.",
-        xpReward: 20,
         options: ["[12]", "12", "3", "undefined"],
       },
       {
@@ -113,7 +105,6 @@ export async function seedLessonBlock_03(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "function noReturn() { }\nconsole.log(noReturn());",
         correctAnswer: "undefined",
         explanation: "A function without a return statement implicitly returns undefined.",
-        xpReward: 20,
         options: ["null", "0", "undefined", "void"],
       },
       {
@@ -122,7 +113,6 @@ export async function seedLessonBlock_03(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "const items = ['a', 'b'];\nitems.___('c');",
         correctAnswer: "push",
         explanation: "push is the standard array method for appending one or more elements to the end.",
-        xpReward: 20,
         options: ["push", "add", "append", "insert"],
       },
     ],

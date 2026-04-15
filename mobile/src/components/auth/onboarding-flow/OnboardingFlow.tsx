@@ -6,8 +6,13 @@ import { ObChoice, ObStep } from "./OnboardingFlow.wA";
 import { ObPath } from "./OnboardingFlow.wB";
 import { o } from "./OnboardingFlow.styles";
 
-export function OnboardingFlow() {
-  const wizard = useOnboardingWizard();
+type OnboardingFlowProps = {
+  /** Invoked after the device key is written so `AppNavigator` can render `MainNavigator`. */
+  onPersistedToDevice: () => void;
+};
+
+export function OnboardingFlow({ onPersistedToDevice }: OnboardingFlowProps) {
+  const wizard = useOnboardingWizard({ onPersistedToDevice });
   return (
     <SafeAreaView style={o.container} edges={["top", "bottom"]}>
       {wizard.step === 1 && (

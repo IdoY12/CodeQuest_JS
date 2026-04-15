@@ -7,6 +7,7 @@ export function registerDisconnect(socket: Socket, duel: DuelNamespace) {
   socket.on("disconnect", () => {
     logInfo("[DUEL]", "socket:disconnected", { socketId: socket.id });
     const queued = queue.findIndex((entry) => entry.socketId === socket.id);
+
     if (queued >= 0) queue.splice(queued, 1);
     sessions.forEach((session, sessionId) => {
       if (session.player1.socketId === socket.id || session.player2.socketId === socket.id) {
@@ -14,6 +15,7 @@ export function registerDisconnect(socket: Socket, duel: DuelNamespace) {
           clearTimeout(session.roundTimeout);
           session.roundTimeout = null;
         }
+
         const survivor = session.player1.socketId === socket.id ? session.player2 : session.player1;
         duel.to(survivor.socketId).emit("opponent_disconnected", { at_round: session.round });
         setTimeout(() => {

@@ -1,7 +1,7 @@
 /**
  * Duel question batch for Prisma seeding (duelAdvancedBugQuestions).
  *
- * Responsibility: synthetic duel questions for one category/difficulty.
+ * Responsibility: synthetic duel questions for one difficulty band.
  * Layer: backend prisma seed
  * Depends on: @prisma/client types
  * Consumers: persistDuelQuestions.ts
@@ -38,6 +38,5 @@ export function buildAdvancedBugQuestions(): Prisma.DuelQuestionCreateManyInput[
     explanation: "Advanced bug spotting focuses on async mistakes, middleware flow, and security.",
     type: "FIND_THE_BUG",
     difficulty: "SENIOR",
-    category: "SCOPE",
   }));
 }

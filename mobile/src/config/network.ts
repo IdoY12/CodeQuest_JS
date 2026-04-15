@@ -27,4 +27,5 @@ export function getDuelSocketUrl(): string {
 }
 
 export const API_BASE_URL = getApiBaseUrl();
+
 export const DUEL_SOCKET_URL = getDuelSocketUrl();

@@ -1,3 +1,5 @@
 export const DUEL_ROUND_COUNT = 5;
+
 export const DUEL_ROUND_TIMEOUT_MS = 15_000;
+
 export const BETWEEN_DUEL_ROUNDS_DELAY_MS = 1800;

@@ -13,6 +13,7 @@ import { createRegisteredUserWithDefaults } from "./authRegisterPersistence.js";
 export async function authRegisterHandler(request: Request, response: Response): Promise<void> {
   logInfo("[AUTH]", "register:attempt", { email: request.body?.email, username: request.body?.username });
   const parsed = registerBodySchema.safeParse(request.body);
+
   if (!parsed.success) {
     logWarn("[AUTH]", "register:validation-failed", { errors: parsed.error.flatten() });
     response.status(400).json({ error: parsed.error.flatten() });
@@ -21,6 +22,7 @@ export async function authRegisterHandler(request: Request, response: Response):
   try {
     const { email, username, password } = parsed.data;
     const existing = await prisma.user.findUnique({ where: { email } });
+
     if (existing) {
       logWarn("[AUTH]", "register:email-exists", { email });
       response.status(409).json({ error: "Email already exists" });
@@ -47,8 +49,6 @@ export async function authRegisterHandler(request: Request, response: Response):
         username: user.username,
         avatarId: user.avatarId,
         avatarUrl: user.avatarUrl,
-        onboardingCompleted: false,
-        pathKey: "JUNIOR",
         goal: null,
         experienceLevel: null,
         dailyCommitmentMinutes: 15,
@@ -59,10 +59,12 @@ export async function authRegisterHandler(request: Request, response: Response):
     });
   } catch (error) {
     logError("[AUTH]", error, { phase: "register" });
+
     if (isUniqueConstraintError(error, "email")) {
       response.status(409).json({ error: "Email already exists" });
       return;
     }
+
     if (isDatabaseUnavailableError(error)) {
       response.status(503).json({ error: DATABASE_UNAVAILABLE_MESSAGE });
       return;

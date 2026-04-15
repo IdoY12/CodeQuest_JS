@@ -16,29 +16,29 @@ export function dispatchSignInSuccess(
   accessToken: string,
   refreshToken: string,
 ): void {
-  logAuth("signin:store-session", { userId: user.id, onboardingCompleted: user.onboardingCompleted, pathKey: user.pathKey });
+  logAuth("signin:store-session", { userId: user.id, experienceLevel: user.experienceLevel });
   dispatch(
     signIn({
       userId: user.id,
       accessToken,
       refreshToken,
-      hasCompletedOnboarding: user.onboardingCompleted,
     }),
   );
   dispatch(setUserIdentity({ username: user.username, email: user.email, avatarUrl: user.avatarUrl }));
+
   const c: Commitment =
     user.dailyCommitmentMinutes === 10 || user.dailyCommitmentMinutes === 15 || user.dailyCommitmentMinutes === 25
       ? (String(user.dailyCommitmentMinutes) as Commitment)
       : "15";
   dispatch(
     hydrateProfile({
-      path: user.pathKey,
       goal: user.goal ?? undefined,
-      experience: user.experienceLevel ?? undefined,
+      experienceLevel: user.experienceLevel ?? undefined,
       commitment: c,
       notificationsEnabled: user.notificationsEnabled ?? true,
     }),
   );
+
   dispatch(resetXp());
   dispatch(resetStreak());
   dispatch(resetLesson());

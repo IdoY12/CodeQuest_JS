@@ -11,6 +11,7 @@ export function assertPostgresUrl(dbUrl: string, configKey: string): void {
   if (!dbUrl?.trim()) {
     throw new Error(`Missing required configuration: ${configKey}`);
   }
+
   if (!dbUrl.startsWith("postgresql://") && !dbUrl.startsWith("postgres://")) {
     throw new Error(`${configKey} must be a PostgreSQL connection URL`);
   }

@@ -18,9 +18,11 @@ export async function runDailyGoalNotificationCheck(
   const user = new UserService(accessToken);
   const now = new Date();
   const dateKey = now.toLocaleDateString("en-CA");
+
   try {
     logApp("daily-goal:check");
     const status = await user.getDailyGoalStatus(dateKey);
+
     if (status.canSendComplete) {
       await fireNotification(
         "Daily goal crushed!",
@@ -29,7 +31,9 @@ export async function runDailyGoalNotificationCheck(
       await user.markDailyGoalNotified(dateKey, "COMPLETE");
       return;
     }
+
     const hour = now.getHours();
+
     if (hour >= 20 && status.canSendIncomplete && status.remainingMinutes > 0) {
       await fireNotification(
         "Keep your streak alive",

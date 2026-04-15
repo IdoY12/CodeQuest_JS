@@ -73,19 +73,23 @@ export function CodePuzzleScreen({ navigation }: CodePuzzleScreenProps) {
 
   const onSubmit = useCallback(async () => {
     if (!puzzle) return;
+
     if (alreadySolved) {
       setMessage("You already solved today's puzzle.");
       return;
     }
+
     if (!input.trim()) {
       setMessage("Please enter a one-line JavaScript expression.");
       return;
     }
+
     try {
       const { data } = await axios.post<{ correct: boolean }>(
         `${API_BASE_URL}/code-puzzles/${puzzle.id}/submit`,
         { answer: input },
       );
+
       if (!data.correct) {
         setMessage("Not quite. Try another valid one-line expression.");
         return;

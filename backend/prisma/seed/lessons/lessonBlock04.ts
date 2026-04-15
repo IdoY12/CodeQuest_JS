@@ -26,7 +26,6 @@ export async function seedLessonBlock_04(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "const obj = { name: 'Alice' };\n// access with bracket notation",
         correctAnswer: 'obj["name"]',
         explanation: "Bracket notation accepts a string key inside square brackets.",
-        xpReward: 25,
         options: ['obj["name"]', "obj.(name)", "obj->name", "obj::name"],
       },
       {
@@ -35,7 +34,6 @@ export async function seedLessonBlock_04(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "class Dog {\n  bark() { console.log(this.name); }\n}",
         correctAnswer: "The instance the method is called on",
         explanation: "Inside a class method, this refers to the specific object instance on which the method is invoked.",
-        xpReward: 25,
         options: [
           "The global object",
           "The instance the method is called on",
@@ -49,7 +47,6 @@ export async function seedLessonBlock_04(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "class Puppy ___ Dog { }",
         correctAnswer: "extends",
         explanation: "extends establishes the prototype chain so Puppy inherits Dog's methods.",
-        xpReward: 25,
         options: ["implements", "extends", "inherits", "derives"],
       },
       {
@@ -58,7 +55,6 @@ export async function seedLessonBlock_04(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "class Puppy extends Dog {\n  constructor(name) {\n    super(name);\n  }\n}",
         correctAnswer: "Calls the parent class constructor",
         explanation: "super() must be called before using this in a subclass constructor; it runs the parent's constructor.",
-        xpReward: 25,
         options: [
           "Calls the parent class constructor",
           "Creates a static copy of the parent",
@@ -72,7 +68,6 @@ export async function seedLessonBlock_04(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "const dog = new Dog('Rex');",
         correctAnswer: "Creates an instance of a class",
         explanation: "new creates a new object, sets its prototype, runs the constructor, and returns the instance.",
-        xpReward: 25,
         options: [
           "Allocates raw memory",
           "Creates an instance of a class",
@@ -86,7 +81,6 @@ export async function seedLessonBlock_04(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "const obj = { a: 1 };\nconsole.log(obj.b);",
         correctAnswer: "undefined",
         explanation: "Accessing a non-existent property returns undefined rather than throwing an error.",
-        xpReward: 25,
         options: ["null", "TypeError", "undefined", "0"],
       },
       {
@@ -95,7 +89,6 @@ export async function seedLessonBlock_04(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "const obj = { x: 1, y: 2 };\nconsole.log(Object.keys(obj));",
         correctAnswer: "An array of own enumerable property names",
         explanation: "Object.keys returns an array of the object's own enumerable string-keyed property names.",
-        xpReward: 25,
         options: [
           "An array of property values",
           "An array of own enumerable property names",
@@ -109,7 +102,6 @@ export async function seedLessonBlock_04(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "const obj = { a: 1 };\nconsole.log(obj.hasOwnProperty('a'));",
         correctAnswer: "Whether the object itself (not its prototype) has that property",
         explanation: "hasOwnProperty only checks properties defined directly on the object, not inherited ones.",
-        xpReward: 25,
         options: [
           "Whether the object or prototype chain has the property",
           "Whether the property value is truthy",
@@ -123,7 +115,6 @@ export async function seedLessonBlock_04(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "class Counter {\n  constructor() { this.count = 0; }\n  increment() { this.___ += 1; }\n}",
         correctAnswer: "count",
         explanation: "this.count refers to the count property set in the constructor.",
-        xpReward: 25,
         options: ["count", "value", "total", "self"],
       },
       {
@@ -132,7 +123,6 @@ export async function seedLessonBlock_04(prisma: PrismaClient, order: GlobalExer
         codeSnippet: "const person = { name: 'Bob', age: 30 };",
         correctAnswer: "A value defined using { key: value } syntax",
         explanation: "Object literals are the most common way to create objects using curly-brace syntax.",
-        xpReward: 25,
         options: [
           "A string that looks like an object",
           "An object created with Object.create()",

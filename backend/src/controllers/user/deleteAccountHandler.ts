@@ -17,6 +17,7 @@ import { logWarn } from "../../utils/logger.js";
 
 export async function deleteAccount(req: AuthenticatedRequest, res: Response) {
   const parsed = z.object({ confirmation: z.literal("DELETE") }).safeParse(req.body ?? {});
+
   if (!parsed.success) {
     return res.status(400).json({ error: "Confirmation text mismatch" });
   }
@@ -26,6 +27,7 @@ export async function deleteAccount(req: AuthenticatedRequest, res: Response) {
     where: { id: userId },
     select: { id: true, avatarUrl: true },
   });
+
   if (!user) return res.status(404).json({ error: "User not found" });
 
   const avatarKey = user.avatarUrl ? extractAvatarKeyFromUrl(user.avatarUrl) : null;
@@ -58,5 +60,6 @@ export async function deleteAccount(req: AuthenticatedRequest, res: Response) {
       });
     }
   }
+
   return res.status(204).send();
 }

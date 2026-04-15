@@ -8,9 +8,11 @@ import type { ProfileReduxState } from "./useProfileRedux";
 
 export function useProfileAvatarHandlers(r: ProfileReduxState, d: ProfileDraftState, user: UserService | null) {
   const dispatch = useAppDispatch();
+
   const pickImageAndUpload = React.useCallback(
     async (source: "camera" | "library") => {
       if (!r.accessToken || !user || d.uploadingAvatar) return;
+
       try {
         d.setUploadingAvatar(true);
         await runAvatarUpload(user, source, dispatch, d.setUploadProgress, d.setSaveMessage);
@@ -25,6 +27,7 @@ export function useProfileAvatarHandlers(r: ProfileReduxState, d: ProfileDraftSt
     },
     [r.accessToken, d.uploadingAvatar, dispatch, d.setUploadingAvatar, d.setUploadProgress, user],
   );
+
   const onAvatarPress = React.useCallback(() => {
     Alert.alert("Update profile picture", "Choose where to get your photo from.", [
       { text: "Cancel", style: "cancel" },
@@ -32,5 +35,6 @@ export function useProfileAvatarHandlers(r: ProfileReduxState, d: ProfileDraftSt
       { text: "Choose from Library", onPress: () => void pickImageAndUpload("library") },
     ]);
   }, [pickImageAndUpload]);
+
   return { onAvatarPress };
 }

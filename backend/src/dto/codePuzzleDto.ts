@@ -6,4 +6,6 @@ export type CodePuzzleDto = {
 
 export type CodePuzzleSubmitDto = {
   correct: boolean;
+  streakCurrent?: number;
+  xpTotal?: number;
 };

@@ -1,7 +1,9 @@
 import { useCallback } from "react";
-import { useAppDispatch } from "@/redux/hooks";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { resetBlockProgress, setExerciseIndex as setSavedExerciseIndex } from "@/redux/lesson-slice";
 import { addXp as addXpAction } from "@/redux/xp-slice";
+import { hydrateStreak, runStreakAppOpen, runStreakQualifyingExercise } from "@/redux/streak-slice";
+import { getStreakCalendarDate } from "@/utils/streakCalendar";
 import type { LessonExerciseCompletionContext } from "@/types/lessonExerciseCompletion.types";
 import type { Experience } from "@/redux/profile-slice";
 import type { LessonScreenNavigation } from "@/types/learnNavigation.types";
@@ -25,13 +27,22 @@ export function useLessonExerciseCompleteHandler(
   load: Load,
 ) {
   const dispatch = useAppDispatch();
+  const isGuest = useAppSelector((s) => s.session.isGuest);
   const addXp = useCallback((n: number) => dispatch(addXpAction(n)), [dispatch]);
+
+  const onQualifyingLessonXpEarned = useCallback(() => {
+    if (!isGuest) return;
+    const today = getStreakCalendarDate();
+    dispatch(runStreakAppOpen({ today }));
+    dispatch(runStreakQualifyingExercise({ today }));
+  }, [dispatch, isGuest]);
 
   return useCallback(
     async (_answer: string, completion: LessonExerciseCompletionContext) => {
       await orchestrateLessonAnswer({
         completion,
         addXp,
+        onQualifyingLessonXpEarned,
         exercisesLength: load.exercises.length,
         exerciseIndex: load.exerciseIndex,
         correctCount: load.correctCount,
@@ -44,6 +55,16 @@ export function useLessonExerciseCompleteHandler(
         setExerciseIndex: load.setExerciseIndex,
       });
 
+      if (!isGuest && typeof completion.submitResult.streakCurrent === "number") {
+        dispatch(
+          hydrateStreak({
+            streakCurrent: completion.submitResult.streakCurrent,
+            lastActivityDate: null,
+            lastCheckedDate: null,
+          }),
+        );
+      }
+
       if (load.exerciseIndex + 1 >= load.exercises.length) {
         dispatch(setSavedExerciseIndex(0));
         dispatch(resetBlockProgress({ level: experienceLevel, blockIndex }));
@@ -51,7 +72,9 @@ export function useLessonExerciseCompleteHandler(
     },
     [
       addXp,
+      onQualifyingLessonXpEarned,
       blockIndex,
+      isGuest,
       load.attemptedCount,
       load.correctCount,
       load.exerciseIndex,

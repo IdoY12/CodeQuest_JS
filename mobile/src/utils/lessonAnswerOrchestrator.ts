@@ -8,6 +8,8 @@ type AddXp = (n: number) => void;
 export type LessonAnswerOrchestratorArgs = {
   completion: LessonExerciseCompletionContext;
   addXp: AddXp;
+  /** Lesson exercise only — invoked only when the user earned XP (correct answer, xpEarned positive). */
+  onQualifyingLessonXpEarned?: () => void;
   exercisesLength: number;
   exerciseIndex: number;
   correctCount: number;
@@ -53,6 +55,7 @@ export async function orchestrateLessonAnswer(a: LessonAnswerOrchestratorArgs): 
   a.setAttemptedCount(nextAttempted);
   if (isCorrect) a.setCorrectCount(nextCorrect);
   if (isCorrect) grantXp(a.addXp, xpEarned);
+  if (isCorrect && xpEarned > 0) a.onQualifyingLessonXpEarned?.();
   hapticForCorrect(isCorrect);
   const accuracy = Math.round((nextCorrect / nextAttempted) * 100);
   finishOrAdvance(

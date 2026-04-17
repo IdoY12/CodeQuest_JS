@@ -27,7 +27,7 @@ export function guardDuelAccess(isGuest: boolean, onAuth: () => void, onAllowed:
   }
   Alert.alert(
     "Account Required",
-    "To play ranked 1v1 Duels, you need a free account. Your XP, rating, and match history are tied to your account and cannot be saved as a guest.",
+    "To play 1v1 Duels, you need a free account. Your XP and match history are tied to your account and cannot be saved as a guest.",
     [{ text: "Cancel", style: "cancel" }, { text: "Sign In / Register", onPress: onAuth }],
   );
 }

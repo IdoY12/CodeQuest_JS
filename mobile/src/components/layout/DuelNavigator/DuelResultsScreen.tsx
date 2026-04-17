@@ -6,7 +6,7 @@ import type { DuelResultsScreenProps } from "@/types/duelNavigation.types";
 import { styles } from "./DuelNavigator.styles";
 
 export function DuelResultsScreen({ route, navigation }: DuelResultsScreenProps) {
-  const { won, score } = route.params;
+  const { won, score, xpEarned } = route.params;
   const replay = route.params.replay ?? [];
 
   useEffect(() => {
@@ -19,7 +19,9 @@ export function DuelResultsScreen({ route, navigation }: DuelResultsScreenProps)
       <ScrollView contentContainerStyle={styles.duelContent}>
         <Text style={styles.title}>{won ? "Victory!" : "Defeat"}</Text>
         <Text style={styles.sub}>Final score: {score}</Text>
-        <Text style={styles.sub}>{won ? "+50 RP · +100 XP" : "-20 RP · +30 XP"}</Text>
+        <Text style={styles.sub}>
+          {won ? "You won this duel." : "You lost this duel."} You earned {xpEarned} XP.
+        </Text>
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Code Replay</Text>
           {replay.length === 0 ? (

@@ -12,7 +12,6 @@ import {
   setExerciseIndex as setSavedExerciseIndex,
 } from "@/redux/lesson-slice";
 import { addStudySeconds } from "@/redux/session-slice";
-import { hydrateStreak } from "@/redux/streak-slice";
 import { useAuthenticatedService } from "@/hooks/useAuthenticatedService";
 import UserService from "@/services/UserService";
 import { drainRefInt } from "@/utils/formatHelpers";
@@ -41,16 +40,8 @@ export function useLessonLoad(experienceLevel: Experience, accessToken: string |
 
     if (!ok) {
       trackedRef.current += seconds;
-      return;
     }
-
-    try {
-      const progress = await user.getProgressSummary();
-      dispatch(hydrateStreak({ streakCurrent: progress.streakCurrent, streakDays: progress.streakDays }));
-    } catch {
-      // Streak will refresh on next bootstrap; don't block the lesson flow.
-    }
-  }, [accessToken, dispatch, user]);
+  }, [accessToken, user]);
 
   useEffect(() => {
     logNav("screen:enter", { screen: "LessonScreen", experienceLevel });

@@ -35,15 +35,3 @@ export async function ensureProgressRow(
   });
 }
 
-export function streakHistoryAsStrings(value: unknown): string[] {
-  if (!Array.isArray(value)) return [];
-
-  return value.filter((x): x is string => typeof x === "string");
-}
-
-export function mergeStreakHistoryJson(existing: unknown, dateKey: string): string[] {
-  const merged = new Set(streakHistoryAsStrings(existing));
-  merged.add(dateKey);
-
-  return [...merged].sort((a, b) => b.localeCompare(a)).slice(0, 7);
-}

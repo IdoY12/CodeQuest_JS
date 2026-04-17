@@ -63,3 +63,40 @@ export async function authMiddleware(
     response.status(401).json({ error: "Invalid token" });
   }
 }
+
+/** Attaches `request.user` when a valid Bearer token is present; otherwise continues without auth (no 401). */
+export async function optionalAuthMiddleware(
+  request: AuthenticatedRequest,
+  _response: Response,
+  next: NextFunction,
+): Promise<void> {
+  delete request.user;
+  const authHeader = request.headers.authorization;
+  if (!authHeader?.startsWith("Bearer ")) {
+    next();
+    return;
+  }
+  const token = authHeader.slice(7);
+  try {
+    const decoded = verifyAccessToken(token);
+    const cachedVersion = readCachedTokenVersionForUser(decoded.userId);
+    if (cachedVersion !== undefined && cachedVersion === decoded.tokenVersion) {
+      request.user = { userId: decoded.userId, email: decoded.email, tokenVersion: decoded.tokenVersion };
+      next();
+      return;
+    }
+    const user = await prisma.user.findUnique({
+      where: { id: decoded.userId },
+      select: { id: true, tokenVersion: true },
+    });
+    if (!user || user.tokenVersion !== decoded.tokenVersion) {
+      next();
+      return;
+    }
+    writeCachedTokenVersionForUser(user.id, user.tokenVersion);
+    request.user = { userId: decoded.userId, email: decoded.email, tokenVersion: decoded.tokenVersion };
+  } catch {
+    // Invalid token on an optional-auth route: treat as anonymous.
+  }
+  next();
+}

@@ -50,8 +50,10 @@ export default class UserService extends AuthAware {
     return data;
   }
 
-  async getProgressSummary(): Promise<ProgressSummary> {
-    const { data } = await this.axiosInstance.get<ProgressSummary>("/user/progress-summary");
+  async getProgressSummary(localDate: string): Promise<ProgressSummary> {
+    const { data } = await this.axiosInstance.get<ProgressSummary>("/user/progress-summary", {
+      params: { localDate },
+    });
     return data;
   }
 

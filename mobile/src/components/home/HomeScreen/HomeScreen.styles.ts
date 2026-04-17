@@ -12,7 +12,6 @@ export const styles = StyleSheet.create({
   row: { flexDirection: "row", gap: spacing.sm, marginTop: spacing.md },
   dot: { width: 12, height: 12, borderRadius: 6, backgroundColor: colors.textMuted },
   dotDone: { backgroundColor: colors.accent },
-  dotToday: { borderWidth: 2, borderColor: colors.success },
   progressTrack: { marginTop: spacing.md, height: 10, borderRadius: 5, backgroundColor: "#0f172a", overflow: "hidden" },
   progressFill: { height: 10, backgroundColor: colors.accent },
   subText: { color: colors.textSecondary, marginTop: spacing.sm },

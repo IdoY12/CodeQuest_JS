@@ -37,7 +37,7 @@ export function ProfileAuthenticatedTop({ p }: { p: UseProfileScreenReturn }) {
         <Text style={t.name}>{p.username}</Text>
         <Text style={t.email}>{p.email}</Text>
         <Text style={t.meta}>
-          Level {p.level} · Duel {p.duelRating} · {p.duelWinRate} win rate
+          Level {p.level} · Duels {p.duelWins}W / {p.duelLosses}L · {p.duelWinRate} win rate
         </Text>
       </View>
       {p.uploadingAvatar ? (

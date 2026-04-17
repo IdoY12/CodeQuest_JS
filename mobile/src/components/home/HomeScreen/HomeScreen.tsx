@@ -35,12 +35,13 @@ export function HomeScreen({ navigation }: HomeMainScreenProps) {
           <Text style={styles.subText}>
             Complete at least one exercise every day to keep your streak alive.
           </Text>
-          <View style={styles.row}>
-            {home.streakDays.map((done, idx) => (
-              <View key={idx} style={[styles.dot, done && styles.dotDone, idx === 6 && styles.dotToday]} />
-            ))}
-            {home.streak > 7 && <Text style={styles.date}>Day {home.streak}</Text>}
-          </View>
+          {home.streakShowsDots && (
+            <View style={styles.row}>
+              {home.streakDotsFilled.map((isFilled, idx) => (
+                <View key={idx} style={[styles.dot, isFilled && styles.dotDone]} />
+              ))}
+            </View>
+          )}
         </View>
         <View style={styles.card}>
           <Text style={styles.cardTitle}>

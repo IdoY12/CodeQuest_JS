@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Pressable, Text } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { Image, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppSelector } from "@/redux/hooks";
 import { useDuelSocket } from "@/hooks/useDuelSocket";
@@ -8,19 +8,24 @@ import type { MatchmakingScreenProps } from "@/types/duelNavigation.types";
 import { styles } from "./DuelNavigator.styles";
 
 const QUEUE_TIMER_INTERVAL_MS = 1000;
-const MOCK_MATCH_TIMEOUT_MS = 20000;
 const MATCH_COUNTDOWN_TICK_MS = 700;
 const FALLBACK_PLAYERS_ONLINE = 143;
 
 export function DuelMatchmakingScreen({ navigation }: MatchmakingScreenProps) {
-  const { playersOnline, sessionId, opponent, joinQueue, leaveQueue, startLocalMockMatch } = useDuelSocket();
+  const { playersOnline, sessionId, opponent, joinQueue, leaveQueue } = useDuelSocket();
   const userId = useAppSelector((s) => s.session.userId);
   const username = useAppSelector((s) => s.profile.username);
-  const duelRating = useAppSelector((s) => s.duel.duelRating);
   const accessToken = useAppSelector((s) => s.session.accessToken);
   const [seconds, setSeconds] = useState(0);
   const [countdown, setCountdown] = useState(3);
-  const hasJoinedQueueRef = React.useRef(false);
+  const hasJoinedQueueRef = useRef(false);
+  const usernameRef = useRef(username);
+  const accessTokenRef = useRef(accessToken);
+
+  useEffect(() => {
+    usernameRef.current = username;
+    accessTokenRef.current = accessToken;
+  }, [username, accessToken]);
 
   useEffect(() => {
     logNav("screen:enter", { screen: "MatchmakingScreen" });
@@ -28,24 +33,20 @@ export function DuelMatchmakingScreen({ navigation }: MatchmakingScreenProps) {
   }, []);
 
   useEffect(() => {
-    if (!userId || hasJoinedQueueRef.current) return;
+    if (!userId || !accessToken || hasJoinedQueueRef.current) return;
     hasJoinedQueueRef.current = true;
-    joinQueue({ userId, username, rating: duelRating, token: accessToken });
+    joinQueue({ userId, username: usernameRef.current, token: accessTokenRef.current });
     logDuel("queue:join", { userId });
 
     const interval = setInterval(() => setSeconds((v) => v + 1), QUEUE_TIMER_INTERVAL_MS);
-    const timeout = setTimeout(() => {
-      if (!sessionId) startLocalMockMatch();
-    }, MOCK_MATCH_TIMEOUT_MS);
 
     return () => {
       clearInterval(interval);
-      clearTimeout(timeout);
       logDuel("queue:leave", { userId: userId ?? "unknown" });
       leaveQueue();
       hasJoinedQueueRef.current = false;
     };
-  }, [accessToken, duelRating, joinQueue, leaveQueue, startLocalMockMatch, userId, username]);
+  }, [accessToken, joinQueue, leaveQueue, userId]);
 
   useEffect(() => {
     if (sessionId && opponent) {
@@ -65,7 +66,20 @@ export function DuelMatchmakingScreen({ navigation }: MatchmakingScreenProps) {
       <Text style={styles.searching}>Searching for an opponent...</Text>
       <Text style={styles.sub}>⚡ {playersOnline || FALLBACK_PLAYERS_ONLINE} players online</Text>
       <Text style={styles.sub}>Estimated wait: {seconds}s</Text>
-      {opponent ? <Text style={styles.vs}>VS {opponent.username} · {countdown}</Text> : null}
+      {opponent ? (
+        <View style={styles.matchOppRow}>
+          {opponent.avatarUrl ? (
+            <Image source={{ uri: opponent.avatarUrl }} style={styles.matchOppAvatar} />
+          ) : (
+            <View style={styles.matchOppInitial}>
+              <Text style={styles.matchOppInitialTxt}>{(opponent.username || "?").slice(0, 1).toUpperCase()}</Text>
+            </View>
+          )}
+          <Text style={styles.vsInline}>
+            VS {opponent.username} · {countdown}
+          </Text>
+        </View>
+      ) : null}
       <Pressable style={styles.secondaryBtn} onPress={() => navigation.goBack()}>
         <Text style={styles.secondaryLabel}>Cancel</Text>
       </Pressable>

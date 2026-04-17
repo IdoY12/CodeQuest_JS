@@ -1,4 +1,5 @@
 import { io, type Socket } from "socket.io-client";
+import { XP_PER_CORRECT_EXERCISE } from "@project/xp-constants";
 import { logDuel, logError } from "@/utils/logger";
 import { duelRefs, publishDuel, normalizeDuelReplayEntry } from "@/utils/duelSocketState";
 
@@ -11,9 +12,16 @@ export function bindDuelSocketEvents(socket: Socket) {
   });
   socket.on("queue_status", (payload) => publishDuel({ playersOnline: payload.players_online ?? 0 }));
   socket.on("match_found", (payload) => {
+    const opp = payload.opponent as {
+      username?: string;
+      avatar_url?: string | null;
+    };
     publishDuel({
       sessionId: payload.session_id,
-      opponent: { username: payload.opponent.username, rating: payload.opponent.rating },
+      opponent: {
+        username: String(opp?.username ?? ""),
+        avatarUrl: typeof opp?.avatar_url === "string" ? opp.avatar_url : null,
+      },
     });
   });
   socket.on("round_start", (payload) => {
@@ -46,15 +54,20 @@ export function bindDuelSocketEvents(socket: Socket) {
     publishDuel({
       duelEnd: {
         won: uid ? winnerId === uid : winnerId === socket.id,
-        ratingDelta: payload.rating_change,
-        xpEarned: payload.xp_earned,
+        xpEarned: Number(payload.xp_earned ?? 0),
+        streakCurrent:
+          typeof payload.streak_current === "number"
+            ? payload.streak_current
+            : typeof payload.streak_current === "string"
+              ? Number(payload.streak_current)
+              : undefined,
         roundReplay: Array.isArray(payload.round_replay) ? payload.round_replay.map(normalizeDuelReplayEntry) : [],
       },
     });
   });
   socket.on("opponent_disconnected", () => {
     logDuel("opponent:disconnected");
-    publishDuel({ duelEnd: { won: true, ratingDelta: 25, xpEarned: 80, roundReplay: [] } });
+    publishDuel({ duelEnd: { won: true, xpEarned: XP_PER_CORRECT_EXERCISE, roundReplay: [] } });
   });
 }
 

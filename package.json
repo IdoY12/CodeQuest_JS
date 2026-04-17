@@ -15,7 +15,7 @@
     "io:dev": "npm --prefix io run dev",
     "io:build": "npm --prefix io run build",
     "mobile:start": "npm --prefix mobile run start",
-    "typecheck:all": "npm --prefix packages/xp-constants run typecheck && npm --prefix backend run typecheck && npm --prefix io run typecheck && npm --prefix mobile run typecheck && npm --prefix packages/auth-jwt run typecheck && npm --prefix packages/server-kit run typecheck && npm --prefix packages/db run typecheck"
+    "typecheck:all": "npm --prefix packages/streak-logic run typecheck && npm --prefix packages/xp-constants run typecheck && npm --prefix packages/db run typecheck && npm --prefix backend run typecheck && npm --prefix io run typecheck && npm --prefix mobile run typecheck && npm --prefix packages/auth-jwt run typecheck && npm --prefix packages/server-kit run typecheck"
   },
   "devDependencies": {
     "patch-package": "^8.0.1"

@@ -20,11 +20,11 @@ export interface DuelReplayRow {
 export interface DuelState {
   playersOnline: number;
   sessionId: string | null;
-  opponent: { username: string; rating: number } | null;
+  opponent: { username: string; avatarUrl: string | null } | null;
   round: DuelRound | null;
   score: { me: number; opp: number };
   duelEnd:
-    | { won: boolean; ratingDelta: number; xpEarned: number; roundReplay: DuelReplayRow[] }
+    | { won: boolean; xpEarned: number; streakCurrent?: number; roundReplay: DuelReplayRow[] }
     | null;
 }
 

@@ -1,26 +1,66 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import {
+  applyStreakOnAppOpen,
+  applyStreakOnQualifyingXp,
+  type DailyXpStreakPersisted,
+} from "@/utils/dailyXpStreakCore";
 
-interface StreakState {
+export interface StreakState {
   streakCurrent: number;
-  streakDays: boolean[];
+  lastActivityDate: string | null;
+  lastCheckedDate: string | null;
 }
 
 const initialState: StreakState = {
   streakCurrent: 0,
-  streakDays: [false, false, false, false, false, false, false],
+  lastActivityDate: null,
+  lastCheckedDate: null,
 };
+
+function toPersisted(state: StreakState): DailyXpStreakPersisted {
+  return {
+    streakCount: state.streakCurrent,
+    lastActivityDate: state.lastActivityDate,
+    lastCheckedDate: state.lastCheckedDate,
+  };
+}
+
+function assignFromPersisted(state: StreakState, next: DailyXpStreakPersisted): void {
+  state.streakCurrent = next.streakCount;
+  state.lastActivityDate = next.lastActivityDate;
+  state.lastCheckedDate = next.lastCheckedDate;
+}
+
+type LegacyHydrate = Partial<StreakState> & { streakDays?: boolean[] };
 
 const streakSlice = createSlice({
   name: "streak",
   initialState,
   reducers: {
-    hydrateStreak: (state, action: PayloadAction<Partial<StreakState>>) => {
-      Object.assign(state, action.payload);
+    hydrateStreak: (state, action: PayloadAction<LegacyHydrate>) => {
+      const payload = action.payload;
+      const isLegacySnapshot =
+        Array.isArray(payload.streakDays) && payload.lastCheckedDate === undefined && payload.lastActivityDate === undefined;
+      if (isLegacySnapshot) {
+        Object.assign(state, initialState);
+        return;
+      }
+      if (typeof payload.streakCurrent === "number") state.streakCurrent = payload.streakCurrent;
+      if (payload.lastActivityDate !== undefined) state.lastActivityDate = payload.lastActivityDate;
+      if (payload.lastCheckedDate !== undefined) state.lastCheckedDate = payload.lastCheckedDate;
     },
     resetStreak: () => initialState,
+    runStreakAppOpen: (state, action: PayloadAction<{ today: string }>) => {
+      const next = applyStreakOnAppOpen(toPersisted(state), action.payload.today);
+      assignFromPersisted(state, next);
+    },
+    runStreakQualifyingExercise: (state, action: PayloadAction<{ today: string }>) => {
+      const next = applyStreakOnQualifyingXp(toPersisted(state), action.payload.today);
+      assignFromPersisted(state, next);
+    },
   },
 });
 
-export const { hydrateStreak, resetStreak } = streakSlice.actions;
+export const { hydrateStreak, resetStreak, runStreakAppOpen, runStreakQualifyingExercise } = streakSlice.actions;
 
 export default streakSlice.reducer;

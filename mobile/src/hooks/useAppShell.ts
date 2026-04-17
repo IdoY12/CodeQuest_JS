@@ -14,6 +14,9 @@ import store from "@/redux/store";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { hydrateStoreFromStorage } from "@/utils/hydrateStore";
 import { bootstrapSession } from "@/utils/bootstrapSession";
+import { runStreakAppOpen } from "@/redux/streak-slice";
+import { getStreakCalendarDate } from "@/utils/streakCalendar";
+import { syncRegisteredStreakFromServer } from "@/utils/syncRegisteredStreakFromServer";
 import { logApp, logAuth } from "@/utils/logger";
 import { runDailyGoalNotificationCheck } from "@/utils/dailyGoalNotificationCheck";
 
@@ -24,6 +27,7 @@ export function useAppShell() {
   const [isConnected, setIsConnected] = useState(true);
   const hasHydrated = useAppSelector((s) => s.session.hasHydrated);
   const isAuthenticated = useAppSelector((s) => s.session.isAuthenticated);
+  const isGuest = useAppSelector((s) => s.session.isGuest);
   const accessToken = useAppSelector((s) => s.session.accessToken);
   const notificationsEnabled = useAppSelector((s) => s.profile.notificationsEnabled);
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
@@ -96,8 +100,9 @@ export function useAppShell() {
   useEffect(() => {
     if (!hasHydrated) return;
     logAuth("bootstrap:start", { isAuthenticated, hasAccessToken: Boolean(accessToken) });
+    if (isGuest) dispatch(runStreakAppOpen({ today: getStreakCalendarDate() }));
     void bootstrapSession(dispatch);
-  }, [accessToken, dispatch, hasHydrated, isAuthenticated]);
+  }, [accessToken, dispatch, hasHydrated, isAuthenticated, isGuest]);
 
   useEffect(() => {
     if (!hasHydrated) return;
@@ -108,13 +113,17 @@ export function useAppShell() {
     void checkDaily();
     const sub = AppState.addEventListener("change", (next) => {
       if (appStateRef.current !== "active" && next === "active") {
-        if (isAuthenticated && accessToken) void refreshSessionOrLogoutOnForeground(accessToken, dispatch);
+        if (isAuthenticated && accessToken) {
+          void refreshSessionOrLogoutOnForeground(accessToken, dispatch);
+          void syncRegisteredStreakFromServer(dispatch, accessToken);
+        }
+        if (isGuest) dispatch(runStreakAppOpen({ today: getStreakCalendarDate() }));
         void checkDaily();
       }
       appStateRef.current = next;
     });
     return () => sub.remove();
-  }, [accessToken, checkDaily, dispatch, isAuthenticated]);
+  }, [accessToken, checkDaily, dispatch, isAuthenticated, isGuest]);
 
   return { isConnected };
 }

@@ -1,7 +1,7 @@
 /**
- * POST /api/user/practice-log — increments daily practice seconds and streak state.
+ * POST /api/user/practice-log — increments daily practice seconds.
  *
- * Responsibility: update active UserProgress row + streakHistoryJson; apply streak rules.
+ * Responsibility: update active UserProgress row practice counters only.
  * Layer: backend user HTTP handlers
  * Consumers: user router
  */
@@ -10,9 +10,8 @@ import type { Response } from "express";
 import { z } from "zod";
 import { prisma } from "@project/db";
 import type { AuthenticatedRequest } from "../../@types/auth.js";
-import { getProgressForActiveUser, mergeStreakHistoryJson } from "@project/db";
+import { getProgressForActiveUser } from "@project/db";
 import { logInfo, logWarn } from "../../utils/logger.js";
-import { applyStreakAfterPracticeLog } from "./applyStreakAfterPracticeLog.js";
 
 export async function postPracticeLog(req: AuthenticatedRequest, res: Response) {
   logInfo("[TASKS]", "practice-log:write-attempt", { userId: req.user?.userId, dateKey: req.body?.dateKey });
@@ -38,21 +37,13 @@ export async function postPracticeLog(req: AuthenticatedRequest, res: Response) 
 
   const sameDay = progress.practiceLogDateKey === dateKey;
   const nextSeconds = sameDay ? progress.practiceLogSeconds + practicedSeconds : practicedSeconds;
-  const nextHistory = mergeStreakHistoryJson(progress.streakHistoryJson, dateKey);
 
   await prisma.userProgress.update({
     where: { id: progress.id },
     data: {
       practiceLogDateKey: dateKey,
       practiceLogSeconds: nextSeconds,
-      streakHistoryJson: nextHistory,
     },
-  });
-
-  await applyStreakAfterPracticeLog(prisma, userId, progress.experienceLevel, dateKey, {
-    streakCurrent: progress.streakCurrent,
-    streakLastDate: progress.streakLastDate,
-    streakLongest: progress.streakLongest,
   });
 
   logInfo("[TASKS]", "practice-log:write-success", { userId: req.user?.userId, practicedSeconds: nextSeconds });

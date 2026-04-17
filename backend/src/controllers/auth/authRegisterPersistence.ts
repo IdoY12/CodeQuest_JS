@@ -22,7 +22,6 @@ export async function createRegisteredUserWithDefaults(input: RegisterInput): Pr
         dailyCommitmentMinutes: 15,
       },
     });
-    await transaction.duelRating.create({ data: { userId: createdUser.id } });
 
     return createdUser;
   });

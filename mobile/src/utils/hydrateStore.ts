@@ -6,7 +6,6 @@ import { hydrateXp } from "@/redux/xp-slice";
 import { hydrateStreak } from "@/redux/streak-slice";
 import { hydrateLesson } from "@/redux/lesson-slice";
 import { hydrateStats } from "@/redux/duel-slice";
-import { hydratePuzzle } from "@/redux/puzzle-slice";
 import { logAuth, logError } from "@/utils/logger";
 import { readSecureSessionTokens, writeSecureSessionTokens } from "@/utils/secureSessionTokens";
 
@@ -19,7 +18,6 @@ type PersistedReduxSnapshot = {
   streak?: Record<string, unknown>;
   lesson?: Record<string, unknown>;
   duel?: Record<string, unknown>;
-  puzzle?: Record<string, unknown>;
 };
 
 async function mergeHydratedSessionTokens<T extends Record<string, unknown>>(session: T) {
@@ -58,7 +56,6 @@ export async function hydrateStoreFromStorage(dispatch: AppDispatch): Promise<vo
     if (parsed.streak) dispatch(hydrateStreak(parsed.streak as never));
     if (parsed.lesson) dispatch(hydrateLesson(parsed.lesson as never));
     if (parsed.duel) dispatch(hydrateStats(parsed.duel as never));
-    if (parsed.puzzle) dispatch(hydratePuzzle(parsed.puzzle as never));
   } catch (error) {
     logError("[APP]", error, { phase: "hydrate-redux" });
   } finally {

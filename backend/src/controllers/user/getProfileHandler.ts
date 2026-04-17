@@ -1,7 +1,7 @@
 /**
  * GET /api/user/profile — returns the authenticated user's core profile fields.
  *
- * Responsibility: read user + active progress + duel rating for the client shell.
+ * Responsibility: read user + active progress for the client shell.
  * Layer: backend user HTTP handlers
  * Consumers: user router
  */
@@ -21,9 +21,6 @@ export async function getProfile(req: AuthenticatedRequest, res: Response) {
       avatarUrl: true,
       createdAt: true,
       activeExperienceLevel: true,
-      duelRating: {
-        select: { rating: true, wins: true, losses: true },
-      },
     },
   });
 
@@ -40,11 +37,8 @@ export async function getProfile(req: AuthenticatedRequest, res: Response) {
       }
     : null;
 
-  const { duelRating, ...rest } = user;
-
   return res.json({
-    ...rest,
+    ...user,
     progress: progressOut,
-    duelRating,
   });
 }

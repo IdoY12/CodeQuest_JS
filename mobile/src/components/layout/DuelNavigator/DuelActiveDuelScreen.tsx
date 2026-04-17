@@ -1,4 +1,4 @@
-import { ScrollView, Text, View } from "react-native";
+import { Image, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { CodeSnippet } from "@/components/common/CodeSnippet/CodeSnippet";
 import { useDuelActiveDuelScreen } from "@/hooks/useDuelActiveDuelScreen";
@@ -31,9 +31,18 @@ export function DuelActiveDuelScreen({ navigation }: ActiveDuelScreenProps) {
             {u.username} {u.myScore}
           </Text>
           <Text style={styles.score}>Round {u.roundNumber}/5</Text>
-          <Text style={styles.score}>
-            {u.opponentName} {u.oppScore}
-          </Text>
+          <View style={styles.scoreCellEnd}>
+            {u.opponentAvatarUrl ? (
+              <Image source={{ uri: u.opponentAvatarUrl }} style={styles.duelMiniAvatar} />
+            ) : (
+              <View style={styles.duelMiniInitial}>
+                <Text style={styles.duelMiniInitialTxt}>{(u.opponentName || "?").slice(0, 1).toUpperCase()}</Text>
+              </View>
+            )}
+            <Text style={styles.score} numberOfLines={1}>
+              {u.opponentName} {u.oppScore}
+            </Text>
+          </View>
         </View>
         <Text style={styles.cardTitle}>{round.prompt}</Text>
         <View style={styles.codeWrap}>

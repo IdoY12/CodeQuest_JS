@@ -5,3 +5,4 @@ export declare function connectDatabase(): Promise<void>;
 export { PrismaClient } from "@prisma/client";
 export * from "@prisma/client";
 export * from "./userProgressActive.js";
+export * from "./userStreak.js";

@@ -27,10 +27,3 @@ export async function ensureUserProgressForLogin(user: User): Promise<UserProgre
   return progress;
 }
 
-export async function ensureDuelRatingRow(userId: string): Promise<void> {
-  await prisma.duelRating.upsert({
-    where: { userId },
-    create: { userId },
-    update: {},
-  });
-}

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAppSelector } from "@/redux/hooks";
 import { DUEL_SOCKET_URL } from "../config/network";
 import type { DuelState } from "@/utils/duelSocketState";
@@ -9,7 +9,6 @@ import {
   duelLeaveQueue,
   duelPlayerReady,
   duelResetMatch,
-  duelScheduleLocalMockRound,
   duelSetEnd,
   duelSetRound,
   duelSetScore,
@@ -18,7 +17,6 @@ import {
 
 export function useDuelSocket() {
   const [state, setState] = useState<DuelState>(duelRefs.state);
-  const mockTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const accessToken = useAppSelector((s) => s.session.accessToken);
   const url = useMemo(() => DUEL_SOCKET_URL, []);
 
@@ -31,17 +29,8 @@ export function useDuelSocket() {
     };
   }, [accessToken, url]);
 
-  useEffect(
-    () => () => {
-      if (mockTimeoutRef.current) clearTimeout(mockTimeoutRef.current);
-    },
-    [],
-  );
-
-  const startLocalMockMatch = useCallback(() => duelScheduleLocalMockRound(mockTimeoutRef), []);
-
   const joinQueue = useCallback(
-    (p: { userId: string; username: string; rating: number; token?: string | null }) => duelJoinQueue(url, p),
+    (p: { userId: string; username: string; token?: string | null }) => duelJoinQueue(url, p),
     [url],
   );
 
@@ -61,7 +50,6 @@ export function useDuelSocket() {
     playerReady: duelPlayerReady,
     submitAnswer: duelSubmitAnswer,
     resetDuel: duelResetMatch,
-    startLocalMockMatch,
   };
 }
 

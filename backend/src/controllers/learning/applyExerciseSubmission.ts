@@ -1,11 +1,15 @@
-import { ensureProgressRow, prisma } from "@project/db";
-import { XP_POINTS_PER_LEVEL } from "@project/xp-constants";
+import { ensureProgressRow, handleStreakQualifyingXpForUser, prisma } from "@project/db";
+import { XP_PER_CORRECT_EXERCISE } from "@project/xp-constants";
 import type { ExerciseSubmitResponseDto } from "../../dto/exerciseSubmitResponseDto.js";
+
+const dateKeyRegex = /^\d{4}-\d{2}-\d{2}$/;
 
 type SubmitInput = {
   userId: string;
   exerciseId: string;
   answer: string;
+  /** Client local calendar date (YYYY-MM-DD) for streak; required when persisting qualifying XP. */
+  clientLocalDate?: string;
 };
 
 export async function applyExerciseSubmission(input: SubmitInput): Promise<ExerciseSubmitResponseDto | null> {
@@ -14,6 +18,8 @@ export async function applyExerciseSubmission(input: SubmitInput): Promise<Exerc
   if (!exercise) return null;
   const isCorrect =
     input.answer.trim().replace(/\s/g, "") === exercise.correctAnswer.trim().replace(/\s/g, "");
+
+  let streakCurrent: number | undefined;
 
   if (isCorrect) {
     await ensureProgressRow(prisma, input.userId, exercise.experienceLevel);
@@ -24,22 +30,31 @@ export async function applyExerciseSubmission(input: SubmitInput): Promise<Exerc
     });
 
     if (progress) {
-      const nextXp = progress.xpTotal + XP_POINTS_PER_LEVEL;
-      const nextLevel = Math.max(1, Math.floor(nextXp / XP_POINTS_PER_LEVEL) + 1);
+      const nextXp = progress.xpTotal + XP_PER_CORRECT_EXERCISE;
+      const nextLevel = Math.max(1, Math.floor(nextXp / XP_PER_CORRECT_EXERCISE) + 1);
       const nextIdx = Math.max(progress.currentExerciseIndex, exercise.orderIndex + 1);
       await prisma.userProgress.update({
         where: { id: progress.id },
         data: { xpTotal: nextXp, level: nextLevel, currentExerciseIndex: nextIdx },
       });
+      if (input.clientLocalDate && dateKeyRegex.test(input.clientLocalDate)) {
+        streakCurrent = await handleStreakQualifyingXpForUser(
+          prisma,
+          input.userId,
+          input.clientLocalDate,
+          XP_PER_CORRECT_EXERCISE,
+        );
+      } else {
+        streakCurrent = (await prisma.userProgress.findUnique({ where: { id: progress.id } }))?.streakCurrent;
+      }
     }
   }
 
-  // Always include correctAnswer and explanation so the client can reveal the correct
-  // option in green and show the explanation regardless of whether the attempt was right.
   return {
     isCorrect,
-    xpEarned: isCorrect ? XP_POINTS_PER_LEVEL : 0,
+    xpEarned: isCorrect ? XP_PER_CORRECT_EXERCISE : 0,
     correctAnswer: exercise.correctAnswer,
     explanation: exercise.explanation,
+    ...(streakCurrent !== undefined ? { streakCurrent } : {}),
   };
 }

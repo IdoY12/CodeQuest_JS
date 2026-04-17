@@ -194,12 +194,19 @@ paths:
     get:
       tags: [User]
       summary: Get dashboard summary
+      parameters:
+        - in: query
+          name: localDate
+          required: true
+          schema: { type: string, pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" }
+          description: Client local calendar date (YYYY-MM-DD) for streak app-open rules
       responses:
         "200":
           description: Summary
           content:
             application/json:
               schema: { $ref: "#/components/schemas/ProgressSummary" }
+        "400": { $ref: "#/components/responses/BadRequest" }
         "500": { $ref: "#/components/responses/InternalError" }
   /user/preferences:
     get:
@@ -519,22 +526,20 @@ components:
         password: { type: string, minLength: 6, description: Raw password }
     AuthMeResponse:
       type: object
-      required: [id, email, username, avatarId, avatarUrl, tokenVersion]
+      required: [id, email, username, avatarUrl, tokenVersion]
       properties:
         id: { type: string, description: User id }
         email: { type: string, format: email, description: User email }
         username: { type: string, description: Username }
-        avatarId: { type: string, description: Avatar id }
         avatarUrl: { type: string, nullable: true, format: uri, description: Avatar URL }
         tokenVersion: { type: integer, description: Current token version }
     AuthUser:
       type: object
-      required: [id, email, username, avatarId, avatarUrl, goal, experienceLevel, dailyCommitmentMinutes, notificationsEnabled]
+      required: [id, email, username, avatarUrl, goal, experienceLevel, dailyCommitmentMinutes, notificationsEnabled]
       properties:
         id: { type: string, description: User id }
         email: { type: string, format: email, description: User email }
         username: { type: string, description: Username }
-        avatarId: { type: string, description: Avatar id }
         avatarUrl: { type: string, nullable: true, format: uri, description: Avatar URL }
         goal: { allOf: [{ $ref: "#/components/schemas/Goal" }], nullable: true, description: Goal selection }
         experienceLevel: { allOf: [{ $ref: "#/components/schemas/ExperienceLevel" }], nullable: true, description: Experience level }
@@ -556,13 +561,6 @@ components:
         dailyCommitmentMinutes: { type: integer, nullable: true, description: Daily minutes }
         notificationsEnabled: { type: boolean, description: Notifications enabled }
         currentExerciseIndex: { type: integer, description: Next exercise index in ordered curriculum for this level }
-    UserProfileDuelRating:
-      type: object
-      required: [rating, wins, losses]
-      properties:
-        rating: { type: integer, description: Duel rating }
-        wins: { type: integer, description: Duel wins }
-        losses: { type: integer, description: Duel losses }
     UserProfileResponse:
       type: object
       required: [id, email, username, avatarUrl, createdAt, activeExperienceLevel]
@@ -574,19 +572,16 @@ components:
         createdAt: { type: string, format: date-time, description: Created timestamp }
         activeExperienceLevel: { allOf: [{ $ref: "#/components/schemas/ExperienceLevel" }], nullable: true, description: Active curriculum band }
         progress: { allOf: [{ $ref: "#/components/schemas/UserProfileProgress" }], nullable: true, description: User progress snapshot }
-        duelRating: { allOf: [{ $ref: "#/components/schemas/UserProfileDuelRating" }], nullable: true, description: Duel rating snapshot }
     ProgressSummary:
       type: object
-      required: [xpTotal, level, streakCurrent, streakDays, lessonsCompleted, duelWins, duelLosses, duelRating]
+      required: [xpTotal, level, streakCurrent, lessonsCompleted, duelWins, duelLosses]
       properties:
         xpTotal: { type: integer, description: Total XP }
         level: { type: integer, description: Current level }
-        streakCurrent: { type: integer, description: Current streak in days }
-        streakDays: { type: array, items: { type: boolean }, description: Last 7 calendar days, practice activity flags }
+        streakCurrent: { type: integer, description: Current streak in days (XP-based, server source of truth) }
         lessonsCompleted: { type: integer, description: Current exercise index (resume position) for active level }
         duelWins: { type: integer, description: Duel wins }
         duelLosses: { type: integer, description: Duel losses }
-        duelRating: { type: integer, description: Duel rating }
     UserPreferencesGetResponse:
       type: object
       required: [userGoal, experienceLevel, dailyGoalMinutes, notificationsEnabled]

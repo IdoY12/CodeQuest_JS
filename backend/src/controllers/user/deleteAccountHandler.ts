@@ -45,7 +45,6 @@ export async function deleteAccount(req: AuthenticatedRequest, res: Response) {
     await tx.duelSession.deleteMany({
       where: { OR: [{ player1Id: userId }, { player2Id: userId }] },
     });
-    await tx.duelRating.deleteMany({ where: { userId } });
     await tx.userProgress.deleteMany({ where: { userId } });
     await tx.user.delete({ where: { id: userId } });
   });

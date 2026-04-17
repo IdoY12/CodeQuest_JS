@@ -10,9 +10,4 @@ export default interface UserProfile {
     notificationsEnabled: boolean;
     currentExerciseIndex?: number;
   } | null;
-  duelRating: {
-    rating: number;
-    wins: number;
-    losses: number;
-  } | null;
 }

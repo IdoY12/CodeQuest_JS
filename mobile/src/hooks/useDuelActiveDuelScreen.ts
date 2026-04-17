@@ -5,6 +5,8 @@ import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { addStudySeconds } from "@/redux/session-slice";
 import { addXp } from "@/redux/xp-slice";
 import { applyDuelResult } from "@/redux/duel-slice";
+import { hydrateStreak, runStreakAppOpen, runStreakQualifyingExercise } from "@/redux/streak-slice";
+import { getStreakCalendarDate } from "@/utils/streakCalendar";
 import { logDuel, logNav } from "@/utils/logger";
 import { useDuelSocket } from "@/hooks/useDuelSocket";
 import type { DuelStackParamList } from "@/types/duelNavigation.types";
@@ -16,8 +18,10 @@ export function useDuelActiveDuelScreen(navigation: Nav) {
   const dispatch = useAppDispatch();
   const { round, score, sessionId, submitAnswer, playerReady, duelEnd, opponent } = useDuelSocket();
   const userId = useAppSelector((s) => s.session.userId);
+  const isGuest = useAppSelector((s) => s.session.isGuest);
   const username = useAppSelector((s) => s.profile.username);
   const opponentName = opponent?.username ?? "Opponent";
+  const opponentAvatarUrl = opponent?.avatarUrl ?? null;
   const [roundNumber, setRoundNumber] = useState(1);
   const [selected, setSelected] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState(DUEL_ACTIVE_ROUND_SECONDS);
@@ -57,9 +61,27 @@ export function useDuelActiveDuelScreen(navigation: Nav) {
     if (!duelEnd) return;
     logDuel("duel:end", { won: duelEnd.won, xpEarned: duelEnd.xpEarned });
     dispatch(addXp(duelEnd.xpEarned));
-    dispatch(applyDuelResult({ won: duelEnd.won, ratingDelta: duelEnd.ratingDelta }));
-    navigation.replace("DuelResults", { won: duelEnd.won, score: `${myScore}-${oppScore}`, replay: duelEnd.roundReplay });
-  }, [dispatch, duelEnd, myScore, navigation, oppScore]);
+    if (isGuest && duelEnd.xpEarned > 0) {
+      const today = getStreakCalendarDate();
+      dispatch(runStreakAppOpen({ today }));
+      dispatch(runStreakQualifyingExercise({ today }));
+    } else if (!isGuest && typeof duelEnd.streakCurrent === "number") {
+      dispatch(
+        hydrateStreak({
+          streakCurrent: duelEnd.streakCurrent,
+          lastActivityDate: null,
+          lastCheckedDate: null,
+        }),
+      );
+    }
+    dispatch(applyDuelResult({ won: duelEnd.won }));
+    navigation.replace("DuelResults", {
+      won: duelEnd.won,
+      score: `${myScore}-${oppScore}`,
+      xpEarned: duelEnd.xpEarned,
+      replay: duelEnd.roundReplay,
+    });
+  }, [dispatch, duelEnd, isGuest, myScore, navigation, oppScore]);
 
   useEffect(() => {
     setTimeLeft(DUEL_ACTIVE_ROUND_SECONDS);
@@ -82,6 +104,7 @@ export function useDuelActiveDuelScreen(navigation: Nav) {
     round,
     username,
     opponentName,
+    opponentAvatarUrl,
     roundNumber,
     selected,
     timeLeft,

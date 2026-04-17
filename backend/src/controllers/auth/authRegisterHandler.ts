@@ -47,7 +47,6 @@ export async function authRegisterHandler(request: Request, response: Response):
         id: user.id,
         email: user.email,
         username: user.username,
-        avatarId: user.avatarId,
         avatarUrl: user.avatarUrl,
         goal: null,
         experienceLevel: null,

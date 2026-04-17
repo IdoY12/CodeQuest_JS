@@ -15,7 +15,9 @@ import { startRound } from "../session.js";
 import type { DuelNamespace } from "../types.js";
 
 export function registerPlayerReady(socket: Socket, duel: DuelNamespace) {
-  socket.on("player_ready", async (payload: { session_id: string }) => {
+  socket.on(
+    "player_ready",
+    async (payload: { session_id: string; streak_local_date?: string }) => {
     try {
       const session = sessions.get(payload.session_id);
 
@@ -29,13 +31,23 @@ export function registerPlayerReady(socket: Socket, duel: DuelNamespace) {
       }
 
       const userId = slot === "player1" ? session.player1.userId : session.player2.userId;
+      const streakDate =
+        typeof payload.streak_local_date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(payload.streak_local_date)
+          ? payload.streak_local_date
+          : null;
+      if (slot === "player1") session.player1StreakLocalDate = streakDate;
+      else session.player2StreakLocalDate = streakDate;
       session.readyUserIds.add(userId);
 
-      if (session.readyUserIds.size >= 2 && session.round === 0) {
+      const sameHumanSolo = session.player1.userId === session.player2.userId;
+      const readyEnough = sameHumanSolo ? session.readyUserIds.size >= 1 : session.readyUserIds.size >= 2;
+
+      if (readyEnough && session.round === 0) {
         await startRound(duel, session);
       }
     } catch (error) {
       logError("[DUEL]", error, { phase: "player_ready" });
     }
-  });
+  },
+  );
 }

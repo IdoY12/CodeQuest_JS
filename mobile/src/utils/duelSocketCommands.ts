@@ -1,35 +1,23 @@
 import type { DuelRound, DuelState } from "@/utils/duelSocketState";
 import { duelRefs, publishDuel } from "@/utils/duelSocketState";
 import { connectDuelSocket } from "@/utils/duelSocketIo";
+import { getStreakCalendarDate } from "@/utils/streakCalendar";
 
-export function duelScheduleLocalMockRound(timerRef: { current: ReturnType<typeof setTimeout> | null }) {
-  publishDuel({
-    sessionId: duelRefs.state.sessionId ?? "local-session",
-    opponent: duelRefs.state.opponent ?? { username: "GlobalRival", rating: 1210 },
+function emitJoinQueueWhenReady(socket: ReturnType<typeof connectDuelSocket>, username: string): void {
+  const body = { username };
+  if (socket.connected) {
+    socket.emit("join_queue", body);
+    return;
+  }
+  socket.once("connect", () => {
+    socket.emit("join_queue", body);
   });
-
-  if (timerRef.current) clearTimeout(timerRef.current);
-  timerRef.current = setTimeout(() => {
-    publishDuel({
-      round: {
-        roundNumber: 1,
-        prompt: "What is the output?",
-        codeSnippet: "console.log(typeof null);",
-        options: ["object", "null", "undefined", "number"],
-        correctAnswer: "object",
-        type: "MULTIPLE_CHOICE",
-      },
-    });
-  }, 900);
 }
 
-export function duelJoinQueue(
-  url: string,
-  payload: { userId: string; username: string; rating: number; token?: string | null },
-) {
+export function duelJoinQueue(url: string, payload: { userId: string; username: string; token?: string | null }) {
   const socket = connectDuelSocket(url, payload.token ?? null);
   duelRefs.userId = payload.userId;
-  socket.emit("join_queue", { rating: payload.rating, username: payload.username });
+  emitJoinQueueWhenReady(socket, payload.username);
 }
 
 export function duelLeaveQueue() {
@@ -37,7 +25,10 @@ export function duelLeaveQueue() {
 }
 
 export function duelPlayerReady(sessionId: string) {
-  duelRefs.socket?.emit("player_ready", { session_id: sessionId });
+  duelRefs.socket?.emit("player_ready", {
+    session_id: sessionId,
+    streak_local_date: getStreakCalendarDate(),
+  });
 }
 
 export function duelSubmitAnswer(payload: {
@@ -51,6 +42,7 @@ export function duelSubmitAnswer(payload: {
     round_number: payload.roundNumber,
     answer: payload.answer,
     time_taken_ms: payload.timeTakenMs,
+    streak_local_date: getStreakCalendarDate(),
   });
 }
 

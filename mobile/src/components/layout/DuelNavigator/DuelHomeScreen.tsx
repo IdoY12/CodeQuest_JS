@@ -10,7 +10,6 @@ import { styles } from "./DuelNavigator.styles";
 
 export function DuelHomeScreen({ navigation }: DuelHomeScreenProps) {
   const { resetDuel } = useDuelSocket();
-  const duelRating = useAppSelector((s) => s.duel.duelRating);
   const duelWins = useAppSelector((s) => s.duel.duelWins);
   const duelLosses = useAppSelector((s) => s.duel.duelLosses);
   const isGuest = useAppSelector((s) => s.session.isGuest);
@@ -22,7 +21,7 @@ export function DuelHomeScreen({ navigation }: DuelHomeScreenProps) {
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
-      <Text style={styles.title}>Duel Rating: {duelRating} RP</Text>
+      <Text style={styles.title}>Duels</Text>
       <Text style={styles.sub}>
         Wins / Losses: {duelWins} / {duelLosses}
       </Text>

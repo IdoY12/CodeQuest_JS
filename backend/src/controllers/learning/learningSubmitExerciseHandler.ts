@@ -17,6 +17,7 @@ export async function learningSubmitExerciseHandler(
       .object({
         exerciseId: z.string().min(3),
         answer: z.string(),
+        clientLocalDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
       })
       .safeParse(request.body);
 
@@ -28,6 +29,7 @@ export async function learningSubmitExerciseHandler(
       userId: request.user!.userId,
       exerciseId: parsed.data.exerciseId,
       answer: parsed.data.answer,
+      clientLocalDate: parsed.data.clientLocalDate,
     });
 
     if (!result) {

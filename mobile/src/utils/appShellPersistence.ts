@@ -22,7 +22,6 @@ export function subscribeStoreToHybridStorage(appStore: typeof store): () => voi
       streak: state.streak,
       lesson: state.lesson,
       duel: state.duel,
-      puzzle: state.puzzle,
     });
     if (serialized === previousSerialized) return;
     previousSerialized = serialized;

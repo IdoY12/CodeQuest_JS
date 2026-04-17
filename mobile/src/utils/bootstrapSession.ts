@@ -8,6 +8,7 @@ import { setUserIdentity, updatePreferences, type Commitment } from "@/redux/pro
 import { hydrateXp } from "@/redux/xp-slice";
 import { hydrateStreak } from "@/redux/streak-slice";
 import { hydrateStats } from "@/redux/duel-slice";
+import { getStreakCalendarDate } from "@/utils/streakCalendar";
 import { REDUX_PERSIST_KEY } from "@/utils/hydrateStore";
 import { resetStoresAfterLogout } from "@/utils/resetStoresAfterLogout";
 
@@ -40,19 +41,19 @@ export async function bootstrapSession(dispatch: AppDispatch): Promise<void> {
       );
     }
 
-    const progress = await userService.getProgressSummary();
+    const progress = await userService.getProgressSummary(getStreakCalendarDate());
     dispatch(hydrateXp({ xpTotal: progress.xpTotal, level: progress.level }));
     dispatch(
       hydrateStreak({
         streakCurrent: progress.streakCurrent,
-        streakDays: progress.streakDays,
+        lastActivityDate: null,
+        lastCheckedDate: null,
       }),
     );
     dispatch(
       hydrateStats({
         duelWins: progress.duelWins,
         duelLosses: progress.duelLosses,
-        duelRating: progress.duelRating,
         lessonsCompleted: progress.lessonsCompleted,
       }),
     );

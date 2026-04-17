@@ -18,7 +18,13 @@ import type { DuelNamespace } from "../types.js";
 export function registerSubmitAnswer(socket: Socket, duel: DuelNamespace) {
   socket.on(
     "submit_answer",
-    async (payload: { session_id: string; round_number: number; answer: string; time_taken_ms: number }) => {
+    async (payload: {
+      session_id: string;
+      round_number: number;
+      answer: string;
+      time_taken_ms: number;
+      streak_local_date?: string;
+    }) => {
       try {
         const session = sessions.get(payload.session_id);
 
@@ -43,6 +49,12 @@ export function registerSubmitAnswer(socket: Socket, duel: DuelNamespace) {
           socket.emit("answer_feedback", { isCorrect: false, lockout_ms: 1000 });
           return;
         }
+        const streakDate =
+          typeof payload.streak_local_date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(payload.streak_local_date)
+            ? payload.streak_local_date
+            : null;
+        if (slot === "player1") session.player1StreakLocalDate = streakDate;
+        else session.player2StreakLocalDate = streakDate;
         applyCorrectDuelAnswer(duel, session, question, slot === "player1", payload.time_taken_ms);
       } catch (error) {
         logError("[DUEL]", error, { phase: "submit_answer" });

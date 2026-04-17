@@ -7,6 +7,8 @@ model DuelQuestion {
   difficulty    Difficulty
   options       Json?
   explanation   String       @default("")
+
+  @@index([difficulty])
 }
 
 model DuelSession {
@@ -26,13 +28,4 @@ model DuelSession {
 
   @@index([player1Id])
   @@index([player2Id])
-}
-
-model DuelRating {
-  id     String @id @default(cuid())
-  userId String @unique
-  rating Int    @default(1000)
-  wins   Int    @default(0)
-  losses Int    @default(0)
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

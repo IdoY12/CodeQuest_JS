@@ -5,7 +5,6 @@ import xpReducer from "./xp-slice";
 import streakReducer from "./streak-slice";
 import lessonReducer from "./lesson-slice";
 import duelReducer from "./duel-slice";
-import puzzleReducer from "./puzzle-slice";
 
 const store = configureStore({
   reducer: {
@@ -15,7 +14,6 @@ const store = configureStore({
     streak: streakReducer,
     lesson: lessonReducer,
     duel: duelReducer,
-    puzzle: puzzleReducer,
   },
 });
 

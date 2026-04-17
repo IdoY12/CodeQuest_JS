@@ -1,47 +1,51 @@
 import type { Socket } from "socket.io";
 import { logInfo } from "../../utils/logger.js";
-import { queue, sessions } from "./state.js";
+import { queue, sessions, soloMatchTimers } from "./state.js";
 import type { DuelNamespace, QueueEntry } from "./types.js";
 
-export function pickRange(entry: QueueEntry): number {
-  const waited = Date.now() - entry.joinedAt;
+/** Wait this long with no opponent before matching the player into a solo duel (real server session). */
+export const SOLO_MATCH_WAIT_MS = 25_000;
 
-  if (waited > 60000) return 500;
+const SOLO_SOCKET_PREFIX = "solo:";
 
-  if (waited > 30000) return 300;
-
-  return 200;
+export function clearSoloMatchTimer(socketId: string): void {
+  const t = soloMatchTimers.get(socketId);
+  if (t) clearTimeout(t);
+  soloMatchTimers.delete(socketId);
 }
 
-export function handleQueueJoin(socket: Socket, duel: DuelNamespace, entry: QueueEntry): void {
-  logInfo("[DUEL]", "queue:join", { userId: entry.userId, socketId: socket.id, rating: entry.rating });
+function scheduleSoloMatchIfAlone(duel: DuelNamespace, socketId: string): void {
+  clearSoloMatchTimer(socketId);
+  soloMatchTimers.set(
+    socketId,
+    setTimeout(() => {
+      soloMatchTimers.delete(socketId);
+      tryBeginSoloDuel(duel, socketId);
+    }, SOLO_MATCH_WAIT_MS),
+  );
+}
 
-  const opponentIndex = queue.findIndex((candidate) => {
-    if (candidate.socketId === entry.socketId) return false;
-    const range = Math.max(pickRange(candidate), pickRange(entry));
-    return Math.abs(candidate.rating - entry.rating) <= range;
-  });
+function tryBeginSoloDuel(duel: DuelNamespace, socketId: string): void {
+  const idx = queue.findIndex((e) => e.socketId === socketId);
+  if (idx === -1) return;
+  const sole = queue.splice(idx, 1)[0];
+  const synthetic: QueueEntry = { ...sole, socketId: `${SOLO_SOCKET_PREFIX}${sole.socketId}` };
+  finalizeMatch(duel, sole, synthetic);
+}
 
-  if (opponentIndex === -1) {
-    queue.push(entry);
-    socket.emit("queue_status", {
-      players_online: Math.max(1, duel.sockets.size),
-    });
-    return;
-  }
-
-  const opponent = queue.splice(opponentIndex, 1)[0];
+function finalizeMatch(duel: DuelNamespace, player1: QueueEntry, player2: QueueEntry): void {
   const sessionId = `sess_${crypto.randomUUID()}`;
   const roomId = `duel_${sessionId}`;
-  const opponentSocket = duel.sockets.get(opponent.socketId);
-  opponentSocket?.join(roomId);
-  socket.join(roomId);
+  const p1Socket = duel.sockets.get(player1.socketId);
+  const p2Socket = duel.sockets.get(player2.socketId);
+  p1Socket?.join(roomId);
+  p2Socket?.join(roomId);
 
   sessions.set(sessionId, {
     sessionId,
     roomId,
-    player1: opponent,
-    player2: entry,
+    player1,
+    player2,
     score: { player1: 0, player2: 0 },
     round: 0,
     readyUserIds: new Set<string>(),
@@ -50,19 +54,45 @@ export function handleQueueJoin(socket: Socket, duel: DuelNamespace, entry: Queu
     roundTimeout: null,
     roundNonce: 0,
     roundReplay: [],
+    player1StreakLocalDate: null,
+    player2StreakLocalDate: null,
+    xpGrantedP1: 0,
+    xpGrantedP2: 0,
   });
   logInfo("[DUEL]", "match:created", {
     sessionId,
-    player1: opponent.userId,
-    player2: entry.userId,
+    player1: player1.userId,
+    player2: player2.userId,
   });
 
-  duel.to(opponent.socketId).emit("match_found", {
+  duel.to(player1.socketId).emit("match_found", {
     session_id: sessionId,
-    opponent: { username: entry.username, avatar_id: entry.avatarId, rating: entry.rating },
+    opponent: { username: player2.username, avatar_url: player2.avatarUrl },
   });
-  socket.emit("match_found", {
-    session_id: sessionId,
-    opponent: { username: opponent.username, avatar_id: opponent.avatarId, rating: opponent.rating },
-  });
+  if (p2Socket) {
+    duel.to(player2.socketId).emit("match_found", {
+      session_id: sessionId,
+      opponent: { username: player1.username, avatar_url: player1.avatarUrl },
+    });
+  }
+}
+
+export function handleQueueJoin(socket: Socket, duel: DuelNamespace, entry: QueueEntry): void {
+  logInfo("[DUEL]", "queue:join", { userId: entry.userId, socketId: socket.id });
+
+  const opponentIndex = queue.findIndex((candidate) => candidate.socketId !== entry.socketId);
+
+  if (opponentIndex === -1) {
+    queue.push(entry);
+    scheduleSoloMatchIfAlone(duel, entry.socketId);
+    socket.emit("queue_status", {
+      players_online: Math.max(1, duel.sockets.size),
+    });
+    return;
+  }
+
+  const opponent = queue.splice(opponentIndex, 1)[0];
+  clearSoloMatchTimer(opponent.socketId);
+  clearSoloMatchTimer(entry.socketId);
+  finalizeMatch(duel, opponent, entry);
 }

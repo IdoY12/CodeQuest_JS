@@ -3,4 +3,5 @@ export default interface ExerciseSubmitResult {
   xpEarned: number;
   correctAnswer?: string;
   explanation?: string;
+  streakCurrent?: number;
 }

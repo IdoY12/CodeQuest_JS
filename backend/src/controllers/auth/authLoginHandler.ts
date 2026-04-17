@@ -6,11 +6,7 @@ import { comparePassword } from "../../utils/passwordHashing.js";
 import { signAccessToken, signRefreshToken } from "../../utils/sessionJwtTokens.js";
 import { loginBodySchema } from "./authBodySchemas.js";
 import { resolveExperienceLevel } from "@project/db";
-import {
-  ensureDuelRatingRow,
-  ensureUserProgressForLogin,
-  touchUserLastActive,
-} from "./authLoginPersistence.js";
+import { ensureUserProgressForLogin, touchUserLastActive } from "./authLoginPersistence.js";
 
 export async function authLoginHandler(request: Request, response: Response): Promise<void> {
   logInfo("[AUTH]", "login:attempt", { email: request.body?.email });
@@ -39,7 +35,6 @@ export async function authLoginHandler(request: Request, response: Response): Pr
     }
     const progress = await ensureUserProgressForLogin(user);
     await touchUserLastActive(user.id);
-    await ensureDuelRatingRow(user.id);
     const accessToken = signAccessToken({
       userId: user.id,
       email: user.email,
@@ -56,7 +51,6 @@ export async function authLoginHandler(request: Request, response: Response): Pr
         id: user.id,
         email: user.email,
         username: user.username,
-        avatarId: user.avatarId,
         avatarUrl: user.avatarUrl,
         goal: progress.goal,
         experienceLevel: resolveExperienceLevel(progress.experienceLevel),

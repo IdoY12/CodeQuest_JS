@@ -8,7 +8,9 @@
  */
 
 import type { DuelQuestion } from "@prisma/client";
+import { XP_PER_CORRECT_EXERCISE } from "@project/xp-constants";
 import { BETWEEN_DUEL_ROUNDS_DELAY_MS, DUEL_ROUND_COUNT } from "../../constants/duelRoundConstants.js";
+import { applyXpReward } from "./rewards.js";
 import { endSession, startRound } from "./session.js";
 import { sessions } from "./state.js";
 import type { DuelNamespace, SessionState } from "./types.js";
@@ -32,9 +34,14 @@ export function applyCorrectDuelAnswer(
 
   if (answeredByPlayer1) {
     session.score.player1 += 1;
+    session.xpGrantedP1 += XP_PER_CORRECT_EXERCISE;
   } else {
     session.score.player2 += 1;
+    session.xpGrantedP2 += XP_PER_CORRECT_EXERCISE;
   }
+  const xpUserId = answeredByPlayer1 ? session.player1.userId : session.player2.userId;
+  const xpStreakDate = answeredByPlayer1 ? session.player1StreakLocalDate : session.player2StreakLocalDate;
+  void applyXpReward(xpUserId, XP_PER_CORRECT_EXERCISE, xpStreakDate);
   session.roundReplay.push({
     roundNumber: session.round,
     winnerUserId: answeredByPlayer1 ? session.player1.userId : session.player2.userId,

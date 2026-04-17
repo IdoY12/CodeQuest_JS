@@ -1,6 +1,7 @@
 import AuthAware from "@/services/AuthAware";
 import type Exercise from "@/models/Exercise";
 import type ExerciseSubmitResult from "@/models/ExerciseSubmitResult";
+import { getStreakCalendarDate } from "@/utils/streakCalendar";
 
 export type LearningResume = {
   experienceLevel: string;
@@ -24,10 +25,15 @@ export default class LearningService extends AuthAware {
     return data;
   }
 
-  async submitExercise(exerciseId: string, answer: string): Promise<ExerciseSubmitResult> {
+  async submitExercise(
+    exerciseId: string,
+    answer: string,
+    clientLocalDate: string = getStreakCalendarDate(),
+  ): Promise<ExerciseSubmitResult> {
     const { data } = await this.axiosInstance.post<ExerciseSubmitResult>("/learning/submit-exercise", {
       exerciseId,
       answer,
+      clientLocalDate,
     });
     return data;
   }

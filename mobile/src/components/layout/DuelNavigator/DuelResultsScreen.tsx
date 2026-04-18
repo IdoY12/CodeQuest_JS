@@ -10,7 +10,7 @@ export function DuelResultsScreen({ route, navigation }: DuelResultsScreenProps)
   const { won, score, xpEarned, replay = [] } = route.params;
   const { sessionId, rematchStatus, requestRematch, resetDuel, socket } = useDuelSocket();
   const initialSessionIdRef = useRef(sessionId);
-  const isWaitingRef = useRef(false);
+  const matchFoundRef = useRef(false);
   const [isWaiting, setIsWaiting] = useState(false);
 
   useEffect(() => { logNav("screen:enter", { screen: "DuelResultsScreen" }); return () => logNav("screen:leave", { screen: "DuelResultsScreen" }); }, []);
@@ -23,11 +23,11 @@ export function DuelResultsScreen({ route, navigation }: DuelResultsScreenProps)
 
   useEffect(() => {
     if (rematchStatus === "opponent_left") { setIsWaiting(false); return; }
-    if (isWaiting && sessionId && sessionId !== initialSessionIdRef.current) { setIsWaiting(false); navigation.replace("ActiveDuel"); }
+    if (isWaiting && sessionId && sessionId !== initialSessionIdRef.current) { matchFoundRef.current = true; setIsWaiting(false); navigation.replace("ActiveDuel"); }
   }, [sessionId, isWaiting, rematchStatus, navigation]);
 
   useEffect(() => {
-    const abandon = () => { if (!isWaitingRef.current && initialSessionIdRef.current) socket?.emit("rematch_abandoned", { session_id: initialSessionIdRef.current }); };
+    const abandon = () => { if (!matchFoundRef.current && initialSessionIdRef.current) socket?.emit("rematch_abandoned", { session_id: initialSessionIdRef.current }); };
     const unsubRemove = navigation.addListener("beforeRemove", abandon);
     const unsubBlur = navigation.addListener("blur", abandon);
     return () => { unsubRemove(); unsubBlur(); };
@@ -66,7 +66,7 @@ export function DuelResultsScreen({ route, navigation }: DuelResultsScreenProps)
           })}
         </View>
         <Pressable style={styles.matchBtn} onPress={goHome}><Text style={styles.matchLabel}>Back to Duel Home</Text></Pressable>
-        <Pressable style={styles.secondaryBtn} onPress={() => { if (sessionId) { isWaitingRef.current = true; setIsWaiting(true); requestRematch(sessionId); } }}>
+        <Pressable style={styles.secondaryBtn} onPress={() => { if (sessionId) { setIsWaiting(true); requestRematch(sessionId); } }}>
           <Text style={styles.secondaryLabel}>Play Again</Text>
         </Pressable>
         {isWaiting ? <Text style={styles.searching}>Waiting for opponent to confirm rematch…</Text> : null}

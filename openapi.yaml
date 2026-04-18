@@ -510,7 +510,7 @@ components:
     ExerciseType:
       type: string
       description: Exercise type enum from Prisma
-      enum: [CONCEPT_CARD, MULTIPLE_CHOICE, FIND_THE_BUG, DRAG_DROP, CODE_FILL, TAP_TOKEN]
+      enum: [CONCEPT_CARD, MULTIPLE_CHOICE, FIND_THE_BUG, LINE_ORDERING, CODE_FILL, TAP_TOKEN]
     RegisterRequest:
       type: object
       required: [email, username, password]

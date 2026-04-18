@@ -1,6 +1,6 @@
 import type { Socket } from "socket.io";
 import { logInfo } from "../../utils/logger.js";
-import { queue, sessions, soloMatchTimers } from "./state.js";
+import { makeSession, queue, sessions, soloMatchTimers } from "./state.js";
 import type { DuelNamespace, QueueEntry } from "./types.js";
 
 /** Wait this long with no opponent before matching the player into a solo duel (real server session). */
@@ -33,7 +33,7 @@ function tryBeginSoloDuel(duel: DuelNamespace, socketId: string): void {
   finalizeMatch(duel, sole, synthetic);
 }
 
-function finalizeMatch(duel: DuelNamespace, player1: QueueEntry, player2: QueueEntry): void {
+export function finalizeMatch(duel: DuelNamespace, player1: QueueEntry, player2: QueueEntry): void {
   const sessionId = `sess_${crypto.randomUUID()}`;
   const roomId = `duel_${sessionId}`;
   const p1Socket = duel.sockets.get(player1.socketId);
@@ -41,40 +41,11 @@ function finalizeMatch(duel: DuelNamespace, player1: QueueEntry, player2: QueueE
   p1Socket?.join(roomId);
   p2Socket?.join(roomId);
 
-  sessions.set(sessionId, {
-    sessionId,
-    roomId,
-    player1,
-    player2,
-    score: { player1: 0, player2: 0 },
-    round: 0,
-    readyUserIds: new Set<string>(),
-    currentQuestionId: null,
-    answered: false,
-    roundTimeout: null,
-    roundNonce: 0,
-    roundReplay: [],
-    player1StreakLocalDate: null,
-    player2StreakLocalDate: null,
-    xpGrantedP1: 0,
-    xpGrantedP2: 0,
-  });
-  logInfo("[DUEL]", "match:created", {
-    sessionId,
-    player1: player1.userId,
-    player2: player2.userId,
-  });
+  sessions.set(sessionId, makeSession(sessionId, roomId, player1, player2));
+  logInfo("[DUEL]", "match:created", { sessionId, player1: player1.userId, player2: player2.userId });
 
-  duel.to(player1.socketId).emit("match_found", {
-    session_id: sessionId,
-    opponent: { username: player2.username, avatar_url: player2.avatarUrl },
-  });
-  if (p2Socket) {
-    duel.to(player2.socketId).emit("match_found", {
-      session_id: sessionId,
-      opponent: { username: player1.username, avatar_url: player1.avatarUrl },
-    });
-  }
+  duel.to(player1.socketId).emit("match_found", { session_id: sessionId, opponent: { username: player2.username, avatar_url: player2.avatarUrl } });
+  if (p2Socket) duel.to(player2.socketId).emit("match_found", { session_id: sessionId, opponent: { username: player1.username, avatar_url: player1.avatarUrl } });
 }
 
 export function handleQueueJoin(socket: Socket, duel: DuelNamespace, entry: QueueEntry): void {

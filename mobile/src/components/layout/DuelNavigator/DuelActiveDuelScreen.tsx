@@ -3,7 +3,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { CodeSnippet } from "@/components/common/CodeSnippet/CodeSnippet";
 import { useDuelActiveDuelScreen } from "@/hooks/useDuelActiveDuelScreen";
 import type { ActiveDuelScreenProps } from "@/types/duelNavigation.types";
-import { DUEL_ACTIVE_ROUND_SECONDS } from "@/constants/duelUiConstants";
 import { DuelActiveAnswerZone } from "./DuelActiveAnswerZone";
 import { styles } from "./DuelNavigator.styles";
 
@@ -23,9 +22,6 @@ export function DuelActiveDuelScreen({ navigation }: ActiveDuelScreenProps) {
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <ScrollView style={styles.container} contentContainerStyle={styles.duelContent} showsVerticalScrollIndicator={false}>
-        <View style={styles.progressBar}>
-          <View style={[styles.progressInner, { width: `${(u.timeLeft / DUEL_ACTIVE_ROUND_SECONDS) * 100}%` }]} />
-        </View>
         <View style={styles.scoreRow}>
           <Text style={styles.score}>
             {u.username} {u.myScore}
@@ -44,14 +40,13 @@ export function DuelActiveDuelScreen({ navigation }: ActiveDuelScreenProps) {
             </Text>
           </View>
         </View>
+        <Text style={styles.sub}>You can choose up to 3 answers. ({u.attemptsLeft} remaining)</Text>
         <Text style={styles.cardTitle}>{round.prompt}</Text>
         <View style={styles.codeWrap}>
           <CodeSnippet code={round.codeSnippet} />
         </View>
         <View style={styles.card}>
-          <ScrollView style={styles.answersScroll} nestedScrollEnabled>
-            <DuelActiveAnswerZone round={round} selected={u.selected} submit={u.submit} />
-          </ScrollView>
+          <DuelActiveAnswerZone round={round} selected={u.selected} locked={u.locked} submit={u.submit} />
         </View>
       </ScrollView>
       {u.overlayVisible ? (

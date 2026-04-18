@@ -3,31 +3,41 @@
  *
  * Responsibility: shared path after a participant submits the correct answer.
  * Layer: io duel session
- * Depends on: DUEL_ROUND_COUNT, BETWEEN_DUEL_ROUNDS_DELAY_MS, endSession, startRound
+ * Depends on: DUEL_ROUND_COUNT, endSession, startRound
  * Consumers: submitAnswer handler
  */
 
-import type { DuelQuestion } from "@prisma/client";
 import { XP_PER_CORRECT_EXERCISE } from "@project/xp-constants";
-import { BETWEEN_DUEL_ROUNDS_DELAY_MS, DUEL_ROUND_COUNT } from "../../constants/duelRoundConstants.js";
+import { DUEL_ROUND_COUNT } from "../../constants/duelRoundConstants.js";
 import { applyXpReward } from "./rewards.js";
 import { endSession, startRound } from "./session.js";
-import { sessions } from "./state.js";
-import type { DuelNamespace, SessionState } from "./types.js";
+import type { CachedQuestion, DuelNamespace, SessionState } from "./types.js";
+
+export function advanceDuelRoundNoWinner(
+  duel: DuelNamespace,
+  session: SessionState,
+  question: CachedQuestion,
+): void {
+  session.answered = true;
+  duel.to(session.roomId).emit("round_result", {
+    winner_user_id: null, correct_answer: question.correctAnswer, explanation: question.explanation,
+    scores: { player1: session.score.player1, player2: session.score.player2 },
+    player_ids: { player1: session.player1.userId, player2: session.player2.userId },
+    response_times: { player1_ms: 0, player2_ms: 0 },
+  });
+  session.roundReplay.push({ roundNumber: session.round, winnerUserId: null, correctAnswer: question.correctAnswer, player1TimeMs: 0, player2TimeMs: 0 });
+  if (session.round >= DUEL_ROUND_COUNT) void endSession(duel, session);
+  else void startRound(duel, session);
+}
 
 export function applyCorrectDuelAnswer(
   duel: DuelNamespace,
   session: SessionState,
-  question: DuelQuestion,
+  question: CachedQuestion,
   answeredByPlayer1: boolean,
   timeTakenMs: number,
 ): void {
   session.answered = true;
-
-  if (session.roundTimeout) {
-    clearTimeout(session.roundTimeout);
-    session.roundTimeout = null;
-  }
 
   const player1TimeMs = answeredByPlayer1 ? timeTakenMs : 0;
   const player2TimeMs = answeredByPlayer1 ? 0 : timeTakenMs;
@@ -62,9 +72,5 @@ export function applyCorrectDuelAnswer(
     void endSession(duel, session);
     return;
   }
-  setTimeout(() => {
-    if (sessions.has(session.sessionId)) {
-      void startRound(duel, session);
-    }
-  }, BETWEEN_DUEL_ROUNDS_DELAY_MS);
+  void startRound(duel, session);
 }

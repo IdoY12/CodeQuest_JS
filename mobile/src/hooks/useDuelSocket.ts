@@ -8,6 +8,7 @@ import {
   duelJoinQueue,
   duelLeaveQueue,
   duelPlayerReady,
+  duelRequestRematch,
   duelResetMatch,
   duelSetEnd,
   duelSetRound,
@@ -42,6 +43,7 @@ export function useDuelSocket() {
     round: state.round,
     score: state.score,
     duelEnd: state.duelEnd,
+    rematchStatus: state.rematchStatus,
     setDuelEnd: duelSetEnd,
     setRound: duelSetRound,
     setScore: duelSetScore,
@@ -50,6 +52,7 @@ export function useDuelSocket() {
     playerReady: duelPlayerReady,
     submitAnswer: duelSubmitAnswer,
     resetDuel: duelResetMatch,
+    requestRematch: duelRequestRematch,
   };
 }
 

@@ -5,10 +5,12 @@ import { styles } from "./DuelNavigator.styles";
 export function DuelActiveAnswerZone({
   round,
   selected,
+  locked,
   submit,
 }: {
   round: DuelRound;
   selected: string | null;
+  locked: boolean;
   submit: (a: string) => void;
 }) {
   if (round.type === "FIND_THE_BUG") {
@@ -17,6 +19,7 @@ export function DuelActiveAnswerZone({
         key={`${line}-${idx}`}
         style={[styles.option, selected === String(idx + 1) && styles.optionSelected]}
         onPress={() => submit(String(idx + 1))}
+        disabled={locked}
       >
         <Text style={styles.optionLabel} numberOfLines={3} adjustsFontSizeToFit minimumFontScale={0.9}>
           {idx + 1}. {line}
@@ -30,6 +33,7 @@ export function DuelActiveAnswerZone({
       key={option}
       style={[styles.option, selected === option && styles.optionSelected]}
       onPress={() => submit(option)}
+      disabled={locked}
     >
       <Text style={styles.optionLabel} numberOfLines={4} adjustsFontSizeToFit minimumFontScale={0.9}>
         {option}

@@ -9,5 +9,6 @@ export type DailyXpStreakPersisted = {
 };
 export declare function calendarDaysBetweenEarlierAndLater(earlierDateOnly: string, laterDateOnly: string): number;
 export declare function applyStreakOnAppOpen(state: DailyXpStreakPersisted, today: string): DailyXpStreakPersisted;
+/** Streak day only from exercise: yesterday → +1; any other gap or null → start at 1. */
 export declare function applyStreakOnQualifyingXp(state: DailyXpStreakPersisted, today: string): DailyXpStreakPersisted;
 //# sourceMappingURL=index.d.ts.map

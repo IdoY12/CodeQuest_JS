@@ -35,7 +35,7 @@ export function EvMcqTap({
     <View style={v.exerciseCard}>
       {variant === "tap_token" ? <Text style={v.hint}>Tap the correct token from this list.</Text> : null}
       {u.options.map((opt, i) => (
-        <Pressable key={`${opt}-${i}`} style={styleFor(opt)} onPress={() => u.setSelected(opt)}>
+        <Pressable key={`${opt}-${i}`} style={styleFor(opt)} onPress={() => u.setSelected(opt)} disabled={u.isCorrect === true}>
           <Text style={v.optionLabel}>{opt}</Text>
         </Pressable>
       ))}

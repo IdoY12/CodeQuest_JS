@@ -1,15 +1,14 @@
 /**
- * Advances a duel session to the next question and arms the round timer.
+ * Advances a duel session to the next question.
  *
- * Responsibility: pick question, emit round_start, attach timeout continuation.
+ * Responsibility: pick question, cache it, reset per-round state, emit round_start.
  * Layer: io duel session
- * Depends on: pickQuestionForSession, roundTimeoutFlow, state map, logger
+ * Depends on: pickQuestionForSession, state map, logger
  * Consumers: playerReady, submitAnswer (via session barrel)
  */
 
 import { logError, logInfo } from "../../utils/logger.js";
 import { pickQuestionForSession } from "./questions.js";
-import { attachRoundTimeout } from "./roundTimeoutFlow.js";
 import { sessions } from "./state.js";
 import type { DuelNamespace, SessionState } from "./types.js";
 
@@ -21,8 +20,9 @@ export async function startRound(io: DuelNamespace, sessionOrId: string | Sessio
 
     session.round += 1;
     session.answered = false;
+    session.player1Attempts = 0;
+    session.player2Attempts = 0;
     session.roundNonce += 1;
-    const nonce = session.roundNonce;
 
     const question = await pickQuestionForSession(session);
 
@@ -31,9 +31,14 @@ export async function startRound(io: DuelNamespace, sessionOrId: string | Sessio
       return;
     }
     session.currentQuestionId = question.id;
+    session.currentQuestion = {
+      id: question.id,
+      correctAnswer: question.correctAnswer,
+      explanation: question.explanation,
+    };
     const options = Array.isArray(question.options) ? (question.options as string[]) : [];
 
-    const payload = {
+    io.to(session.roomId).emit("round_start", {
       round_number: session.round,
       question: {
         id: question.id,
@@ -43,9 +48,7 @@ export async function startRound(io: DuelNamespace, sessionOrId: string | Sessio
         options,
       },
       starts_at: Date.now(),
-    };
-    io.to(session.roomId).emit("round_start", payload);
-    session.roundTimeout = attachRoundTimeout(io, session, question, nonce, () => startRound(io, session));
+    });
   } catch (error) {
     logError("[DUEL]", error, { phase: "start-round" });
   }

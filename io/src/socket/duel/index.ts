@@ -5,6 +5,7 @@ import { registerDisconnect } from "./handlers/disconnect.js";
 import { registerJoinQueue } from "./handlers/joinQueue.js";
 import { registerLeaveQueue } from "./handlers/leaveQueue.js";
 import { registerPlayerReady } from "./handlers/playerReady.js";
+import { registerRematchRequest } from "./handlers/rematchRequest.js";
 import { registerSubmitAnswer } from "./handlers/submitAnswer.js";
 
 export function attachDuelNamespace(io: Server) {
@@ -19,6 +20,7 @@ export function attachDuelNamespace(io: Server) {
     registerLeaveQueue(socket, duel);
     registerPlayerReady(socket, duel);
     registerSubmitAnswer(socket, duel);
+    registerRematchRequest(socket, duel);
     registerDisconnect(socket, duel);
   });
 }

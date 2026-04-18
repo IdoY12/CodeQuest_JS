@@ -30,6 +30,7 @@ export function EvFindBug({ exercise, lineList, accessToken, onLessonExerciseCom
             key={`${line}-${idx}`}
             onPress={() => u.setSelected(lineNumber)}
             style={lineExtraStyle ? [x.line, lineExtraStyle] : x.line}
+            disabled={u.isCorrectNow === true}
           >
             <Text style={x.lineText}>
               {idx + 1}. {line}

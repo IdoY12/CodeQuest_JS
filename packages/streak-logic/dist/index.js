@@ -19,6 +19,7 @@ export function applyStreakOnAppOpen(state, today) {
         lastCheckedDate: today,
     };
 }
+/** Streak day only from exercise: yesterday → +1; any other gap or null → start at 1. */
 export function applyStreakOnQualifyingXp(state, today) {
     if (state.lastActivityDate === today)
         return state;
@@ -30,15 +31,15 @@ export function applyStreakOnQualifyingXp(state, today) {
         };
     }
     const gap = calendarDaysBetweenEarlierAndLater(state.lastActivityDate, today);
-    if (gap >= 2) {
+    if (gap === 1) {
         return {
-            streakCount: 1,
+            streakCount: state.streakCount + 1,
             lastActivityDate: today,
             lastCheckedDate: state.lastCheckedDate,
         };
     }
     return {
-        streakCount: state.streakCount + 1,
+        streakCount: 1,
         lastActivityDate: today,
         lastCheckedDate: state.lastCheckedDate,
     };

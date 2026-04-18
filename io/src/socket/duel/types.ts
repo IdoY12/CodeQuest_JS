@@ -9,6 +9,12 @@ export interface QueueEntry {
   joinedAt: number;
 }
 
+export interface CachedQuestion {
+  id: string;
+  correctAnswer: string;
+  explanation: string | null;
+}
+
 export interface SessionState {
   sessionId: string;
   roomId: string;
@@ -18,8 +24,11 @@ export interface SessionState {
   round: number;
   readyUserIds: Set<string>;
   currentQuestionId: string | null;
+  /** Cached to avoid redundant DB queries on each answer submission. */
+  currentQuestion: CachedQuestion | null;
   answered: boolean;
-  roundTimeout: ReturnType<typeof setTimeout> | null;
+  player1Attempts: number;
+  player2Attempts: number;
   roundNonce: number;
   roundReplay: Array<{
     roundNumber: number;

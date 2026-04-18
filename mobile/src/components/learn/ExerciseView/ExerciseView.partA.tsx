@@ -3,7 +3,7 @@ import { Pressable, Text, View } from "react-native";
 import type Exercise from "@/models/Exercise";
 import type { LessonExerciseCompletionContext } from "@/types/lessonExerciseCompletion.types";
 import { useAuthenticatedService } from "@/hooks/useAuthenticatedService";
-import LearningService from "@/services/LearningService";
+import LearningService from "@/services/auth-aware/LearningService";
 import { evaluateExerciseLocally } from "@/utils/lessonExerciseState";
 import { v } from "./ExerciseView.styles";
 

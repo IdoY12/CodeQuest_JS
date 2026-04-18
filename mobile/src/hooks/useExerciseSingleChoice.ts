@@ -3,7 +3,7 @@ import type Exercise from "@/models/Exercise";
 import type ExerciseSubmitResult from "@/models/ExerciseSubmitResult";
 import type { LessonExerciseCompletionContext } from "@/types/lessonExerciseCompletion.types";
 import { useAuthenticatedService } from "@/hooks/useAuthenticatedService";
-import LearningService from "@/services/LearningService";
+import LearningService from "@/services/auth-aware/LearningService";
 import { evaluateExerciseLocally } from "@/utils/lessonExerciseState";
 
 export function useExerciseSingleChoice(

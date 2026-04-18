@@ -1,5 +1,5 @@
 import type { Experience } from "@/redux/profile-slice";
-import LearningService from "@/services/LearningService";
+import LearningService from "@/services/auth-aware/LearningService";
 import { fetchCurriculumExercisesForLevel } from "@/utils/fetchCurriculumExercisesForLevel";
 import { applyLessonExercisePayload, type LessonExerciseSetters } from "@/utils/lessonExerciseState";
 import { logError, logTasks } from "@/utils/logger";
@@ -18,7 +18,7 @@ export async function runLessonExerciseLoad(
   setLoading(true);
 
   try {
-    const learning = new LearningService(jwt ?? "");
+    const learning = new LearningService();
     const allExercises = await fetchCurriculumExercisesForLevel(experienceLevel, jwt);
     const blockStart = blockIndex * EXERCISES_PER_BLOCK;
     const blockExercises = allExercises.slice(blockStart, blockStart + EXERCISES_PER_BLOCK);

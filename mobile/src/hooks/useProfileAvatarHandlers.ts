@@ -1,7 +1,7 @@
 import React from "react";
 import { Alert } from "react-native";
 import { useAppDispatch } from "@/redux/hooks";
-import type UserService from "@/services/UserService";
+import type UserService from "@/services/auth-aware/UserService";
 import { handleAvatarUploadError, runAvatarUpload } from "@/utils/profileAvatarUpload";
 import type { ProfileDraftState } from "./useProfileDraftState";
 import type { ProfileReduxState } from "./useProfileRedux";

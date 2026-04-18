@@ -1,5 +1,5 @@
 import * as Notifications from "expo-notifications";
-import UserService from "@/services/UserService";
+import UserService from "@/services/auth-aware/UserService";
 import { logApp } from "@/utils/logger";
 
 async function fireNotification(title: string, body: string) {
@@ -15,7 +15,7 @@ export async function runDailyGoalNotificationCheck(
   notificationsEnabled: boolean,
 ): Promise<void> {
   if (!isAuthenticated || !accessToken || !notificationsEnabled) return;
-  const user = new UserService(accessToken);
+  const user = new UserService();
   const now = new Date();
   const dateKey = now.toLocaleDateString("en-CA");
 

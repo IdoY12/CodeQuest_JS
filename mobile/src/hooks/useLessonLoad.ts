@@ -13,7 +13,7 @@ import {
 } from "@/redux/lesson-slice";
 import { addStudySeconds } from "@/redux/session-slice";
 import { useAuthenticatedService } from "@/hooks/useAuthenticatedService";
-import UserService from "@/services/UserService";
+import UserService from "@/services/auth-aware/UserService";
 import { drainRefInt } from "@/utils/formatHelpers";
 import { runLessonExerciseLoad } from "@/utils/runLessonExerciseLoad";
 import { tryPostPracticeLog } from "@/utils/tryPostPracticeLog";

@@ -1,4 +1,4 @@
-import AuthAware from "@/services/AuthAware";
+import AuthAware from "./AuthAware";
 import { API_BASE_URL } from "@/config/network";
 import type AvatarPatchResponse from "@/models/AvatarPatchResponse";
 import type ChangePasswordResponse from "@/models/ChangePasswordResponse";
@@ -11,38 +11,31 @@ import type AuthMeResponse from "@/models/AuthMeResponse";
 import type UserProfile from "@/models/UserProfile";
 
 export default class UserService extends AuthAware {
-  constructor(jwt: string) {
-    super(jwt);
-  }
-
   async getMe(): Promise<AuthMeResponse> {
     const { data } = await this.axiosInstance.get<AuthMeResponse>("/auth/me");
-    return data;
+    return data; 
   }
-
+  
   async logout(refreshToken: string): Promise<{ ok: boolean }> {
     const { data } = await this.axiosInstance.post<{ ok: boolean }>("/auth/logout", { refreshToken });
-    return data;
+    return data; 
   }
-
+  
   async getProfile(): Promise<UserProfile> {
     const { data } = await this.axiosInstance.get<UserProfile>("/user/profile");
     return data;
   }
-
+  
   async patchUsername(username: string): Promise<UserProfile> {
     const { data } = await this.axiosInstance.patch<UserProfile>("/user/profile", { username });
     return data;
   }
-
+  
   async patchPreferences(body: {
-    goal: string;
-    experienceLevel: string;
-    dailyCommitmentMinutes: number;
-    notificationsEnabled: boolean;
+    goal: string; experienceLevel: string; dailyCommitmentMinutes: number; notificationsEnabled: boolean;
   }): Promise<UserPreferences> {
     const { data } = await this.axiosInstance.patch<UserPreferences>("/user/preferences", body);
-    return data;
+    return data; 
   }
 
   async getPreferencesGet(): Promise<UserPreferencesGet> {
@@ -51,17 +44,12 @@ export default class UserService extends AuthAware {
   }
 
   async getProgressSummary(localDate: string): Promise<ProgressSummary> {
-    const { data } = await this.axiosInstance.get<ProgressSummary>("/user/progress-summary", {
-      params: { localDate },
-    });
+    const { data } = await this.axiosInstance.get<ProgressSummary>("/user/progress-summary", { params: { localDate } });
     return data;
   }
 
   async changePassword(currentPassword: string, newPassword: string): Promise<ChangePasswordResponse> {
-    const { data } = await this.axiosInstance.post<ChangePasswordResponse>("/user/change-password", {
-      currentPassword,
-      newPassword,
-    });
+    const { data } = await this.axiosInstance.post<ChangePasswordResponse>("/user/change-password", { currentPassword, newPassword });
     return data;
   }
 
@@ -73,7 +61,6 @@ export default class UserService extends AuthAware {
     const { data } = await this.axiosInstance.patch<AvatarPatchResponse>("/user/avatar", { avatarUrl });
     return data;
   }
-
   /**
    * Upload a JPEG image blob to the backend, which stores it in S3 and returns the
    * public URL. Using fetch (not axios) so the binary body is sent correctly on
@@ -81,22 +68,14 @@ export default class UserService extends AuthAware {
    */
   async uploadAvatarBlob(blob: Blob): Promise<{ publicUrl: string }> {
     const response = await fetch(`${API_BASE_URL}/user/avatar/upload`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "image/jpeg",
-        Authorization: `Bearer ${this.jwt}`,
-      },
-      body: blob,
+      method: "PUT", headers: { "Content-Type": "image/jpeg", Authorization: `Bearer ${this.jwt}` }, body: blob,
     });
     if (!response.ok) throw new Error(`Avatar upload failed (${response.status})`);
     return response.json() as Promise<{ publicUrl: string }>;
   }
 
   async postPracticeLog(dateKey: string, practicedSeconds: number): Promise<PracticeLogResponse> {
-    const { data } = await this.axiosInstance.post<PracticeLogResponse>("/user/practice-log", {
-      dateKey,
-      practicedSeconds,
-    });
+    const { data } = await this.axiosInstance.post<PracticeLogResponse>("/user/practice-log", { dateKey, practicedSeconds });
     return data;
   }
 

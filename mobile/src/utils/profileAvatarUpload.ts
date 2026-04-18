@@ -1,6 +1,6 @@
 import { Alert } from "react-native";
 import type { AppDispatch } from "@/redux/store";
-import type UserService from "@/services/UserService";
+import type UserService from "@/services/auth-aware/UserService";
 import { logError } from "@/utils/logger";
 import { setUserIdentity } from "@/redux/profile-slice";
 import {

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { AppDispatch } from "@/redux/store";
 import { dispatchSignInSuccess } from "@/utils/dispatchSignInSuccess";
 import { logAuth, logError, logNav } from "@/utils/logger";
-import authService from "@/services/AuthService";
+import authService from "@/services/auth";
 
 export function useAuthScreen(dispatch: AppDispatch) {
   const [email, setEmail] = useState("");

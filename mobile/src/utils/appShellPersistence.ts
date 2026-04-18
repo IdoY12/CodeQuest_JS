@@ -3,7 +3,7 @@ import { Platform } from "react-native";
 import * as Notifications from "expo-notifications";
 import type store from "@/redux/store";
 import type { AppDispatch } from "@/redux/store";
-import UserService from "@/services/UserService";
+import UserService from "@/services/auth-aware/UserService";
 import { setUserIdentity } from "@/redux/profile-slice";
 import { REDUX_PERSIST_KEY } from "@/utils/hydrateStore";
 import { clearSecureSessionTokens, writeSecureSessionTokens } from "@/utils/secureSessionTokens";
@@ -60,7 +60,7 @@ export async function ensureAppShellNotificationSetup(): Promise<void> {
 
 export async function refreshSessionOrLogoutOnForeground(accessToken: string, dispatch: AppDispatch): Promise<void> {
   try {
-    const me = await new UserService(accessToken).getMe();
+    const me = await new UserService().getMe();
     dispatch(setUserIdentity({ email: me.email, username: me.username, avatarUrl: me.avatarUrl ?? null }));
   } catch {
     await AsyncStorage.removeItem(REDUX_PERSIST_KEY);

@@ -2,7 +2,7 @@ import React from "react";
 import { Alert } from "react-native";
 import { useAppDispatch } from "@/redux/hooks";
 import { toggleHaptics, toggleSounds } from "@/redux/profile-slice";
-import type UserService from "@/services/UserService";
+import type UserService from "@/services/auth-aware/UserService";
 import { changePasswordRequest, deleteAccountRequest, updateUsername } from "@/utils/profileAccountMutations";
 import { patchUserPreferences } from "@/utils/profileUiAndPreferences";
 import { confirmLogout } from "@/utils/confirmLogout";

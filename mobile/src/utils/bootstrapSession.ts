@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { AppDispatch } from "@/redux/store";
 import store from "@/redux/store";
-import UserService from "@/services/UserService";
+import UserService from "@/services/auth-aware/UserService";
 import { logError } from "@/utils/logger";
 import { enterGuestMode, setAuthChecked } from "@/redux/session-slice";
 import { setUserIdentity, updatePreferences, type Commitment } from "@/redux/profile-slice";
@@ -23,7 +23,7 @@ export async function bootstrapSession(dispatch: AppDispatch): Promise<void> {
     return;
   }
 
-  const userService = new UserService(token);
+  const userService = new UserService();
 
   try {
     const me = await userService.getMe();

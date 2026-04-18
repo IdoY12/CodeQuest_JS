@@ -9,17 +9,16 @@ type RetryableConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
 export default abstract class AuthAware {
   protected axiosInstance: AxiosInstance;
-  protected readonly jwt: string;
 
-  constructor(jwt: string) {
-    this.jwt = jwt;
-    this.axiosInstance = axios.create({
-      baseURL: API_BASE_URL,
-      headers: {
-        Authorization: `Bearer ${jwt}`,
-        "Content-Type": "application/json",
-      },
+  constructor() {
+    this.axiosInstance = axios.create({ baseURL: API_BASE_URL });
+
+    this.axiosInstance.interceptors.request.use((config) => {
+      const { accessToken, isGuest } = store.getState().session;
+      if (accessToken && !isGuest) config.headers.set("Authorization", `Bearer ${accessToken}`);
+      return config;
     });
+
     this.axiosInstance.interceptors.response.use(
       (response) => response,
       async (error: unknown) => {
@@ -30,29 +29,22 @@ export default abstract class AuthAware {
         config._retry = true;
         const secure = await readSecureSessionTokens();
         const refreshToken = secure.refreshToken;
-
-        if (!refreshToken) {
-          resetStoresAfterLogout(store.dispatch);
-          throw error;
-        }
-
+        if (!refreshToken) { resetStoresAfterLogout(store.dispatch); throw error; }
         try {
           const refreshResponse = await axios.post<{ accessToken: string }>(`${API_BASE_URL}/auth/refresh`, { refreshToken });
           const nextAccessToken = refreshResponse.data.accessToken;
           store.dispatch(updateAccessToken(nextAccessToken));
           await writeSecureSessionTokens(nextAccessToken, refreshToken);
-
           if (config.headers && typeof config.headers.set === "function") {
             config.headers.set("Authorization", `Bearer ${nextAccessToken}`);
           } else {
             config.headers = { ...config.headers, Authorization: `Bearer ${nextAccessToken}` } as RetryableConfig["headers"];
           }
           return this.axiosInstance.request(config);
-        } catch {
-          resetStoresAfterLogout(store.dispatch);
-          throw error;
-        }
+        } catch { resetStoresAfterLogout(store.dispatch); throw error; }
       },
     );
   }
+
+  protected get jwt(): string { return store.getState().session.accessToken ?? ""; }
 }

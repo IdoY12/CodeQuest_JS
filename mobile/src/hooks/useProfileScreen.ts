@@ -2,14 +2,14 @@ import { useEffect, useRef } from "react";
 import { useAppDispatch } from "@/redux/hooks";
 import type { AppDispatch } from "@/redux/store";
 import { logNav } from "@/utils/logger";
-import type UserService from "@/services/UserService";
+import type UserService from "@/services/auth-aware/UserService";
 import { fetchAndApplyProfile, type DraftSetters } from "@/utils/profileLoadFromApi";
 import { useProfileAccountHandlers } from "./useProfileAccountHandlers";
 import { useProfileAvatarHandlers } from "./useProfileAvatarHandlers";
 import { useProfileDraftState } from "./useProfileDraftState";
 import { useProfileRedux } from "./useProfileRedux";
 import { useAuthenticatedService } from "@/hooks/useAuthenticatedService";
-import UserServiceClass from "@/services/UserService";
+import UserServiceClass from "@/services/auth-aware/UserService";
 
 function useProfileLifecycle(
   user: UserService | null,

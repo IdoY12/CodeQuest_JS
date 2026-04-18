@@ -6,7 +6,7 @@ import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import type { Commitment, Experience, Goal } from "@/redux/profile-slice";
 import { completeOnboarding, setOnboarding } from "@/redux/profile-slice";
 import { useAuthenticatedService } from "@/hooks/useAuthenticatedService";
-import UserService from "@/services/UserService";
+import UserService from "@/services/auth-aware/UserService";
 
 export type UseOnboardingWizardOptions = {
   /** Called after wizard answers are saved and `ONBOARDING_SEEN_STORAGE_KEY` is written (so the root navigator can switch to the app shell). */

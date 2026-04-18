@@ -4,16 +4,16 @@ import type ExerciseSubmitResult from "@/models/ExerciseSubmitResult";
 import type { LessonExerciseCompletionContext } from "@/types/lessonExerciseCompletion.types";
 import { useAuthenticatedService } from "@/hooks/useAuthenticatedService";
 import LearningService from "@/services/LearningService";
-import { useExerciseDragDrop } from "./useLessonExerciseInteractions";
+import { useExerciseLineOrdering } from "./useLessonExerciseInteractions";
 import { evaluateExerciseLocally } from "@/utils/lessonExerciseState";
 
-export function useExerciseDragDropLesson(
+export function useExerciseLineOrderingLesson(
   exercise: Exercise,
   accessToken: string | null,
   onLessonExerciseComplete: (a: string, c: LessonExerciseCompletionContext) => void,
 ) {
   const learning = useAuthenticatedService(LearningService);
-  const d = useExerciseDragDrop(exercise.id, exercise.codeSnippet);
+  const d = useExerciseLineOrdering(exercise.id, exercise.codeSnippet);
   const [serverResult, setServerResult] = useState<ExerciseSubmitResult | null>(null);
   const [curriculumChecked, setCurriculumChecked] = useState(false);
   const [curriculumCorrect, setCurriculumCorrect] = useState<boolean | null>(null);

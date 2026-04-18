@@ -27,6 +27,8 @@ export interface DuelState {
     | { won: boolean; xpEarned: number; streakCurrent?: number; roundReplay: DuelReplayRow[]; finalScore: string }
     | null;
   rematchStatus: "opponent_left" | null;
+  lastCorrectAnswer: string | null;
+  queueRejected: string | null;
 }
 
 export const duelRefs = {
@@ -41,6 +43,8 @@ export const duelRefs = {
     score: { me: 0, opp: 0 },
     duelEnd: null,
     rematchStatus: null,
+    lastCorrectAnswer: null,
+    queueRejected: null,
   } as DuelState,
   listeners: new Set<(state: DuelState) => void>(),
 };

@@ -44,6 +44,8 @@ export function useDuelSocket() {
     score: state.score,
     duelEnd: state.duelEnd,
     rematchStatus: state.rematchStatus,
+    lastCorrectAnswer: state.lastCorrectAnswer,
+    queueRejected: state.queueRejected,
     setDuelEnd: duelSetEnd,
     setRound: duelSetRound,
     setScore: duelSetScore,

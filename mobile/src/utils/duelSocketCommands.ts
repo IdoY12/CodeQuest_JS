@@ -47,7 +47,7 @@ export function duelSubmitAnswer(payload: {
 }
 
 export function duelResetMatch() {
-  publishDuel({ sessionId: null, opponent: null, round: null, score: { me: 0, opp: 0 }, duelEnd: null, rematchStatus: null });
+  publishDuel({ sessionId: null, opponent: null, round: null, score: { me: 0, opp: 0 }, duelEnd: null, rematchStatus: null, lastCorrectAnswer: null, queueRejected: null });
 }
 
 export function duelRequestRematch(sessionId: string) {

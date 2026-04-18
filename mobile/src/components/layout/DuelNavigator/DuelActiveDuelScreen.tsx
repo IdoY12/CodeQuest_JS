@@ -51,7 +51,8 @@ export function DuelActiveDuelScreen({ navigation }: ActiveDuelScreenProps) {
       </ScrollView>
       {u.overlayVisible ? (
         <View style={styles.overlay}>
-          <Text style={styles.overlayTitle}>Round Update</Text>
+          <Text style={styles.overlayTitle}>Round Over</Text>
+          <Text style={styles.overlayText}>Correct answer: {u.lastCorrectAnswer}</Text>
           <Text style={styles.overlayText}>
             {u.myScore === u.oppScore ? "Tie round" : u.myScore > u.oppScore ? "You lead" : "Opponent leads"}
           </Text>

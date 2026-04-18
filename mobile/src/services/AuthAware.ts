@@ -1,6 +1,7 @@
 import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from "axios";
 import { API_BASE_URL } from "@/config/network";
 import store from "@/redux/store";
+import { updateAccessToken } from "@/redux/session-slice";
 import { resetStoresAfterLogout } from "@/utils/resetStoresAfterLogout";
 import { readSecureSessionTokens, writeSecureSessionTokens } from "@/utils/secureSessionTokens";
 
@@ -38,6 +39,7 @@ export default abstract class AuthAware {
         try {
           const refreshResponse = await axios.post<{ accessToken: string }>(`${API_BASE_URL}/auth/refresh`, { refreshToken });
           const nextAccessToken = refreshResponse.data.accessToken;
+          store.dispatch(updateAccessToken(nextAccessToken));
           await writeSecureSessionTokens(nextAccessToken, refreshToken);
 
           if (config.headers && typeof config.headers.set === "function") {

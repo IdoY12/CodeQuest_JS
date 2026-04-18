@@ -15,7 +15,7 @@ type Nav = NativeStackNavigationProp<DuelStackParamList, "ActiveDuel">;
 
 export function useDuelActiveDuelScreen(navigation: Nav) {
   const dispatch = useAppDispatch();
-  const { round, score, sessionId, submitAnswer, playerReady, duelEnd, opponent } = useDuelSocket();
+  const { round, score, sessionId, submitAnswer, playerReady, duelEnd, opponent, lastCorrectAnswer } = useDuelSocket();
   const userId = useAppSelector((s) => s.session.userId);
   const isGuest = useAppSelector((s) => s.session.isGuest);
   const username = useAppSelector((s) => s.profile.username);
@@ -25,19 +25,12 @@ export function useDuelActiveDuelScreen(navigation: Nav) {
   const [selected, setSelected] = useState<string | null>(null);
   const [myScore, setMyScore] = useState(0);
   const [oppScore, setOppScore] = useState(0);
-  const [overlayVisible, setOverlayVisible] = useState(false);
   const [attemptCount, setAttemptCount] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const roundStartTimeRef = useRef(Date.now());
 
   useEffect(() => { logNav("screen:enter", { screen: "ActiveDuelScreen" }); return () => logNav("screen:leave", { screen: "ActiveDuelScreen" }); }, []);
-  useEffect(() => {
-    setMyScore(score.me); setOppScore(score.opp);
-    if (!round) return undefined;
-    setOverlayVisible(true);
-    const t = setTimeout(() => setOverlayVisible(false), 1600);
-    return () => clearTimeout(t);
-  }, [score]);
+  useEffect(() => { setMyScore(score.me); setOppScore(score.opp); }, [score]);
   useEffect(() => {
     if (!round) return;
     setRoundNumber(round.roundNumber); setSelected(null); setAttemptCount(0); setSubmitted(false);
@@ -68,10 +61,11 @@ export function useDuelActiveDuelScreen(navigation: Nav) {
   }, []);
 
   const locked = submitted || attemptCount >= DUEL_MAX_ATTEMPTS_PER_ROUND;
+  const overlayVisible = lastCorrectAnswer !== null;
   const submit = (answer: string) => {
     if (!sessionId || !userId || locked) return;
     submitAnswer({ sessionId, roundNumber, answer, timeTakenMs: Date.now() - roundStartTimeRef.current });
     setSelected(answer); setSubmitted(true);
   };
-  return { round, username, opponentName, opponentAvatarUrl, roundNumber, selected, myScore, oppScore, overlayVisible, locked, attemptsLeft: DUEL_MAX_ATTEMPTS_PER_ROUND - attemptCount, submit };
+  return { round, username, opponentName, opponentAvatarUrl, roundNumber, selected, myScore, oppScore, overlayVisible, lastCorrectAnswer, locked, attemptsLeft: DUEL_MAX_ATTEMPTS_PER_ROUND - attemptCount, submit };
 }

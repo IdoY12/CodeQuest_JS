@@ -1,6 +1,6 @@
 import { Pressable, Text, View } from "react-native";
 import type Exercise from "@/models/Exercise";
-import { useExerciseDragDropLesson } from "@/hooks/useExerciseDragDropLesson";
+import { useExerciseLineOrderingLesson } from "@/hooks/useExerciseLineOrderingLesson";
 import type { LessonExerciseCompletionContext } from "@/types/lessonExerciseCompletion.types";
 import { v } from "./ExerciseView.styles";
 import { x } from "./ExerciseView.styles.extra";
@@ -11,8 +11,8 @@ type Base = {
   onLessonExerciseComplete: (answer: string, context: LessonExerciseCompletionContext) => void;
 };
 
-export function EvDragDrop({ exercise, accessToken, onLessonExerciseComplete }: Base) {
-  const { drag: d, canCheck, runCheck, goNext, showResults, isCorrectNow, serverResult } = useExerciseDragDropLesson(
+export function EvLineOrdering({ exercise, accessToken, onLessonExerciseComplete }: Base) {
+  const { drag: d, canCheck, runCheck, goNext, showResults, isCorrectNow, serverResult } = useExerciseLineOrderingLesson(
     exercise,
     accessToken,
     onLessonExerciseComplete,

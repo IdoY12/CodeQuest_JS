@@ -13,6 +13,23 @@ import { finalizeMatch } from "../queue.js";
 import { rematchEntries } from "../state.js";
 import type { DuelNamespace, QueueEntry } from "../types.js";
 
+export function registerRematchAbandoned(socket: Socket, duel: DuelNamespace) {
+  socket.on("rematch_abandoned", (payload: { session_id: string }) => {
+    const entry = rematchEntries.get(payload.session_id);
+    if (!entry) return;
+    const userId = socket.data.authenticatedUserId as string | undefined;
+    if (!userId) return;
+    if (entry.player1.userId !== userId && entry.player2.userId !== userId) return;
+    if (entry.timer) clearTimeout(entry.timer);
+    rematchEntries.delete(payload.session_id);
+    const waitingSocketId = entry.player1.userId === userId
+      ? entry.requests.get(entry.player2.userId)
+      : entry.requests.get(entry.player1.userId);
+    if (waitingSocketId) duel.to(waitingSocketId).emit("rematch_declined", { reason: "opponent_left" });
+    logInfo("[DUEL]", "rematch:abandoned", { userId, sessionId: payload.session_id });
+  });
+}
+
 export function registerRematchRequest(socket: Socket, duel: DuelNamespace) {
   socket.on("rematch_request", (payload: { session_id: string }) => {
     const entry = rematchEntries.get(payload.session_id);

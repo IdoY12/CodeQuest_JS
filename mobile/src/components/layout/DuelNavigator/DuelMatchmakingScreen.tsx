@@ -12,7 +12,7 @@ const MATCH_COUNTDOWN_TICK_MS = 700;
 const FALLBACK_PLAYERS_ONLINE = 143;
 
 export function DuelMatchmakingScreen({ navigation }: MatchmakingScreenProps) {
-  const { playersOnline, sessionId, opponent, joinQueue, leaveQueue } = useDuelSocket();
+  const { playersOnline, sessionId, opponent, joinQueue, leaveQueue, queueRejected } = useDuelSocket();
   const userId = useAppSelector((s) => s.session.userId);
   const username = useAppSelector((s) => s.profile.username);
   const accessToken = useAppSelector((s) => s.session.accessToken);
@@ -22,44 +22,33 @@ export function DuelMatchmakingScreen({ navigation }: MatchmakingScreenProps) {
   const usernameRef = useRef(username);
   const accessTokenRef = useRef(accessToken);
 
-  useEffect(() => {
-    usernameRef.current = username;
-    accessTokenRef.current = accessToken;
-  }, [username, accessToken]);
-
-  useEffect(() => {
-    logNav("screen:enter", { screen: "MatchmakingScreen" });
-    return () => logNav("screen:leave", { screen: "MatchmakingScreen" });
-  }, []);
-
+  useEffect(() => { usernameRef.current = username; accessTokenRef.current = accessToken; }, [username, accessToken]);
+  useEffect(() => { logNav("screen:enter", { screen: "MatchmakingScreen" }); return () => logNav("screen:leave", { screen: "MatchmakingScreen" }); }, []);
   useEffect(() => {
     if (!userId || !accessToken || hasJoinedQueueRef.current) return;
     hasJoinedQueueRef.current = true;
     joinQueue({ userId, username: usernameRef.current, token: accessTokenRef.current });
     logDuel("queue:join", { userId });
-
     const interval = setInterval(() => setSeconds((v) => v + 1), QUEUE_TIMER_INTERVAL_MS);
-
-    return () => {
-      clearInterval(interval);
-      logDuel("queue:leave", { userId: userId ?? "unknown" });
-      leaveQueue();
-      hasJoinedQueueRef.current = false;
-    };
+    return () => { clearInterval(interval); logDuel("queue:leave", { userId: userId ?? "unknown" }); leaveQueue(); hasJoinedQueueRef.current = false; };
   }, [accessToken, joinQueue, leaveQueue, userId]);
-
   useEffect(() => {
-    if (sessionId && opponent) {
-      const timer = setInterval(() => setCountdown((value) => Math.max(0, value - 1)), MATCH_COUNTDOWN_TICK_MS);
-      return () => clearInterval(timer);
-    }
-
-    return undefined;
+    if (!sessionId || !opponent) return undefined;
+    const timer = setInterval(() => setCountdown((value) => Math.max(0, value - 1)), MATCH_COUNTDOWN_TICK_MS);
+    return () => clearInterval(timer);
   }, [sessionId, opponent]);
+  useEffect(() => { if (sessionId && opponent && countdown === 0) navigation.replace("ActiveDuel"); }, [countdown, navigation, opponent, sessionId]);
 
-  useEffect(() => {
-    if (sessionId && opponent && countdown === 0) navigation.replace("ActiveDuel");
-  }, [countdown, navigation, opponent, sessionId]);
+  if (queueRejected) {
+    return (
+      <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
+        <Text style={styles.sub}>Session expired. Please log out and back in to play duels.</Text>
+        <Pressable style={styles.secondaryBtn} onPress={() => navigation.goBack()}>
+          <Text style={styles.secondaryLabel}>Go Back</Text>
+        </Pressable>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
@@ -75,9 +64,7 @@ export function DuelMatchmakingScreen({ navigation }: MatchmakingScreenProps) {
               <Text style={styles.matchOppInitialTxt}>{(opponent.username || "?").slice(0, 1).toUpperCase()}</Text>
             </View>
           )}
-          <Text style={styles.vsInline}>
-            VS {opponent.username} · {countdown}
-          </Text>
+          <Text style={styles.vsInline}>VS {opponent.username} · {countdown}</Text>
         </View>
       ) : null}
       <Pressable style={styles.secondaryBtn} onPress={() => navigation.goBack()}>

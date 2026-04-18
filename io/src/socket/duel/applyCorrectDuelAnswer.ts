@@ -8,8 +8,9 @@
  */
 
 import { XP_PER_CORRECT_EXERCISE } from "@project/xp-constants";
-import { DUEL_ROUND_COUNT } from "../../constants/duelRoundConstants.js";
+import { DUEL_ROUND_COUNT, DUEL_BETWEEN_ROUNDS_DELAY_MS } from "../../constants/duelRoundConstants.js";
 import { applyXpReward } from "./rewards.js";
+import { sessions } from "./state.js";
 import { endSession, startRound } from "./session.js";
 import type { CachedQuestion, DuelNamespace, SessionState } from "./types.js";
 
@@ -26,8 +27,10 @@ export function advanceDuelRoundNoWinner(
     response_times: { player1_ms: 0, player2_ms: 0 },
   });
   session.roundReplay.push({ roundNumber: session.round, winnerUserId: null, correctAnswer: question.correctAnswer, player1TimeMs: 0, player2TimeMs: 0 });
-  if (session.round >= DUEL_ROUND_COUNT) void endSession(duel, session);
-  else void startRound(duel, session);
+  setTimeout(() => {
+    if (!sessions.has(session.sessionId)) return;
+    if (session.round >= DUEL_ROUND_COUNT) void endSession(duel, session); else void startRound(duel, session.sessionId);
+  }, DUEL_BETWEEN_ROUNDS_DELAY_MS);
 }
 
 export function applyCorrectDuelAnswer(
@@ -68,9 +71,8 @@ export function applyCorrectDuelAnswer(
     response_times: { player1_ms: player1TimeMs, player2_ms: player2TimeMs },
   });
 
-  if (session.round >= DUEL_ROUND_COUNT) {
-    void endSession(duel, session);
-    return;
-  }
-  void startRound(duel, session);
+  setTimeout(() => {
+    if (!sessions.has(session.sessionId)) return;
+    if (session.round >= DUEL_ROUND_COUNT) void endSession(duel, session); else void startRound(duel, session.sessionId);
+  }, DUEL_BETWEEN_ROUNDS_DELAY_MS);
 }

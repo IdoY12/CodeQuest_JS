@@ -70,9 +70,10 @@ const sessionSlice = createSlice({
       const h = state.hasHydrated;
       return { ...initialState, hasHydrated: h, authChecked: true };
     },
+    updateAccessToken: (state, a: PayloadAction<string>) => { state.accessToken = a.payload; },
   },
 });
 
-export const { hydrateSession, setHasHydrated, setAuthChecked, addStudySeconds, enterGuestMode, signIn, signOut } =
+export const { hydrateSession, setHasHydrated, setAuthChecked, addStudySeconds, enterGuestMode, signIn, signOut, updateAccessToken } =
   sessionSlice.actions;
 export default sessionSlice.reducer;

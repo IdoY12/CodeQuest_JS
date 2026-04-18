@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { shuffleLines } from "@/utils/formatHelpers";
 
-export function useExerciseDragDrop(exerciseId: string, codeSnippet: string) {
+export function useExerciseLineOrdering(exerciseId: string, codeSnippet: string) {
   const lineList = useMemo(() => codeSnippet.split("\n"), [codeSnippet]);
   const [orderedSelection, setOrderedSelection] = useState<string[]>([]);
   const [poolLines, setPoolLines] = useState<string[]>([]);

@@ -28,6 +28,7 @@ export function useDuelActiveDuelScreen(navigation: Nav) {
   const [attemptCount, setAttemptCount] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const roundStartTimeRef = useRef(Date.now());
+  const skipLeaveAfterEndRef = useRef(false);
 
   useEffect(() => { logNav("screen:enter", { screen: "ActiveDuelScreen" }); return () => logNav("screen:leave", { screen: "ActiveDuelScreen" }); }, []);
   useEffect(() => { setMyScore(score.me); setOppScore(score.opp); }, [score]);
@@ -39,6 +40,7 @@ export function useDuelActiveDuelScreen(navigation: Nav) {
   useEffect(() => { if (sessionId && userId) playerReady(sessionId); }, [playerReady, sessionId, userId]);
   useEffect(() => {
     if (!duelEnd) return;
+    skipLeaveAfterEndRef.current = true;
     logDuel("duel:end", { won: duelEnd.won, xpEarned: duelEnd.xpEarned });
     dispatch(addXp(duelEnd.xpEarned));
     if (isGuest && duelEnd.xpEarned > 0) {
@@ -48,7 +50,7 @@ export function useDuelActiveDuelScreen(navigation: Nav) {
       dispatch(hydrateStreak({ streakCurrent: duelEnd.streakCurrent, lastActivityDate: null, lastCheckedDate: null }));
     }
     dispatch(applyDuelResult({ won: duelEnd.won }));
-    navigation.replace("DuelResults", { won: duelEnd.won, score: duelEnd.finalScore, xpEarned: duelEnd.xpEarned, replay: duelEnd.roundReplay });
+    navigation.replace("DuelResults", { won: duelEnd.won, score: duelEnd.finalScore, xpEarned: duelEnd.xpEarned, replay: duelEnd.roundReplay, ...(duelEnd.opponentDisconnected ? { opponentDisconnected: true } : {}) });
   }, [dispatch, duelEnd, isGuest, navigation]);
   useEffect(() => {
     const socket = duelRefs.socket;
@@ -67,5 +69,5 @@ export function useDuelActiveDuelScreen(navigation: Nav) {
     submitAnswer({ sessionId, roundNumber, answer, timeTakenMs: Date.now() - roundStartTimeRef.current });
     setSelected(answer); setSubmitted(true);
   };
-  return { round, username, opponentName, opponentAvatarUrl, roundNumber, selected, myScore, oppScore, overlayVisible, lastCorrectAnswer, locked, attemptsLeft: DUEL_MAX_ATTEMPTS_PER_ROUND - attemptCount, submit };
+  return { round, username, opponentName, opponentAvatarUrl, roundNumber, selected, myScore, oppScore, overlayVisible, lastCorrectAnswer, locked, attemptsLeft: DUEL_MAX_ATTEMPTS_PER_ROUND - attemptCount, submit, sessionId, skipLeaveAfterEndRef };
 }

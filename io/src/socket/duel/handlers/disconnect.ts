@@ -3,7 +3,29 @@ import { XP_PER_CORRECT_EXERCISE } from "@project/xp-constants";
 import { logInfo } from "../../../utils/logger.js";
 import { clearSoloMatchTimer } from "../queue.js";
 import { queue, sessions, rematchEntries } from "../state.js";
-import type { DuelNamespace } from "../types.js";
+import type { DuelNamespace, SessionState } from "../types.js";
+
+function onDuelParticipantGone(duel: DuelNamespace, leaverSocketId: string, session: SessionState, sessionId: string) {
+  const soloOpponent = session.player2.socketId.startsWith("solo:");
+  if (soloOpponent && session.player1.socketId === leaverSocketId) {
+    sessions.delete(sessionId);
+    return;
+  }
+  if (session.player1.socketId !== leaverSocketId && session.player2.socketId !== leaverSocketId) return;
+  if (session.abandonInProgress) return;
+  session.abandonInProgress = true;
+  const survivor = session.player1.socketId === leaverSocketId ? session.player2 : session.player1;
+  duel.to(survivor.socketId).emit("opponent_disconnected", { at_round: session.round });
+  setTimeout(() => {
+    duel.to(survivor.socketId).emit("duel_end", {
+      winner_user_id: survivor.userId,
+      my_score: survivor.socketId === session.player1.socketId ? session.score.player1 : session.score.player2,
+      opp_score: survivor.socketId === session.player1.socketId ? session.score.player2 : session.score.player1,
+      xp_earned: XP_PER_CORRECT_EXERCISE,
+    });
+    sessions.delete(sessionId);
+  }, 5000);
+}
 
 export function registerDisconnect(socket: Socket, duel: DuelNamespace) {
   socket.on("disconnect", () => {
@@ -13,24 +35,8 @@ export function registerDisconnect(socket: Socket, duel: DuelNamespace) {
     clearSoloMatchTimer(socket.id);
 
     sessions.forEach((session, sessionId) => {
-      const soloOpponent = session.player2.socketId.startsWith("solo:");
-      if (soloOpponent && session.player1.socketId === socket.id) {
-        sessions.delete(sessionId);
-        return;
-      }
-
       if (session.player1.socketId === socket.id || session.player2.socketId === socket.id) {
-        const survivor = session.player1.socketId === socket.id ? session.player2 : session.player1;
-        duel.to(survivor.socketId).emit("opponent_disconnected", { at_round: session.round });
-        setTimeout(() => {
-          duel.to(survivor.socketId).emit("duel_end", {
-            winner_user_id: survivor.userId,
-            my_score: survivor.socketId === session.player1.socketId ? session.score.player1 : session.score.player2,
-            opp_score: survivor.socketId === session.player1.socketId ? session.score.player2 : session.score.player1,
-            xp_earned: XP_PER_CORRECT_EXERCISE,
-          });
-          sessions.delete(sessionId);
-        }, 5000);
+        onDuelParticipantGone(duel, socket.id, session, sessionId);
       }
     });
 
@@ -47,5 +53,13 @@ export function registerDisconnect(socket: Socket, duel: DuelNamespace) {
         : entry.requests.get(entry.player1.userId);
       if (waitingSocketId) duel.to(waitingSocketId).emit("rematch_declined", { reason: "opponent_left" });
     });
+  });
+
+  socket.on("leave_duel", (payload: { session_id?: string }) => {
+    const sessionId = typeof payload?.session_id === "string" ? payload.session_id : "";
+    if (!sessionId) return;
+    const session = sessions.get(sessionId);
+    if (!session) return;
+    onDuelParticipantGone(duel, socket.id, session, sessionId);
   });
 }

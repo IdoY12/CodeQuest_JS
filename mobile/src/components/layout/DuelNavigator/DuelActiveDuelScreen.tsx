@@ -1,13 +1,28 @@
+import { useEffect, useRef } from "react";
 import { Image, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { CodeSnippet } from "@/components/common/CodeSnippet/CodeSnippet";
 import { useDuelActiveDuelScreen } from "@/hooks/useDuelActiveDuelScreen";
 import type { ActiveDuelScreenProps } from "@/types/duelNavigation.types";
+import { duelLeaveDuel } from "@/utils/duelSocketCommands";
 import { DuelActiveAnswerZone } from "./DuelActiveAnswerZone";
 import { styles } from "./DuelNavigator.styles";
 
 export function DuelActiveDuelScreen({ navigation }: ActiveDuelScreenProps) {
   const u = useDuelActiveDuelScreen(navigation);
+  const emittedRef = useRef(false);
+  useEffect(() => {
+    emittedRef.current = false;
+    const sid = u.sessionId;
+    const leave = () => {
+      if (u.skipLeaveAfterEndRef.current || !sid || emittedRef.current) return;
+      emittedRef.current = true;
+      duelLeaveDuel(sid);
+    };
+    const s1 = navigation.addListener("beforeRemove", leave);
+    const s2 = navigation.addListener("blur", leave);
+    return () => { s1(); s2(); };
+  }, [navigation, u.sessionId]);
 
   if (!u.round) {
     return (
@@ -16,8 +31,6 @@ export function DuelActiveDuelScreen({ navigation }: ActiveDuelScreenProps) {
       </SafeAreaView>
     );
   }
-
-  const { round } = u;
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
@@ -41,12 +54,12 @@ export function DuelActiveDuelScreen({ navigation }: ActiveDuelScreenProps) {
           </View>
         </View>
         <Text style={styles.sub}>You can choose up to 3 answers. ({u.attemptsLeft} remaining)</Text>
-        <Text style={styles.cardTitle}>{round.prompt}</Text>
+        <Text style={styles.cardTitle}>{u.round.prompt}</Text>
         <View style={styles.codeWrap}>
-          <CodeSnippet code={round.codeSnippet} />
+          <CodeSnippet code={u.round.codeSnippet} />
         </View>
         <View style={styles.card}>
-          <DuelActiveAnswerZone round={round} selected={u.selected} locked={u.locked} submit={u.submit} />
+          <DuelActiveAnswerZone round={u.round} selected={u.selected} locked={u.locked} submit={u.submit} />
         </View>
       </ScrollView>
       {u.overlayVisible ? (

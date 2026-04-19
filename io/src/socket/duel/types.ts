@@ -43,6 +43,7 @@ export interface SessionState {
   /** XP persisted during this duel for each slot (for duel_end client sync). */
   xpGrantedP1: number;
   xpGrantedP2: number;
+  abandonInProgress?: boolean;
 }
 
 export type DuelNamespace = ReturnType<Server["of"]>;

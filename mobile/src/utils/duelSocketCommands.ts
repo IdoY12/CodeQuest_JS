@@ -24,6 +24,10 @@ export function duelLeaveQueue() {
   duelRefs.socket?.emit("leave_queue");
 }
 
+export function duelLeaveDuel(sessionId: string) {
+  duelRefs.socket?.emit("leave_duel", { session_id: sessionId });
+}
+
 export function duelPlayerReady(sessionId: string) {
   duelRefs.socket?.emit("player_ready", {
     session_id: sessionId,

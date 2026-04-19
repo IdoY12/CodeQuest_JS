@@ -7,7 +7,7 @@ import type { DuelResultsScreenProps } from "@/types/duelNavigation.types";
 import { styles } from "./DuelNavigator.styles";
 
 export function DuelResultsScreen({ route, navigation }: DuelResultsScreenProps) {
-  const { won, score, xpEarned, replay = [] } = route.params;
+  const { won, score, xpEarned, replay = [], opponentDisconnected } = route.params;
   const { sessionId, rematchStatus, requestRematch, resetDuel, socket } = useDuelSocket();
   const initialSessionIdRef = useRef(sessionId);
   const matchFoundRef = useRef(false);
@@ -22,9 +22,9 @@ export function DuelResultsScreen({ route, navigation }: DuelResultsScreenProps)
   }, [navigation, resetDuel]);
 
   useEffect(() => {
-    if (rematchStatus === "opponent_left") { setIsWaiting(false); return; }
+    if (rematchStatus === "opponent_left" || opponentDisconnected) { setIsWaiting(false); return; }
     if (isWaiting && sessionId && sessionId !== initialSessionIdRef.current) { matchFoundRef.current = true; setIsWaiting(false); navigation.replace("ActiveDuel"); }
-  }, [sessionId, isWaiting, rematchStatus, navigation]);
+  }, [sessionId, isWaiting, rematchStatus, navigation, opponentDisconnected]);
 
   useEffect(() => {
     const abandon = () => { if (!matchFoundRef.current && initialSessionIdRef.current) socket?.emit("rematch_abandoned", { session_id: initialSessionIdRef.current }); };
@@ -35,7 +35,7 @@ export function DuelResultsScreen({ route, navigation }: DuelResultsScreenProps)
 
   const goHome = () => { resetDuel(); navigation.popToTop(); };
 
-  if (rematchStatus === "opponent_left") {
+  if (rematchStatus === "opponent_left" || opponentDisconnected) {
     return (
       <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
         <Text style={styles.title}>Opponent left</Text>

@@ -12,7 +12,13 @@ export type DuelStackParamList = {
   DuelHome: undefined;
   Matchmaking: undefined;
   ActiveDuel: undefined;
-  DuelResults: { won: boolean; score: string; xpEarned: number; replay?: DuelReplayRound[] };
+  DuelResults: {
+    won: boolean;
+    score: string;
+    xpEarned: number;
+    replay?: DuelReplayRound[];
+    opponentDisconnected?: boolean;
+  };
 };
 
 export type DuelHomeScreenProps = NativeStackScreenProps<DuelStackParamList, "DuelHome">;

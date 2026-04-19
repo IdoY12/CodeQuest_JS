@@ -32,6 +32,7 @@ export function bindDuelSocketEvents(socket: Socket) {
   });
   socket.on("duel_end", (p) => {
     const uid = duelRefs.userId;
+    const keepOd = duelRefs.state.duelEnd?.opponentDisconnected === true;
     publishDuel({
       duelEnd: {
         won: uid ? (p.winner_user_id as string) === uid : (p.winner_user_id as string) === socket.id,
@@ -39,12 +40,21 @@ export function bindDuelSocketEvents(socket: Socket) {
         streakCurrent: typeof p.streak_current === "number" ? p.streak_current : typeof p.streak_current === "string" ? Number(p.streak_current) : undefined,
         roundReplay: Array.isArray(p.round_replay) ? p.round_replay.map(normalizeDuelReplayEntry) : [],
         finalScore: `${p.my_score ?? 0}-${p.opp_score ?? 0}`,
+        ...(keepOd ? { opponentDisconnected: true } : {}),
       },
     });
   });
   socket.on("opponent_disconnected", () => {
     logDuel("opponent:disconnected");
-    publishDuel({ duelEnd: { won: true, xpEarned: XP_PER_CORRECT_EXERCISE, roundReplay: [], finalScore: "W-0" } });
+    publishDuel({
+      duelEnd: {
+        won: true,
+        xpEarned: XP_PER_CORRECT_EXERCISE,
+        roundReplay: [],
+        finalScore: "W-0",
+        opponentDisconnected: true,
+      },
+    });
   });
   socket.on("rematch_declined", () => publishDuel({ rematchStatus: "opponent_left" }));
 }

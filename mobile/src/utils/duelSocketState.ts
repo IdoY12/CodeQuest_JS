@@ -23,9 +23,7 @@ export interface DuelState {
   opponent: { username: string; avatarUrl: string | null } | null;
   round: DuelRound | null;
   score: { me: number; opp: number };
-  duelEnd:
-    | { won: boolean; xpEarned: number; streakCurrent?: number; roundReplay: DuelReplayRow[]; finalScore: string }
-    | null;
+  duelEnd: { won: boolean; xpEarned: number; streakCurrent?: number; roundReplay: DuelReplayRow[]; finalScore: string; opponentDisconnected?: boolean } | null;
   rematchStatus: "opponent_left" | null;
   lastCorrectAnswer: string | null;
   queueRejected: string | null;
@@ -54,19 +52,20 @@ export function publishDuel(next: Partial<DuelState>) {
   duelRefs.listeners.forEach((l) => l(duelRefs.state));
 }
 
+type ReplayRaw = {
+  roundNumber?: number;
+  round_number?: number;
+  winnerUserId?: string;
+  winner_user_id?: string | null;
+  correctAnswer?: string;
+  correct_answer?: string;
+  player1TimeMs?: number;
+  player1_ms?: number;
+  player2TimeMs?: number;
+  player2_ms?: number;
+};
 export function normalizeDuelReplayEntry(entry: unknown): DuelReplayRow {
-  const e = entry as {
-    roundNumber?: number;
-    round_number?: number;
-    winnerUserId?: string;
-    winner_user_id?: string | null;
-    correctAnswer?: string;
-    correct_answer?: string;
-    player1TimeMs?: number;
-    player1_ms?: number;
-    player2TimeMs?: number;
-    player2_ms?: number;
-  };
+  const e = entry as ReplayRaw;
   return {
     roundNumber: Number(e.roundNumber ?? e.round_number ?? 0),
     winnerUserId: typeof e.winnerUserId === "string" ? e.winnerUserId : e.winner_user_id ?? null,

@@ -2,6 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { useIsFocused } from "@react-navigation/native";
 import { XP_PER_CORRECT_EXERCISE } from "@project/xp-constants";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import { setCachedAllPuzzles } from "@/redux/puzzle-slice";
+import store from "@/redux/store";
 import { addXp, hydrateXp } from "@/redux/xp-slice";
 import { runStreakAppOpen, runStreakQualifyingExercise, hydrateStreak } from "@/redux/streak-slice";
 import { getStreakCalendarDate } from "@/utils/streakCalendar";
@@ -35,12 +37,19 @@ export function useCodePuzzle() {
     let cancelled = false;
     setLoading(true);
     setMessage(null);
+    const cached = store.getState().puzzle.allPuzzles;
+    if (cached !== null) {
+      setPuzzles(cached);
+      if (cached.length > 0) setCurrentIndex(Math.floor(Date.now() / MS_PER_DAY) % cached.length);
+      setLoading(false);
+      return () => { cancelled = true; };
+    }
     puzzleService.getAllPuzzles()
-      .then((data) => { if (!cancelled) { setPuzzles(data); setCurrentIndex(Math.floor(Date.now() / MS_PER_DAY) % data.length); } })
+      .then((data) => { if (!cancelled) { dispatch(setCachedAllPuzzles(data)); setPuzzles(data); setCurrentIndex(Math.floor(Date.now() / MS_PER_DAY) % data.length); } })
       .catch(() => { if (!cancelled) setMessage("Failed to load puzzles. Please try again."); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
-  }, [puzzleService]);
+  }, [dispatch, puzzleService]);
 
   const onSubmit = useCallback(async () => {
     if (!puzzle) return;

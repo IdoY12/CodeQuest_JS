@@ -5,6 +5,7 @@ import { resetXp } from "@/redux/xp-slice";
 import { resetStreak } from "@/redux/streak-slice";
 import { resetLesson } from "@/redux/lesson-slice";
 import { resetStats } from "@/redux/duel-slice";
+import { resetPuzzle } from "@/redux/puzzle-slice";
 import { clearSecureSessionTokens } from "@/utils/secureSessionTokens";
 
 export function resetStoresAfterLogout(dispatch: AppDispatch): void {
@@ -15,4 +16,5 @@ export function resetStoresAfterLogout(dispatch: AppDispatch): void {
   dispatch(resetStreak());
   dispatch(resetLesson());
   dispatch(resetStats());
+  dispatch(resetPuzzle());
 }

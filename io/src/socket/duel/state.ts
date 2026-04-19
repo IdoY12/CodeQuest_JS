@@ -1,5 +1,19 @@
 import type { DuelNamespace, QueueEntry, SessionState } from "./types.js";
 
+export function countAuthenticatedDuelUsers(duel: DuelNamespace, excludeSocketId?: string): number {
+  const seen = new Set<string>();
+  duel.sockets.forEach((sock, sid) => {
+    if (excludeSocketId !== undefined && sid === excludeSocketId) return;
+    const uid = sock.data.authenticatedUserId;
+    if (typeof uid === "string" && uid.length > 0) seen.add(uid);
+  });
+  return seen.size;
+}
+
+export function broadcastQueueStatus(duel: DuelNamespace, excludeSocketId?: string): void {
+  duel.emit("queue_status", { players_online: countAuthenticatedDuelUsers(duel, excludeSocketId) });
+}
+
 export const queue: QueueEntry[] = [];
 
 export const sessions = new Map<string, SessionState>();

@@ -56,9 +56,6 @@ export function handleQueueJoin(socket: Socket, duel: DuelNamespace, entry: Queu
   if (opponentIndex === -1) {
     queue.push(entry);
     scheduleSoloMatchIfAlone(duel, entry.socketId);
-    socket.emit("queue_status", {
-      players_online: Math.max(1, duel.sockets.size),
-    });
     return;
   }
 

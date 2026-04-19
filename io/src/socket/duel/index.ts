@@ -7,15 +7,14 @@ import { registerLeaveQueue } from "./handlers/leaveQueue.js";
 import { registerPlayerReady } from "./handlers/playerReady.js";
 import { registerRematchAbandoned, registerRematchRequest } from "./handlers/rematchRequest.js";
 import { registerSubmitAnswer } from "./handlers/submitAnswer.js";
+import { broadcastQueueStatus } from "./state.js";
 
 export function attachDuelNamespace(io: Server) {
   const duel = io.of("/duel");
   attachDuelConnectionAuthentication(duel);
   duel.on("connection", (socket: Socket) => {
     logInfo("[DUEL]", "socket:connected", { socketId: socket.id });
-    socket.emit("queue_status", {
-      players_online: Math.max(1, duel.sockets.size),
-    });
+    if (socket.data.authenticatedUserId) broadcastQueueStatus(duel);
     registerJoinQueue(socket, duel);
     registerLeaveQueue(socket, duel);
     registerPlayerReady(socket, duel);

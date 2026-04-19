@@ -9,7 +9,6 @@ import { styles } from "./DuelNavigator.styles";
 
 const QUEUE_TIMER_INTERVAL_MS = 1000;
 const MATCH_COUNTDOWN_TICK_MS = 700;
-const FALLBACK_PLAYERS_ONLINE = 143;
 
 export function DuelMatchmakingScreen({ navigation }: MatchmakingScreenProps) {
   const { playersOnline, sessionId, opponent, joinQueue, leaveQueue, queueRejected } = useDuelSocket();
@@ -53,7 +52,7 @@ export function DuelMatchmakingScreen({ navigation }: MatchmakingScreenProps) {
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <Text style={styles.searching}>Searching for an opponent...</Text>
-      <Text style={styles.sub}>⚡ {playersOnline || FALLBACK_PLAYERS_ONLINE} players online</Text>
+      <Text style={styles.sub}>⚡ {playersOnline} players online</Text>
       <Text style={styles.sub}>Estimated wait: {seconds}s</Text>
       {opponent ? (
         <View style={styles.matchOppRow}>

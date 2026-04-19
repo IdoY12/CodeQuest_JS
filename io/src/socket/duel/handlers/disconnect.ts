@@ -2,7 +2,7 @@ import type { Socket } from "socket.io";
 import { XP_PER_CORRECT_EXERCISE } from "@project/xp-constants";
 import { logInfo } from "../../../utils/logger.js";
 import { clearSoloMatchTimer } from "../queue.js";
-import { queue, sessions, rematchEntries } from "../state.js";
+import { broadcastQueueStatus, queue, sessions, rematchEntries } from "../state.js";
 import type { DuelNamespace, SessionState } from "../types.js";
 
 function onDuelParticipantGone(duel: DuelNamespace, leaverSocketId: string, session: SessionState, sessionId: string) {
@@ -53,6 +53,7 @@ export function registerDisconnect(socket: Socket, duel: DuelNamespace) {
         : entry.requests.get(entry.player1.userId);
       if (waitingSocketId) duel.to(waitingSocketId).emit("rematch_declined", { reason: "opponent_left" });
     });
+    if (socket.data.authenticatedUserId) broadcastQueueStatus(duel, socket.id);
   });
 
   socket.on("leave_duel", (payload: { session_id?: string }) => {

@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useAppSelector } from "@/redux/hooks";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import store from "@/redux/store";
 import { DUEL_SOCKET_URL } from "../config/network";
 import type { DuelState } from "@/utils/duelSocketState";
 import { duelRefs } from "@/utils/duelSocketState";
 import { connectDuelSocket } from "@/utils/duelSocketIo";
+import { refreshSessionOrLogoutOnForeground } from "@/utils/appShellPersistence";
 import {
   duelJoinQueue,
   duelLeaveQueue,
@@ -17,6 +19,7 @@ import {
 } from "@/utils/duelSocketCommands";
 
 export function useDuelSocket() {
+  const dispatch = useAppDispatch();
   const [state, setState] = useState<DuelState>(duelRefs.state);
   const accessToken = useAppSelector((s) => s.session.accessToken);
   const url = useMemo(() => DUEL_SOCKET_URL, []);
@@ -31,8 +34,13 @@ export function useDuelSocket() {
   }, [accessToken, url]);
 
   const joinQueue = useCallback(
-    (p: { userId: string; username: string; token?: string | null }) => duelJoinQueue(url, p),
-    [url],
+    async (p: { userId: string; username: string; token?: string | null }) => {
+      await refreshSessionOrLogoutOnForeground(p.token ?? "", dispatch);
+      const next = store.getState().session.accessToken;
+      if (!next) return;
+      duelJoinQueue(url, { ...p, token: next });
+    },
+    [dispatch, url],
   );
 
   return {

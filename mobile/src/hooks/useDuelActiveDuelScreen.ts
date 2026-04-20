@@ -15,7 +15,8 @@ type Nav = NativeStackNavigationProp<DuelStackParamList, "ActiveDuel">;
 
 export function useDuelActiveDuelScreen(navigation: Nav) {
   const dispatch = useAppDispatch();
-  const { round, score, sessionId, submitAnswer, playerReady, duelEnd, opponent, lastCorrectAnswer } = useDuelSocket();
+  const { round, score, sessionId, submitAnswer, playerReady, duelEnd, opponent, lastCorrectAnswer } =
+    useDuelSocket();
   const userId = useAppSelector((s) => s.session.userId);
   const isGuest = useAppSelector((s) => s.session.isGuest);
   const username = useAppSelector((s) => s.profile.username);
@@ -30,14 +31,29 @@ export function useDuelActiveDuelScreen(navigation: Nav) {
   const roundStartTimeRef = useRef(Date.now());
   const skipLeaveAfterEndRef = useRef(false);
 
-  useEffect(() => { logNav("screen:enter", { screen: "ActiveDuelScreen" }); return () => logNav("screen:leave", { screen: "ActiveDuelScreen" }); }, []);
-  useEffect(() => { setMyScore(score.me); setOppScore(score.opp); }, [score]);
+  useEffect(() => {
+    logNav("screen:enter", { screen: "ActiveDuelScreen" });
+    return () => logNav("screen:leave", { screen: "ActiveDuelScreen" });
+  }, []);
+
+  useEffect(() => {
+    setMyScore(score.me);
+    setOppScore(score.opp);
+  }, [score]);
+
   useEffect(() => {
     if (!round) return;
-    setRoundNumber(round.roundNumber); setSelected(null); setAttemptCount(0); setSubmitted(false);
+    setRoundNumber(round.roundNumber);
+    setSelected(null);
+    setAttemptCount(0);
+    setSubmitted(false);
     roundStartTimeRef.current = Date.now();
   }, [round]);
-  useEffect(() => { if (sessionId && userId) playerReady(sessionId); }, [playerReady, sessionId, userId]);
+
+  useEffect(() => {
+    if (sessionId && userId) playerReady(sessionId);
+  }, [playerReady, sessionId, userId]);
+
   useEffect(() => {
     if (!duelEnd) return;
     skipLeaveAfterEndRef.current = true;
@@ -45,29 +61,58 @@ export function useDuelActiveDuelScreen(navigation: Nav) {
     dispatch(addXp(duelEnd.xpEarned));
     if (isGuest && duelEnd.xpEarned > 0) {
       const today = getStreakCalendarDate();
-      dispatch(runStreakAppOpen({ today })); dispatch(runStreakQualifyingExercise({ today }));
+      dispatch(runStreakAppOpen({ today }));
+      dispatch(runStreakQualifyingExercise({ today }));
     } else if (!isGuest && typeof duelEnd.streakCurrent === "number") {
-      dispatch(hydrateStreak({ streakCurrent: duelEnd.streakCurrent, lastActivityDate: null, lastCheckedDate: null }));
+      dispatch(
+        hydrateStreak({
+          streakCurrent: duelEnd.streakCurrent,
+          lastActivityDate: null,
+          lastCheckedDate: null,
+        }),
+      );
     }
     dispatch(applyDuelResult({ won: duelEnd.won }));
-    navigation.replace("DuelResults", { won: duelEnd.won, score: duelEnd.finalScore, xpEarned: duelEnd.xpEarned, replay: duelEnd.roundReplay, ...(duelEnd.opponentDisconnected ? { opponentDisconnected: true } : {}) });
+    navigation.replace("DuelResults", {
+      won: duelEnd.won,
+      score: duelEnd.finalScore,
+      xpEarned: duelEnd.xpEarned,
+      replay: duelEnd.roundReplay,
+      ...(duelEnd.opponentDisconnected ? { opponentDisconnected: true } : {}),
+    });
   }, [dispatch, duelEnd, isGuest, navigation]);
+
   useEffect(() => {
     const socket = duelRefs.socket;
     if (!socket) return;
     const onFeedback = (p: { isCorrect: boolean }) => {
-      if (!p.isCorrect) { setAttemptCount((c) => c + 1); setSubmitted(false); }
+      if (!p.isCorrect) {
+        setAttemptCount((c) => c + 1);
+        setSubmitted(false);
+      }
     };
     socket.on("answer_feedback", onFeedback);
-    return () => { socket.off("answer_feedback", onFeedback); };
+    return () => {
+      socket.off("answer_feedback", onFeedback);
+    };
   }, []);
 
   const locked = submitted || attemptCount >= DUEL_MAX_ATTEMPTS_PER_ROUND;
   const overlayVisible = lastCorrectAnswer !== null;
   const submit = (answer: string) => {
     if (!sessionId || !userId || locked) return;
-    submitAnswer({ sessionId, roundNumber, answer, timeTakenMs: Date.now() - roundStartTimeRef.current });
-    setSelected(answer); setSubmitted(true);
+    submitAnswer({
+      sessionId,
+      roundNumber,
+      answer,
+      timeTakenMs: Date.now() - roundStartTimeRef.current,
+    });
+    setSelected(answer);
+    setSubmitted(true);
   };
-  return { round, username, opponentName, opponentAvatarUrl, roundNumber, selected, myScore, oppScore, overlayVisible, lastCorrectAnswer, locked, attemptsLeft: DUEL_MAX_ATTEMPTS_PER_ROUND - attemptCount, submit, sessionId, skipLeaveAfterEndRef };
+  return {
+    round, username, opponentName, opponentAvatarUrl, roundNumber, selected, myScore, oppScore,
+    overlayVisible, lastCorrectAnswer, locked,
+    attemptsLeft: DUEL_MAX_ATTEMPTS_PER_ROUND - attemptCount, submit, sessionId, skipLeaveAfterEndRef,
+  };
 }

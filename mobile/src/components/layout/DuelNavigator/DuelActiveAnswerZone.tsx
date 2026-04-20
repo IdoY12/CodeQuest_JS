@@ -2,17 +2,14 @@ import { Pressable, Text } from "react-native";
 import type { DuelRound } from "@/utils/duelSocketState";
 import { styles } from "./DuelNavigator.styles";
 
-export function DuelActiveAnswerZone({
-  round,
-  selected,
-  locked,
-  submit,
-}: {
+interface DuelActiveAnswerZoneProps {
   round: DuelRound;
   selected: string | null;
   locked: boolean;
-  submit: (a: string) => void;
-}) {
+  submit: (answer: string) => void;
+}
+
+export function DuelActiveAnswerZone({ round, selected, locked, submit }: DuelActiveAnswerZoneProps) {
   if (round.type === "FIND_THE_BUG") {
     return round.codeSnippet.split("\n").map((line, idx) => (
       <Pressable

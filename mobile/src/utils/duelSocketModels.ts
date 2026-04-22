@@ -1,3 +1,13 @@
+/**
+ * `duelConnectionRefs` holds runtime connection state: the active Socket.IO client, the `userId` associated with
+ * queue joins, and `lastAuthTokenKey` for reconnect deduplication. These values are not stored in Redux for three
+ * reasons: (1) `Socket` is a non-serializable class instance and would violate Redux Toolkit serialization rules and
+ * any persistence layer. (2) They do not need to drive React re-renders; putting them in the store would add dispatch
+ * churn without UI benefit. (3) They are module-scoped transport plumbing, not render state.
+ *
+ * Any new runtime connection handle (reconnect timer id, heartbeat handle, transport flag) belongs here, not in the
+ * `duelLive` slice. Everything a component renders from belongs in `duelLive` instead. Keep those two lanes separate.
+ */
 import type { Socket } from "socket.io-client";
 
 export interface DuelRound {
@@ -17,40 +27,11 @@ export interface DuelReplayRow {
   player2TimeMs: number;
 }
 
-export interface DuelState {
-  playersOnline: number;
-  sessionId: string | null;
-  opponent: { username: string; avatarUrl: string | null } | null;
-  round: DuelRound | null;
-  score: { me: number; opp: number };
-  duelEnd: { won: boolean; xpEarned: number; streakCurrent?: number; roundReplay: DuelReplayRow[]; finalScore: string; opponentDisconnected?: boolean } | null;
-  rematchStatus: "opponent_left" | null;
-  lastCorrectAnswer: string | null;
-  queueRejected: string | null;
-}
-
-export const duelRefs = {
+export const duelConnectionRefs = {
   socket: null as Socket | null,
   lastAuthTokenKey: "__init__",
   userId: null as string | null,
-  state: {
-    playersOnline: 0,
-    sessionId: null,
-    opponent: null,
-    round: null,
-    score: { me: 0, opp: 0 },
-    duelEnd: null,
-    rematchStatus: null,
-    lastCorrectAnswer: null,
-    queueRejected: null,
-  } as DuelState,
-  listeners: new Set<(state: DuelState) => void>(),
 };
-
-export function publishDuel(next: Partial<DuelState>) {
-  duelRefs.state = { ...duelRefs.state, ...next };
-  duelRefs.listeners.forEach((l) => l(duelRefs.state));
-}
 
 type ReplayRaw = {
   roundNumber?: number;

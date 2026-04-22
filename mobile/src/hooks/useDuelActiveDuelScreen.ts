@@ -6,8 +6,9 @@ import { applyDuelResult } from "@/redux/duel-slice";
 import { hydrateStreak, runStreakAppOpen, runStreakQualifyingExercise } from "@/redux/streak-slice";
 import { getStreakCalendarDate } from "@/utils/streakCalendar";
 import { logDuel, logNav } from "@/utils/logger";
-import { useDuelSocket } from "@/hooks/useDuelSocket";
-import { duelRefs } from "@/utils/duelSocketState";
+import { useDuelActiveDuelLive } from "@/hooks/useDuelSocket";
+import { duelSubmitAnswer, duelPlayerReady } from "@/utils/duelSocketCommands";
+import { duelConnectionRefs } from "@/utils/duelSocketModels";
 import type { DuelStackParamList } from "@/types/duelNavigation.types";
 import { DUEL_MAX_ATTEMPTS_PER_ROUND } from "@/constants/duelUiConstants";
 
@@ -15,8 +16,7 @@ type Nav = NativeStackNavigationProp<DuelStackParamList, "ActiveDuel">;
 
 export function useDuelActiveDuelScreen(navigation: Nav) {
   const dispatch = useAppDispatch();
-  const { round, score, sessionId, submitAnswer, playerReady, duelEnd, opponent, lastCorrectAnswer } =
-    useDuelSocket();
+  const { round, score, sessionId, duelEnd, opponent, lastCorrectAnswer } = useDuelActiveDuelLive();
   const userId = useAppSelector((s) => s.session.userId);
   const isGuest = useAppSelector((s) => s.session.isGuest);
   const username = useAppSelector((s) => s.profile.username);
@@ -51,8 +51,8 @@ export function useDuelActiveDuelScreen(navigation: Nav) {
   }, [round]);
 
   useEffect(() => {
-    if (sessionId && userId) playerReady(sessionId);
-  }, [playerReady, sessionId, userId]);
+    if (sessionId && userId) duelPlayerReady(sessionId);
+  }, [sessionId, userId]);
 
   useEffect(() => {
     if (!duelEnd) return;
@@ -83,7 +83,7 @@ export function useDuelActiveDuelScreen(navigation: Nav) {
   }, [dispatch, duelEnd, isGuest, navigation]);
 
   useEffect(() => {
-    const socket = duelRefs.socket;
+    const socket = duelConnectionRefs.socket;
     if (!socket) return;
     const onFeedback = (p: { isCorrect: boolean }) => {
       if (!p.isCorrect) {
@@ -101,7 +101,7 @@ export function useDuelActiveDuelScreen(navigation: Nav) {
   const overlayVisible = lastCorrectAnswer !== null;
   const submit = (answer: string) => {
     if (!sessionId || !userId || locked) return;
-    submitAnswer({
+    duelSubmitAnswer({
       sessionId,
       roundNumber,
       answer,

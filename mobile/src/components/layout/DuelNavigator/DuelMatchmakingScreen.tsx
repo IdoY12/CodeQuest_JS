@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { Image, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppSelector } from "@/redux/hooks";
-import { useDuelSocket } from "@/hooks/useDuelSocket";
+import { useDuelMatchmakingSocket } from "@/hooks/useDuelSocket";
 import { logDuel, logNav } from "@/utils/logger";
 import type { MatchmakingScreenProps } from "@/types/duelNavigation.types";
 import { styles } from "./DuelNavigator.styles";
@@ -11,7 +11,7 @@ const QUEUE_TIMER_INTERVAL_MS = 1000;
 const MATCH_COUNTDOWN_TICK_MS = 700;
 
 export function DuelMatchmakingScreen({ navigation }: MatchmakingScreenProps) {
-  const { playersOnline, sessionId, opponent, joinQueue, leaveQueue, queueRejected } = useDuelSocket();
+  const { playersOnline, sessionId, opponent, joinQueue, leaveQueue, queueRejected } = useDuelMatchmakingSocket();
   const userId = useAppSelector((s) => s.session.userId);
   const username = useAppSelector((s) => s.profile.username);
   const accessToken = useAppSelector((s) => s.session.accessToken);

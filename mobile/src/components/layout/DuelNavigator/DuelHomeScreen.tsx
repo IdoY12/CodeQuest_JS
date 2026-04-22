@@ -2,14 +2,14 @@ import React, { useEffect } from "react";
 import { Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppSelector } from "@/redux/hooks";
-import { useDuelSocket } from "@/hooks/useDuelSocket";
+import { useDuelResetDuel } from "@/hooks/useDuelSocket";
 import { guardDuelAccess } from "@/utils/formatHelpers";
 import { logDuel, logNav } from "@/utils/logger";
 import type { DuelHomeScreenProps } from "@/types/duelNavigation.types";
 import { styles } from "./DuelNavigator.styles";
 
 export function DuelHomeScreen({ navigation }: DuelHomeScreenProps) {
-  const { resetDuel } = useDuelSocket();
+  const { resetDuel } = useDuelResetDuel();
   const duelWins = useAppSelector((s) => s.duel.duelWins);
   const duelLosses = useAppSelector((s) => s.duel.duelLosses);
   const isGuest = useAppSelector((s) => s.session.isGuest);

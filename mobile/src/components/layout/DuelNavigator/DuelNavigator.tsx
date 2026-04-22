@@ -1,4 +1,5 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { useDuelSocketBootstrap } from "@/hooks/useDuelSocket";
 import { colors } from "@/theme/theme";
 import type { DuelStackParamList } from "@/types/duelNavigation.types";
 import { DuelActiveDuelScreen } from "./DuelActiveDuelScreen";
@@ -9,6 +10,7 @@ import { DuelResultsScreen } from "./DuelResultsScreen";
 const Stack = createNativeStackNavigator<DuelStackParamList>();
 
 export function DuelNavigator() {
+  useDuelSocketBootstrap();
   return (
     <Stack.Navigator
       screenOptions={{

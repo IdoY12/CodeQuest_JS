@@ -2,13 +2,13 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { logNav } from "@/utils/logger";
-import { useDuelSocket } from "@/hooks/useDuelSocket";
+import { useDuelResultsSocket } from "@/hooks/useDuelSocket";
 import type { DuelResultsScreenProps } from "@/types/duelNavigation.types";
 import { styles } from "./DuelNavigator.styles";
 
 export function DuelResultsScreen({ route, navigation }: DuelResultsScreenProps) {
   const { won, score, xpEarned, replay = [], opponentDisconnected } = route.params;
-  const { sessionId, rematchStatus, requestRematch, resetDuel, socket } = useDuelSocket();
+  const { sessionId, rematchStatus, requestRematch, resetDuel, socket } = useDuelResultsSocket();
   const initialSessionIdRef = useRef(sessionId);
   const matchFoundRef = useRef(false);
   const [isWaiting, setIsWaiting] = useState(false);

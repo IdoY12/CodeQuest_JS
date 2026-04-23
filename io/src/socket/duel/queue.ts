@@ -1,6 +1,6 @@
 import type { Socket } from "socket.io";
 import { logInfo } from "../../utils/logger.js";
-import { makeSession, queue, sessions, soloMatchTimers } from "./state.js";
+import { broadcastQueueStatus, makeSession, queue, sessions, soloMatchTimers } from "./state.js";
 import type { DuelNamespace, QueueEntry } from "./types.js";
 
 /** Wait this long with no opponent before matching the player into a solo duel (real server session). */
@@ -56,11 +56,11 @@ export function handleQueueJoin(socket: Socket, duel: DuelNamespace, entry: Queu
   if (opponentIndex === -1) {
     queue.push(entry);
     scheduleSoloMatchIfAlone(duel, entry.socketId);
-    return;
+  } else {
+    const opponent = queue.splice(opponentIndex, 1)[0];
+    clearSoloMatchTimer(opponent.socketId);
+    clearSoloMatchTimer(entry.socketId);
+    finalizeMatch(duel, opponent, entry);
   }
-
-  const opponent = queue.splice(opponentIndex, 1)[0];
-  clearSoloMatchTimer(opponent.socketId);
-  clearSoloMatchTimer(entry.socketId);
-  finalizeMatch(duel, opponent, entry);
+  broadcastQueueStatus(duel);
 }

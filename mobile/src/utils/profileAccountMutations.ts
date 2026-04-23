@@ -1,3 +1,4 @@
+import { usernameValidationError } from "@project/user-credentials";
 import { Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { AppDispatch } from "@/redux/store";
@@ -14,8 +15,14 @@ export async function updateUsername(
   onDone: () => void,
   setMessage: (m: string | null) => void,
 ): Promise<void> {
+  const trimmed = name.trim();
+  const uerr = usernameValidationError(trimmed);
+  if (uerr) {
+    Alert.alert("Invalid username", uerr);
+    return;
+  }
   try {
-    const updated = await user.patchUsername(name.trim());
+    const updated = await user.patchUsername(trimmed);
     dispatch(setUserIdentity({ username: updated.username }));
     onDone();
     setMessage("Username updated.");

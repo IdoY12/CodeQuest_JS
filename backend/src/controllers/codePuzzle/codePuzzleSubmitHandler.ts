@@ -8,7 +8,6 @@
  */
 
 import type { Response } from "express";
-import { z } from "zod";
 import {
   activeExperienceLevelOf,
   ensureProgressRow,
@@ -20,30 +19,16 @@ import { XP_PER_CORRECT_EXERCISE } from "@project/xp-constants";
 import type { AuthenticatedRequest } from "../../@types/auth.js";
 import type { CodePuzzleSubmitDto } from "../../dto/codePuzzleDto.js";
 import { logError } from "../../utils/logger.js";
+import type { CodePuzzleSubmitBody, CodePuzzleSubmitParams } from "../../validators/codePuzzleValidators.js";
 
 function normalizeAnswer(value: string): string {
   return value.replace(/\s+/g, "").trim().replace(/;$/, "");
 }
 
-const submitBodySchema = z.object({
-  answer: z.string(),
-  clientLocalDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
-});
-
 export async function codePuzzleSubmitHandler(request: AuthenticatedRequest, response: Response): Promise<void> {
   try {
-    const id = Number(request.params.id);
-
-    if (!Number.isInteger(id) || id <= 0) {
-      response.status(400).json({ error: "Invalid puzzle id" });
-      return;
-    }
-    const parsed = submitBodySchema.safeParse(request.body);
-    if (!parsed.success) {
-      response.status(400).json({ error: parsed.error.flatten() });
-      return;
-    }
-    const { answer, clientLocalDate } = parsed.data;
+    const { id } = request.validatedParams as CodePuzzleSubmitParams;
+    const { answer, clientLocalDate } = request.body as CodePuzzleSubmitBody;
 
     if (!answer.trim()) {
       response.status(400).json({ error: "answer is required" });

@@ -9,6 +9,7 @@ COPY backend/package.json ./backend/package.json
 COPY io/package.json ./io/package.json
 COPY mobile/package.json ./mobile/package.json
 COPY packages/db/package.json ./packages/db/package.json
+COPY packages/user-credentials/package.json ./packages/user-credentials/package.json
 
 RUN npm ci
 

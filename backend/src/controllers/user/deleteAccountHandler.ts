@@ -3,12 +3,11 @@
  *
  * Responsibility: transactional cleanup of related rows and optional avatar delete.
  * Layer: backend user HTTP handlers
- * Depends on: zod, Prisma, storage, logger, token cache
+ * Depends on: Prisma, storage, logger, token cache
  * Consumers: user router
  */
 
 import type { Response } from "express";
-import { z } from "zod";
 import { prisma } from "@project/db";
 import type { AuthenticatedRequest } from "../../@types/auth.js";
 import { invalidateCachedTokenVersionForUser } from "../../utils/authenticatedUserTokenVersionCache.js";
@@ -16,12 +15,6 @@ import { deleteAvatarObject, extractAvatarKeyFromUrl } from "../../utils/storage
 import { logWarn } from "../../utils/logger.js";
 
 export async function deleteAccount(req: AuthenticatedRequest, res: Response) {
-  const parsed = z.object({ confirmation: z.literal("DELETE") }).safeParse(req.body ?? {});
-
-  if (!parsed.success) {
-    return res.status(400).json({ error: "Confirmation text mismatch" });
-  }
-
   const userId = req.user!.userId;
   const user = await prisma.user.findUnique({
     where: { id: userId },

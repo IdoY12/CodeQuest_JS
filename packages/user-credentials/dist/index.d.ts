@@ -1,0 +1,15 @@
+export declare const USERNAME_MIN_LEN = 2;
+export declare const USERNAME_MAX_LEN = 25;
+export declare const EMAIL_MIN_LEN = 5;
+export declare const EMAIL_MAX_LEN = 254;
+export declare const PASSWORD_MIN_LEN = 8;
+export declare const PASSWORD_MAX_LEN = 64;
+export declare const USERNAME_TOO_SHORT = "Username must be at least 2 characters.";
+export declare const USERNAME_TOO_LONG = "Username must be at most 25 characters.";
+export declare const EMAIL_TOO_SHORT = "Email must be at least 5 characters.";
+export declare const EMAIL_TOO_LONG = "Email must be at most 254 characters.";
+export declare const PASSWORD_TOO_SHORT = "Password must be at least 8 characters.";
+export declare const PASSWORD_TOO_LONG = "Password must be at most 64 characters.";
+export declare const EMAIL_INVALID = "Enter a valid email address.";
+export declare function registerValidationError(email: string, username: string, password: string): string | null;
+export declare function usernameValidationError(username: string): string | null;

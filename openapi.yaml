@@ -151,7 +151,7 @@ paths:
               type: object
               required: [username]
               properties:
-                username: { type: string, minLength: 2, maxLength: 30, description: New username }
+                username: { type: string, minLength: 2, maxLength: 25, description: New username }
       responses:
         "200":
           description: Updated
@@ -515,15 +515,15 @@ components:
       type: object
       required: [email, username, password]
       properties:
-        email: { type: string, format: email, description: User email }
-        username: { type: string, minLength: 2, description: Username }
-        password: { type: string, minLength: 6, description: Raw password }
+        email: { type: string, format: email, minLength: 5, maxLength: 254, description: User email }
+        username: { type: string, minLength: 2, maxLength: 25, description: Username }
+        password: { type: string, minLength: 8, maxLength: 64, description: Raw password }
     LoginRequest:
       type: object
       required: [email, password]
       properties:
-        email: { type: string, format: email, description: User email }
-        password: { type: string, minLength: 6, description: Raw password }
+        email: { type: string, format: email, minLength: 5, maxLength: 254, description: User email }
+        password: { type: string, minLength: 8, maxLength: 64, description: Raw password }
     AuthMeResponse:
       type: object
       required: [id, email, username, avatarUrl, tokenVersion]

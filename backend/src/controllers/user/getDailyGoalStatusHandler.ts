@@ -9,13 +9,10 @@
 import type { Response } from "express";
 import type { AuthenticatedRequest } from "../../@types/auth.js";
 import { getProgressForActiveUser, prisma } from "@project/db";
+import type { DailyGoalDateKeyParams } from "../../validators/userValidators.js";
 
 export async function getDailyGoalStatus(req: AuthenticatedRequest, res: Response) {
-  const dateKey = String(req.params.dateKey);
-
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateKey)) {
-    return res.status(400).json({ error: "Invalid date key format" });
-  }
+  const { dateKey } = req.validatedParams as DailyGoalDateKeyParams;
   const progress = await getProgressForActiveUser(prisma, req.user!.userId);
 
   if (!progress) return res.status(404).json({ error: "Progress not found" });

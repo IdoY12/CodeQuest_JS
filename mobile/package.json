@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@project/xp-constants": "file:../packages/xp-constants",
+    "@project/user-credentials": "file:../packages/user-credentials",
     "@project/streak-logic": "file:../packages/streak-logic",
     "@expo/vector-icons": "^15.0.3",
     "@react-native-async-storage/async-storage": "2.2.0",

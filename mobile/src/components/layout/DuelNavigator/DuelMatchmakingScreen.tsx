@@ -52,7 +52,9 @@ export function DuelMatchmakingScreen({ navigation }: MatchmakingScreenProps) {
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <Text style={styles.searching}>Searching for an opponent...</Text>
-      <Text style={styles.sub}>⚡ {playersOnline} players online</Text>
+      <Text style={styles.sub}>
+        ⚡ {playersOnline === 1 ? "1 player" : `${playersOnline} players`} online
+      </Text>
       <Text style={styles.sub}>Estimated wait: {seconds}s</Text>
       {opponent ? (
         <View style={styles.matchOppRow}>

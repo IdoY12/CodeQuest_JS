@@ -4,21 +4,15 @@ import { logError, logInfo, logWarn } from "../../utils/logger.js";
 import { DATABASE_UNAVAILABLE_MESSAGE, isDatabaseUnavailableError } from "../../utils/dbErrors.js";
 import { comparePassword } from "../../utils/passwordHashing.js";
 import { signAccessToken, signRefreshToken } from "../../utils/sessionJwtTokens.js";
-import { loginBodySchema } from "./authBodySchemas.js";
 import { resolveExperienceLevel } from "@project/db";
+import type { LoginBody } from "../../validators/authValidators.js";
 import { ensureUserProgressForLogin, touchUserLastActive } from "./authLoginPersistence.js";
 
 export async function authLoginHandler(request: Request, response: Response): Promise<void> {
-  logInfo("[AUTH]", "login:attempt", { email: request.body?.email });
-  const parsed = loginBodySchema.safeParse(request.body);
-  if (!parsed.success) {
-    logWarn("[AUTH]", "login:validation-failed", { errors: parsed.error.flatten() });
-    response.status(400).json({ error: parsed.error.flatten() });
-    return;
-  }
+  const { email, password } = request.body as LoginBody;
+  logInfo("[AUTH]", "login:attempt", { email });
 
   try {
-    const { email, password } = parsed.data;
     const user = await prisma.user.findUnique({ where: { email } });
 
     if (!user) {

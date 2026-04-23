@@ -7,28 +7,17 @@
  */
 
 import type { Response } from "express";
-import { z } from "zod";
 import { prisma } from "@project/db";
 import type { AuthenticatedRequest } from "../../@types/auth.js";
 import { getProgressForActiveUser } from "@project/db";
-import { logInfo, logWarn } from "../../utils/logger.js";
+import { logInfo } from "../../utils/logger.js";
+import type { PostPracticeLogBody } from "../../validators/userValidators.js";
 
 export async function postPracticeLog(req: AuthenticatedRequest, res: Response) {
-  logInfo("[TASKS]", "practice-log:write-attempt", { userId: req.user?.userId, dateKey: req.body?.dateKey });
-  const parsed = z
-    .object({
-      dateKey: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-      practicedSeconds: z.number().int().min(1).max(60 * 60),
-    })
-    .safeParse(req.body);
-
-  if (!parsed.success) {
-    logWarn("[TASKS]", "practice-log:validation-failed", { userId: req.user?.userId, errors: parsed.error.flatten() });
-    return res.status(400).json({ error: parsed.error.flatten() });
-  }
+  const { dateKey, practicedSeconds } = req.body as PostPracticeLogBody;
+  logInfo("[TASKS]", "practice-log:write-attempt", { userId: req.user?.userId, dateKey });
 
   const userId = req.user!.userId;
-  const { dateKey, practicedSeconds } = parsed.data;
   const progress = await getProgressForActiveUser(prisma, userId);
 
   if (!progress) {

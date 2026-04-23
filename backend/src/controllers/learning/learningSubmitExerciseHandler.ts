@@ -1,35 +1,24 @@
 import type { Response } from "express";
-import { z } from "zod";
 import type { AuthenticatedRequest } from "../../@types/auth.js";
 import { logError, logInfo } from "../../utils/logger.js";
 import { applyExerciseSubmission } from "./applyExerciseSubmission.js";
+import type { LearningSubmitExerciseBody } from "../../validators/learningValidators.js";
 
 export async function learningSubmitExerciseHandler(
   request: AuthenticatedRequest,
   response: Response,
 ): Promise<void> {
   try {
+    const body = request.body as LearningSubmitExerciseBody;
     logInfo("[TASKS]", "exercise:submit-attempt", {
       userId: request.user?.userId,
-      exerciseId: request.body?.exerciseId,
+      exerciseId: body.exerciseId,
     });
-    const parsed = z
-      .object({
-        exerciseId: z.string().min(3),
-        answer: z.string(),
-        clientLocalDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
-      })
-      .safeParse(request.body);
-
-    if (!parsed.success) {
-      response.status(400).json({ error: parsed.error.flatten() });
-      return;
-    }
     const result = await applyExerciseSubmission({
       userId: request.user!.userId,
-      exerciseId: parsed.data.exerciseId,
-      answer: parsed.data.answer,
-      clientLocalDate: parsed.data.clientLocalDate,
+      exerciseId: body.exerciseId,
+      answer: body.answer,
+      clientLocalDate: body.clientLocalDate,
     });
 
     if (!result) {

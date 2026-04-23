@@ -7,29 +7,17 @@
  */
 
 import type { Response } from "express";
-import { z } from "zod";
 import { prisma } from "@project/db";
 import type { AuthenticatedRequest } from "../../@types/auth.js";
 import { resolveExperienceLevel } from "@project/db";
-import { logInfo, logWarn } from "../../utils/logger.js";
+import { logInfo } from "../../utils/logger.js";
+import type { PatchPreferencesBody } from "../../validators/userValidators.js";
 
 export async function patchPreferences(req: AuthenticatedRequest, res: Response) {
   logInfo("[AUTH]", "preferences:update-attempt", { userId: req.user?.userId });
-  const parsed = z
-    .object({
-      goal: z.enum(["JOB", "WORK", "FUN", "PROJECT"]),
-      experienceLevel: z.enum(["JUNIOR", "MID", "SENIOR"]),
-      dailyCommitmentMinutes: z.number().int().refine((value) => value === 10 || value === 15 || value === 25),
-      notificationsEnabled: z.boolean(),
-    })
-    .safeParse(req.body);
+  const data = req.body as PatchPreferencesBody;
 
-  if (!parsed.success) {
-    logWarn("[AUTH]", "preferences:update-validation-failed", { userId: req.user?.userId, errors: parsed.error.flatten() });
-    return res.status(400).json({ error: parsed.error.flatten() });
-  }
-
-  const level = parsed.data.experienceLevel;
+  const level = data.experienceLevel;
   await prisma.user.update({
     where: { id: req.user!.userId },
     data: { activeExperienceLevel: level },
@@ -40,14 +28,14 @@ export async function patchPreferences(req: AuthenticatedRequest, res: Response)
     create: {
       userId: req.user!.userId,
       experienceLevel: level,
-      goal: parsed.data.goal,
-      dailyCommitmentMinutes: parsed.data.dailyCommitmentMinutes,
-      notificationsEnabled: parsed.data.notificationsEnabled,
+      goal: data.goal,
+      dailyCommitmentMinutes: data.dailyCommitmentMinutes,
+      notificationsEnabled: data.notificationsEnabled,
     },
     update: {
-      goal: parsed.data.goal,
-      dailyCommitmentMinutes: parsed.data.dailyCommitmentMinutes,
-      notificationsEnabled: parsed.data.notificationsEnabled,
+      goal: data.goal,
+      dailyCommitmentMinutes: data.dailyCommitmentMinutes,
+      notificationsEnabled: data.notificationsEnabled,
     },
   });
 

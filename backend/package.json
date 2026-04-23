@@ -28,6 +28,7 @@
     "@prisma/client": "^6.19.0",
     "@project/auth-jwt": "file:../packages/auth-jwt",
     "@project/db": "file:../packages/db",
+    "@project/user-credentials": "file:../packages/user-credentials",
     "@project/xp-constants": "file:../packages/xp-constants",
     "@project/server-kit": "file:../packages/server-kit",
     "bcrypt": "^6.0.0",

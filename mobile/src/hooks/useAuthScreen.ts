@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { registerValidationError } from "@project/user-credentials";
 import type { AppDispatch } from "@/redux/store";
 import { dispatchSignInSuccess } from "@/utils/dispatchSignInSuccess";
 import { logAuth, logError, logNav } from "@/utils/logger";
@@ -13,7 +14,9 @@ export function useAuthScreen(dispatch: AppDispatch) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const canSubmit = useMemo(
-    () => email.includes("@") && password.length >= 6 && (isLogin || username.length >= 2),
+    () =>
+      email.includes("@") &&
+      (isLogin ? password.length >= 6 : registerValidationError(email, username, password) === null),
     [email, password, username, isLogin],
   );
 
@@ -24,6 +27,13 @@ export function useAuthScreen(dispatch: AppDispatch) {
 
   const onSubmit = useCallback(async () => {
     if (!canSubmit || loading) return;
+    if (!isLogin) {
+      const regErr = registerValidationError(email, username, password);
+      if (regErr) {
+        setError(regErr);
+        return;
+      }
+    }
     logAuth("submit:start", { mode: isLogin ? "login" : "register", email });
     setLoading(true);
     setError(null);

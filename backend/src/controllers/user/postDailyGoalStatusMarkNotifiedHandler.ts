@@ -7,20 +7,14 @@
  */
 
 import type { Response } from "express";
-import { z } from "zod";
 import { prisma } from "@project/db";
 import type { AuthenticatedRequest } from "../../@types/auth.js";
 import { getProgressForActiveUser } from "@project/db";
+import type { DailyGoalDateKeyParams, PostDailyGoalMarkNotifiedBody } from "../../validators/userValidators.js";
 
 export async function postDailyGoalStatusMarkNotified(req: AuthenticatedRequest, res: Response) {
-  const dateKey = String(req.params.dateKey);
-  const parsed = z.object({ type: z.enum(["INCOMPLETE", "COMPLETE"]) }).safeParse(req.body);
-
-  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
-
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(dateKey)) {
-    return res.status(400).json({ error: "Invalid date key format" });
-  }
+  const { dateKey } = req.validatedParams as DailyGoalDateKeyParams;
+  const { type } = req.body as PostDailyGoalMarkNotifiedBody;
 
   const userId = req.user!.userId;
   const progress = await getProgressForActiveUser(prisma, userId);
@@ -29,7 +23,7 @@ export async function postDailyGoalStatusMarkNotified(req: AuthenticatedRequest,
 
   const sameDay = progress.practiceLogDateKey === dateKey;
 
-  if (parsed.data.type === "INCOMPLETE") {
+  if (type === "INCOMPLETE") {
     await prisma.userProgress.update({
       where: { id: progress.id },
       data: {

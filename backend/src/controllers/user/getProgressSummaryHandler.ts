@@ -8,24 +8,16 @@
  */
 
 import type { Response } from "express";
-import { z } from "zod";
 import { prisma } from "@project/db";
 import type { AuthenticatedRequest } from "../../@types/auth.js";
 import { getProgressForActiveUser } from "@project/db";
 import { logError } from "../../utils/logger.js";
 import { handleStreakAppOpen } from "../../services/streakService.js";
-
-const progressSummaryQuery = z.object({
-  localDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-});
+import type { ProgressSummaryQuery } from "../../validators/userValidators.js";
 
 export async function getProgressSummary(req: AuthenticatedRequest, res: Response) {
   try {
-    const parsed = progressSummaryQuery.safeParse(req.query);
-    if (!parsed.success) {
-      return res.status(400).json({ error: "Query parameter localDate is required (YYYY-MM-DD)." });
-    }
-    const { localDate } = parsed.data;
+    const { localDate } = req.query as ProgressSummaryQuery;
     const userId = req.user!.userId;
 
     await handleStreakAppOpen(prisma, userId, localDate);

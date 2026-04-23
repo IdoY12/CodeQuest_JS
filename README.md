@@ -11,7 +11,7 @@ This document is a **human-readable map of the repository**: what each part does
 - **Mobile app** (Expo / React Native): lessons, exercises, profile, daily challenges, real-time duels.
 - **REST backend** (Express): authentication, user profile, learning content APIs, duels metadata, and daily puzzles.
 - **Realtime service** (Socket.IO): duel matchmaking and in-match events.
-- **Shared packages**: database access (Prisma), JWT helpers, static puzzle/exercise data, and small server utilities (CORS, logging, env validation).
+- **Shared packages**: database access (Prisma), JWT helpers, shared user credential limits/messages (`@project/user-credentials`), static puzzle/exercise data, and small server utilities (CORS, logging, env validation).
 
 PostgreSQL is the primary datastore. Optional S3 (or LocalStack in Docker) supports assets such as avatar uploads.
 
@@ -42,7 +42,7 @@ flowchart LR
   IO --> PKG
 ```
 
-- The **mobile** client talks to the **backend** over HTTP (see `mobile/src/services/api.ts` and `mobile/src/config/network.ts`).
+- The **mobile** client talks to the **backend** over HTTP (see `mobile/src/config/network.ts` for `API_BASE_URL` and `mobile/src/services/auth-aware/` for axios-based API clients).
 - The **mobile** client opens a **Socket.IO** connection to the **io** service for duels (see `mobile` code under duel/socket usage and `io/src/socket/duel/`).
 - **backend** and **io** both use **`@project/db`** for Prisma and **`@project/auth-jwt`** where JWT verification is required.
 
@@ -58,6 +58,7 @@ flowchart LR
 | `packages/db/` | Prisma schema, migrations, DB URL injection, `connectDatabase`. |
 | `packages/auth-jwt/` | Sign/verify access and refresh tokens (shared secret contract with backend/io). |
 | `packages/server-kit/` | Shared server concerns: CORS resolution, structured logging, production security checks. |
+| `packages/user-credentials/` | Shared username/email/password length constants and user-facing validation messages (backend + mobile). |
 | `infra/` | Local infrastructure helpers (e.g. LocalStack S3 init). |
 | `docker-compose.yml` | Postgres, LocalStack, backend, io — wired for local full-stack runs. |
 | `patches/` | **`patch-package`** patches applied after `npm install` (see below). |
@@ -68,14 +69,14 @@ flowchart LR
 
 ### 1. REST request (typical)
 
-1. **Mobile** calls `apiRequest()` in `mobile/src/services/api.ts` (axios under the hood): builds URL from `API_BASE_URL`, attaches `Authorization` when needed, sends JSON.
+1. **Mobile** issues HTTP calls through axios instances from `mobile/src/services/auth-aware/AuthAware.ts` (subclasses like `UserService`): base URL from `API_BASE_URL` in `mobile/src/config/network.ts`, `Authorization` attached in an interceptor when a session access token exists.
 2. **Request** hits **Express** in `backend/src/app.ts`: global middleware (Helmet, CORS, JSON body, request logging), then a mounted router under `/api/...`.
-3. **Router** delegates to a **handler** under `backend/src/controllers/` (organized by domain) or inline handlers, depending on the route file in `backend/src/routers/`.
+3. **Router** chains per-route middleware (rate limits where configured, optional JSON/query/param validation via `validateBody` / `validateQuery` / `validateParams` in `backend/src/middlewares/validateBody.ts` using Zod schemas in `backend/src/validators/`), then the **handler** under `backend/src/controllers/` for that route in `backend/src/routers/`.
 4. **Auth** where required: `backend/src/middlewares/auth.ts` validates JWT using shared logic / `@project/auth-jwt`.
 5. **Persistence**: handlers use **Prisma** via `@project/db` (`PrismaClient`) to read/write PostgreSQL.
-6. **Response**: JSON body; errors are mapped to HTTP status codes and `{ error: ... }` shapes where applicable. The mobile client maps non-2xx responses to `ApiError`.
+6. **Response**: JSON body; errors are mapped to HTTP status codes and `{ error: ... }` shapes where applicable. The mobile client surfaces failures as axios errors for callers to catch (see interceptors in `mobile/src/services/auth-aware/AuthAware.ts`).
 
-**When reviewing REST changes**, start at the router (what path and method), then the controller/handler (validation and business rules), then any Prisma queries (correct indexes, transactions, and user scoping).
+**When reviewing REST changes**, start at the router (what path and method, middleware order including validation), then the controller/handler (business rules; JSON bodies are already validated when `validateBody` is in the chain), then any Prisma queries (correct indexes, transactions, and user scoping).
 
 ### 2. Realtime duel flow (conceptual)
 
@@ -100,7 +101,8 @@ flowchart LR
 | App composition | `backend/src/app.ts` | Middleware order, router mounts, global error handler. |
 | Process entry | `backend/src/index.ts` | DB connect, HTTP server listen, env validation hooks. |
 | HTTP routes | `backend/src/routers/*.ts` | Path prefixes match `app.ts` mounts (`/api/auth`, `/api/user`, etc.). |
-| Domain logic | `backend/src/controllers/` | Request parsing, authorization, orchestration. |
+| Request validation (Zod) | `backend/src/validators/*.ts` + `backend/src/middlewares/validateBody.ts` | Schemas live in `validators/`; routers call `validateBody` / `validateQuery` / `validateParams` before handlers. |
+| Domain logic | `backend/src/controllers/` | Business rules and orchestration (validated request shapes arrive from middleware). |
 | Auth | `backend/src/middlewares/auth.ts` | Token extraction and user attachment to `req`. |
 | Logging | `backend/src/utils/logger.ts` | Correlation with `@project/server-kit` patterns where used. |
 | Config | `backend/config/` | `config` npm package; `NODE_CONFIG_ENV` selects default vs compose vs production files. |
@@ -128,7 +130,7 @@ flowchart LR
 |------|-----------|------------------|
 | Root UI | `mobile/src/components/app/App.tsx` | Redux `Provider`, shell layout. |
 | Navigation / shell | `mobile/src/components/layout/AppShell/` | Tab/stack structure and feature entry. |
-| API | `mobile/src/services/api.ts` | All REST calls should go through here for consistent errors and logging. |
+| API | `mobile/src/services/auth-aware/` (`AuthAware`, `UserService`, etc.) | Axios clients; shared interceptors for auth header and token refresh. |
 | State | `mobile/src/redux/` | Global client state (e.g. profile, auth tokens). |
 | Server state | React Query hooks under `mobile/src/hooks/` | Cache keys, stale times, and refetch on focus. |
 | Theme | `mobile/src/theme/` | Shared spacing, typography tokens for consistent UI. |
@@ -142,7 +144,8 @@ Path alias: `@/*` → `mobile/src/*` (see `mobile/tsconfig.json`).
 1. **`packages/db`** — Schema (`packages/db/prisma/`), migrations, and exported `connectDatabase`. Wrong schema changes ripple through backend, io, and seeds.
 2. **`packages/auth-jwt`** — Token shape and expiry constants; must stay aligned with backend auth routes and io verification.
 3. **`packages/server-kit`** — CORS and security validation; changes affect both deployable servers.
-4. **`packages/db`** migrations and `backend/prisma/seed/codePuzzles.ts` — code puzzle data lives in the DB; schema changes require a new migration and re-seed.
+4. **`packages/user-credentials`** — Length limits and messages consumed by backend `validators/` and the mobile app; keep backend Zod messages aligned with these strings.
+5. **`packages/db`** migrations and `backend/prisma/seed/codePuzzles.ts` — code puzzle data lives in the DB; schema changes require a new migration and re-seed.
 
 ---
 
@@ -212,12 +215,12 @@ starts Postgres, LocalStack, **backend**, and **io** with healthchecks. **Docker
 
 1. This **README** (you are here).
 2. `backend/src/app.ts` — the full list of HTTP surfaces.
-3. `backend/src/routers/auth.ts` and `backend/src/middlewares/auth.ts` — how identity is established.
-4. `mobile/src/services/api.ts` — how the client sees failures and success.
+3. `backend/src/routers/auth.ts`, `backend/src/middlewares/auth.ts`, and `backend/src/validators/` + `middlewares/validateBody.ts` — how identity is established and how JSON bodies are validated before controllers.
+4. `mobile/src/services/auth-aware/AuthAware.ts` — how the client attaches auth and handles HTTP failures.
 5. `io/src/index.ts` and `io/src/socket/duel/index.ts` — how realtime is structured.
 6. `packages/db/prisma/schema.prisma` — the data model.
 
-When touching a feature, read **router → controller → Prisma** on the server, and **hook/screen → apiRequest → Redux/React Query** on mobile.
+When touching a feature, read **router (middleware + validation) → controller → Prisma** on the server, and **hook/screen → auth-aware services / axios → Redux/React Query** on mobile.
 
 ---
 

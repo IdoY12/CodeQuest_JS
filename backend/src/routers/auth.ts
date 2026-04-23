@@ -3,7 +3,7 @@
  *
  * Responsibility: mount auth handlers with per-route rate limits and JWT gate for /me.
  * Layer: backend HTTP
- * Depends on: auth controllers, authMiddleware, authRateLimiters
+ * Depends on: auth controllers, authMiddleware, authRateLimiters, validateBody middleware, validators/authValidators
  * Consumers: app.ts
  */
 
@@ -20,11 +20,13 @@ import {
   authRefreshRateLimiter,
   authRegisterRateLimiter,
 } from "../middlewares/authRateLimiters.js";
+import { validateBody } from "../middlewares/validateBody.js";
+import { loginBodySchema, registerBodySchema } from "../validators/authValidators.js";
 
 export const authRouter = Router();
 
-authRouter.post("/register", authRegisterRateLimiter, authRegisterHandler);
-authRouter.post("/login", authLoginRateLimiter, authLoginHandler);
+authRouter.post("/register", authRegisterRateLimiter, validateBody(registerBodySchema), authRegisterHandler);
+authRouter.post("/login", authLoginRateLimiter, validateBody(loginBodySchema), authLoginHandler);
 authRouter.post("/refresh", authRefreshRateLimiter, authRefreshHandler);
 authRouter.get("/me", authMiddleware, authMeHandler);
 authRouter.post("/logout", authLogoutRateLimiter, authLogoutHandler);

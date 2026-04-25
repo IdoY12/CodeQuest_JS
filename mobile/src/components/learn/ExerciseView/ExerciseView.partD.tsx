@@ -1,6 +1,6 @@
 import { Pressable, Text, View } from "react-native";
 import type Exercise from "@/models/Exercise";
-import { useExerciseLineOrderingLesson } from "@/hooks/useExerciseLineOrderingLesson";
+import { useBuiltAnswerLessonExercise } from "@/hooks/useBuiltAnswerLessonExercise";
 import type { LessonExerciseCompletionContext } from "@/types/lessonExerciseCompletion.types";
 import { v } from "./ExerciseView.styles";
 import { x } from "./ExerciseView.styles.extra";
@@ -12,7 +12,7 @@ type Base = {
 };
 
 export function EvLineOrdering({ exercise, accessToken, onLessonExerciseComplete }: Base) {
-  const { drag: d, canCheck, runCheck, goNext, showResults, isAnswerCorrect, serverResult } = useExerciseLineOrderingLesson(
+  const { lineOrder: lo, canCheck, runCheck, goNext, hasChecked, isAnswerCorrect, serverResult } = useBuiltAnswerLessonExercise(
     exercise,
     accessToken,
     onLessonExerciseComplete,
@@ -23,13 +23,13 @@ export function EvLineOrdering({ exercise, accessToken, onLessonExerciseComplete
       <Text style={v.explanation}>Build the answer above. Tap a selected line to remove it.</Text>
       <View style={x.answerZone}>
         <Text style={x.answerZoneTitle}>
-          Answer Zone ({d.orderedSelection.length}/{d.lineList.length})
+          Answer Zone ({lo.orderedSelection.length}/{lo.lineList.length})
         </Text>
-        {d.orderedSelection.length === 0 ? (
+        {lo.orderedSelection.length === 0 ? (
           <Text style={x.answerPreview}>No lines selected yet.</Text>
         ) : (
-          d.orderedSelection.map((line, idx) => (
-            <Pressable key={`${line}-${idx}`} style={x.selectedLine} onPress={() => d.removeLine(idx, line)}>
+          lo.orderedSelection.map((line, idx) => (
+            <Pressable key={`${line}-${idx}`} style={x.selectedLine} onPress={() => lo.removeLine(idx, line)}>
               <Text style={x.lineText}>{line}</Text>
               <Text style={x.removeIcon}>×</Text>
             </Pressable>
@@ -37,22 +37,22 @@ export function EvLineOrdering({ exercise, accessToken, onLessonExerciseComplete
         )}
       </View>
       <Text style={x.answerZoneTitle}>Line Pool</Text>
-      {d.poolLines.map((line, idx) => (
-        <Pressable key={`${line}-${idx}`} style={x.poolOption} onPress={() => d.addLine(line, idx)}>
+      {lo.poolLines.map((line, idx) => (
+        <Pressable key={`${line}-${idx}`} style={x.poolOption} onPress={() => lo.addLine(line, idx)}>
           <Text style={v.optionLabel}>{line}</Text>
         </Pressable>
       ))}
       <Pressable
-        style={[x.secondaryAction, d.orderedSelection.length === 0 && v.disabled]}
-        disabled={d.orderedSelection.length === 0}
-        onPress={d.resetOrder}
+        style={[x.secondaryAction, lo.orderedSelection.length === 0 && v.disabled]}
+        disabled={lo.orderedSelection.length === 0}
+        onPress={lo.resetOrder}
       >
         <Text style={x.secondaryActionLabel}>Reset</Text>
       </Pressable>
       <Pressable style={[v.lessonButton, !canCheck && v.disabled]} disabled={!canCheck} onPress={() => void runCheck()}>
         <Text style={v.lessonButtonLabel}>Check</Text>
       </Pressable>
-      {showResults && isAnswerCorrect ? (
+      {hasChecked && isAnswerCorrect ? (
         <>
           <Text style={[v.feedback, v.feedbackGood]}>Perfect order.</Text>
           {serverResult?.explanation ? <Text style={v.feedback}>{serverResult.explanation}</Text> : null}
@@ -60,7 +60,7 @@ export function EvLineOrdering({ exercise, accessToken, onLessonExerciseComplete
             <Text style={v.lessonButtonLabel}>Next</Text>
           </Pressable>
         </>
-      ) : showResults ? (
+      ) : hasChecked ? (
         <Text style={[v.feedback, v.feedbackBad]}>Order is incorrect. Reset and try again.</Text>
       ) : null}
     </View>

@@ -1,6 +1,6 @@
 import { Pressable, Text, View } from "react-native";
 import type Exercise from "@/models/Exercise";
-import { useExerciseSingleChoice } from "@/hooks/useExerciseSingleChoice";
+import { usePickOneLessonExercise } from "@/hooks/usePickOneLessonExercise";
 import type { LessonExerciseCompletionContext } from "@/types/lessonExerciseCompletion.types";
 import { v } from "./ExerciseView.styles";
 
@@ -10,13 +10,8 @@ type Base = {
   onLessonExerciseComplete: (answer: string, context: LessonExerciseCompletionContext) => void;
 };
 
-export function EvMcqTap({
-  variant,
-  exercise,
-  accessToken,
-  onLessonExerciseComplete,
-}: Base & { variant: "mcq" | "tap_token" }) {
-  const u = useExerciseSingleChoice(exercise, variant, accessToken, onLessonExerciseComplete);
+export function EvMcqTap({ exercise, accessToken, onLessonExerciseComplete }: Base) {
+  const u = usePickOneLessonExercise(exercise, accessToken, onLessonExerciseComplete);
 
   const styleFor = (opt: string) => {
     // Red/green only for what was ACTUALLY SUBMITTED — never for the current tap target.
@@ -29,11 +24,11 @@ export function EvMcqTap({
     return v.option;
   };
 
-  const ok = variant === "tap_token" ? "Token identified." : "Correct!";
+  const ok = exercise.type === "TAP_TOKEN" ? "Token identified." : "Correct!";
 
   return (
     <View style={v.exerciseCard}>
-      {variant === "tap_token" ? <Text style={v.hint}>Tap the correct token from this list.</Text> : null}
+      {exercise.type === "TAP_TOKEN" ? <Text style={v.hint}>Tap the correct token from this list.</Text> : null}
       {u.options.map((opt, i) => (
         <Pressable key={`${opt}-${i}`} style={styleFor(opt)} onPress={() => u.setSelected(opt)} disabled={u.isAnswerCorrect === true}>
           <Text style={v.optionLabel}>{opt}</Text>

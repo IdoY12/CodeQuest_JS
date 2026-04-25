@@ -1,57 +1,62 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import type { Dispatch, SetStateAction } from "react";
 import { shuffleLines } from "@/utils/formatHelpers";
+import type ExerciseSubmitResult from "@/models/ExerciseSubmitResult";
+import LearningService from "@/services/auth-aware/LearningService";
 
-export function useExerciseLineOrdering(exerciseId: string, codeSnippet: string) {
-  const lineList = useMemo(() => codeSnippet.split("\n"), [codeSnippet]);
+export async function persistLessonExerciseOnCorrect(
+  learning: LearningService,
+  exerciseId: string,
+  answer: string,
+  setServerResult: Dispatch<SetStateAction<ExerciseSubmitResult | null>>,
+): Promise<void> {
+  const persisted = await learning.submitExercise(exerciseId, answer);
+  setServerResult((prev) => ({
+    xpEarned: persisted.xpEarned,
+    explanation: persisted.explanation ?? prev?.explanation,
+    streakCurrent: persisted.streakCurrent,
+  }));
+}
+
+export function useExerciseLineOrdering(exerciseId: string, codeSnippet: string, active: boolean) {
+  const lineList = useMemo(() => (active ? codeSnippet.split("\n") : []), [active, codeSnippet]);
   const [orderedSelection, setOrderedSelection] = useState<string[]>([]);
   const [poolLines, setPoolLines] = useState<string[]>([]);
-  const [hasChecked, setHasChecked] = useState(false);
-  const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
 
   useEffect(() => {
     setOrderedSelection([]);
+    if (!active) {
+      setPoolLines([]);
+      return;
+    }
     setPoolLines(shuffleLines(lineList));
-    setHasChecked(false);
-    setIsCorrect(null);
-  }, [exerciseId, lineList]);
+  }, [active, exerciseId, lineList]);
 
-  const addLine = useCallback((line: string, poolIdx: number) => {
-    setOrderedSelection((c) => [...c, line]);
-    setPoolLines((c) => c.filter((_, i) => i !== poolIdx));
-  }, []);
-
-  const removeLine = useCallback((idx: number, line: string) => {
-    setOrderedSelection((c) => c.filter((_, i) => i !== idx));
-    setPoolLines((c) => [...c, line]);
-  }, []);
-
-  const resetOrder = useCallback(() => {
-    setPoolLines(shuffleLines(lineList));
-    setOrderedSelection([]);
-    setHasChecked(false);
-    setIsCorrect(null);
-  }, [lineList]);
-
-  const normalizedAnswer = orderedSelection.join("||");
-
-  const runCheck = useCallback(
-    (correctAnswer: string) => {
-      setIsCorrect(normalizedAnswer === correctAnswer);
-      setHasChecked(true);
+  const addLine = useCallback(
+    (line: string, poolIdx: number) => {
+      if (!active) return;
+      setOrderedSelection((c) => [...c, line]);
+      setPoolLines((c) => c.filter((_, i) => i !== poolIdx));
     },
-    [normalizedAnswer],
+    [active],
   );
 
-  return {
-    lineList,
-    orderedSelection,
-    poolLines,
-    hasChecked,
-    isCorrect,
-    normalizedAnswer,
-    addLine,
-    removeLine,
-    resetOrder,
-    runCheck,
-  };
+  const removeLine = useCallback(
+    (idx: number, line: string) => {
+      if (!active) return;
+      setOrderedSelection((c) => c.filter((_, i) => i !== idx));
+      setPoolLines((c) => [...c, line]);
+    },
+    [active],
+  );
+
+  const resetOrder = useCallback(() => {
+    if (!active) return;
+    setPoolLines(shuffleLines(lineList));
+    setOrderedSelection([]);
+  }, [active, lineList]);
+
+  const normalizedAnswer = active ? orderedSelection.join("||") : "";
+
+  return { lineList, orderedSelection, poolLines, normalizedAnswer, addLine, removeLine, resetOrder };
 }

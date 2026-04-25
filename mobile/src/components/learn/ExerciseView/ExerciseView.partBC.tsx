@@ -1,6 +1,6 @@
 import { Pressable, Text, View } from "react-native";
 import type Exercise from "@/models/Exercise";
-import { useExerciseFindBug } from "@/hooks/useExerciseFindBug";
+import { usePickOneLessonExercise } from "@/hooks/usePickOneLessonExercise";
 import type { LessonExerciseCompletionContext } from "@/types/lessonExerciseCompletion.types";
 import { v } from "./ExerciseView.styles";
 import { x } from "./ExerciseView.styles.extra";
@@ -12,7 +12,7 @@ type Base = {
 };
 
 export function EvFindBug({ exercise, lineList, accessToken, onLessonExerciseComplete }: Base & { lineList: string[] }) {
-  const u = useExerciseFindBug(exercise, accessToken, onLessonExerciseComplete);
+  const u = usePickOneLessonExercise(exercise, accessToken, onLessonExerciseComplete);
 
   return (
     <View style={v.exerciseCard}>
@@ -20,6 +20,7 @@ export function EvFindBug({ exercise, lineList, accessToken, onLessonExerciseCom
         const lineNumber = String(idx + 1);
         const lineExtraStyle = (() => {
           if (u.lastCheckedAnswer === lineNumber && u.isAnswerCorrect) return v.correct;
+          if (u.lastCheckedAnswer === lineNumber && !u.isAnswerCorrect && u.hasChecked) return v.wrong;
           if (u.selected === lineNumber) return x.lineSelected;
 
           return null;
@@ -41,7 +42,7 @@ export function EvFindBug({ exercise, lineList, accessToken, onLessonExerciseCom
       <Pressable style={[v.lessonButton, !u.canCheck && v.disabled]} disabled={!u.canCheck} onPress={() => void u.runCheck()}>
         <Text style={v.lessonButtonLabel}>Check Line</Text>
       </Pressable>
-      {u.showResults && u.isAnswerCorrect ? (
+      {u.hasChecked && u.isAnswerCorrect ? (
         <>
           <Text style={[v.feedback, v.feedbackGood]}>Great catch.</Text>
           {u.serverResult?.explanation ? <Text style={v.feedback}>{u.serverResult.explanation}</Text> : null}
@@ -49,7 +50,7 @@ export function EvFindBug({ exercise, lineList, accessToken, onLessonExerciseCom
             <Text style={v.lessonButtonLabel}>Next</Text>
           </Pressable>
         </>
-      ) : u.showResults ? (
+      ) : u.hasChecked ? (
         <Text style={[v.feedback, v.feedbackBad]}>Not the right line. Try again.</Text>
       ) : null}
     </View>

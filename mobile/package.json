@@ -11,6 +11,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@project/exercise-answer": "file:../packages/exercise-answer",
     "@project/xp-constants": "file:../packages/xp-constants",
     "@project/user-credentials": "file:../packages/user-credentials",
     "@project/streak-logic": "file:../packages/streak-logic",

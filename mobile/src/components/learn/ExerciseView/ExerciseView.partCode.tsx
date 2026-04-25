@@ -2,7 +2,7 @@ import { Pressable, Text, TextInput, View } from "react-native";
 import { colors } from "@/theme/theme";
 import type Exercise from "@/models/Exercise";
 import { CODE_FILL_DEFAULT_TOKENS } from "@/constants/codeFillDefaults";
-import { useExerciseCodeFill } from "@/hooks/useExerciseCodeFill";
+import { useBuiltAnswerLessonExercise } from "@/hooks/useBuiltAnswerLessonExercise";
 import type { LessonExerciseCompletionContext } from "@/types/lessonExerciseCompletion.types";
 import { v } from "./ExerciseView.styles";
 import { x } from "./ExerciseView.styles.extra";
@@ -14,7 +14,7 @@ type Base = {
 };
 
 export function EvCodeFill({ exercise, accessToken, onLessonExerciseComplete }: Base) {
-  const u = useExerciseCodeFill(exercise, accessToken, onLessonExerciseComplete);
+  const u = useBuiltAnswerLessonExercise(exercise, accessToken, onLessonExerciseComplete);
   const tokens = exercise.options.length > 0 ? exercise.options.map((o) => o.text) : [...CODE_FILL_DEFAULT_TOKENS];
 
   return (
@@ -37,7 +37,7 @@ export function EvCodeFill({ exercise, accessToken, onLessonExerciseComplete }: 
       <Pressable style={[v.lessonButton, !u.canCheck && v.disabled]} disabled={!u.canCheck} onPress={() => void u.runCheck()}>
         <Text style={v.lessonButtonLabel}>Submit</Text>
       </Pressable>
-      {u.showResults && u.isAnswerCorrect ? (
+      {u.hasChecked && u.isAnswerCorrect ? (
         <>
           <Text style={[v.feedback, v.feedbackGood]}>Nice work.</Text>
           {u.serverResult?.explanation ? <Text style={v.feedback}>{u.serverResult.explanation}</Text> : null}
@@ -45,7 +45,7 @@ export function EvCodeFill({ exercise, accessToken, onLessonExerciseComplete }: 
             <Text style={v.lessonButtonLabel}>Next</Text>
           </Pressable>
         </>
-      ) : u.showResults ? (
+      ) : u.hasChecked ? (
         <Text style={[v.feedback, v.feedbackBad]}>Try again.</Text>
       ) : null}
     </View>

@@ -1,4 +1,5 @@
 import { ensureProgressRow, handleStreakQualifyingXpForUser, prisma } from "@project/db";
+import { normaliseExerciseAnswer } from "@project/exercise-answer";
 import { XP_PER_CORRECT_EXERCISE } from "@project/xp-constants";
 import type { ExerciseSubmitResponseDto } from "../../dto/exerciseSubmitResponseDto.js";
 
@@ -17,7 +18,7 @@ export async function applyExerciseSubmission(input: SubmitInput): Promise<Exerc
 
   if (!exercise) return null;
   const isCorrect =
-    input.answer.trim().replace(/\s/g, "") === exercise.correctAnswer.trim().replace(/\s/g, "");
+    normaliseExerciseAnswer(input.answer) === normaliseExerciseAnswer(exercise.correctAnswer);
 
   let streakCurrent: number | undefined;
 

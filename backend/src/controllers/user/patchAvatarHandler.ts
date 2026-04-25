@@ -47,7 +47,7 @@ export async function putAvatarDirectUpload(req: AuthenticatedRequest, res: Resp
 }
 
 export async function patchAvatar(req: AuthenticatedRequest, res: Response) {
-  const { avatarUrl } = req.body as PatchAvatarBody;
+  const { avatarUrl } = req.validatedBody as PatchAvatarBody;
 
   const nextKey = extractAvatarKeyFromUrl(avatarUrl);
 

@@ -9,7 +9,7 @@ import type { LoginBody } from "../../validators/authValidators.js";
 import { ensureUserProgressForLogin, touchUserLastActive } from "./authLoginPersistence.js";
 
 export async function authLoginHandler(request: Request, response: Response): Promise<void> {
-  const { email, password } = request.body as LoginBody;
+  const { email, password } = request.validatedBody as LoginBody;
   logInfo("[AUTH]", "login:attempt", { email });
 
   try {

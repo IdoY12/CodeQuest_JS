@@ -11,7 +11,7 @@ import type { RegisterBody } from "../../validators/authValidators.js";
 import { createRegisteredUserWithDefaults } from "./authRegisterPersistence.js";
 
 export async function authRegisterHandler(request: Request, response: Response): Promise<void> {
-  const { email, username, password } = request.body as RegisterBody;
+  const { email, username, password } = request.validatedBody as RegisterBody;
   logInfo("[AUTH]", "register:attempt", { email, username });
   try {
     const existing = await prisma.user.findUnique({ where: { email } });

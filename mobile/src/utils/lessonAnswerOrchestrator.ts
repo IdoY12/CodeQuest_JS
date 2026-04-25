@@ -26,9 +26,9 @@ function grantXp(addXp: AddXp, xp: number): void {
   addXp(xp);
 }
 
-function hapticForCorrect(isCorrect: boolean): void {
+function hapticForCorrect(isAnswerCorrect: boolean): void {
   void Haptics.notificationAsync(
-    isCorrect ? Haptics.NotificationFeedbackType.Success : Haptics.NotificationFeedbackType.Error,
+    isAnswerCorrect ? Haptics.NotificationFeedbackType.Success : Haptics.NotificationFeedbackType.Error,
   );
 }
 
@@ -49,14 +49,15 @@ function finishOrAdvance(
 }
 
 export async function orchestrateLessonAnswer(a: LessonAnswerOrchestratorArgs): Promise<void> {
-  const { isCorrect, xpEarned } = a.completion.submitResult;
+  const { isAnswerCorrect } = a.completion;
+  const { xpEarned } = a.completion.submitResult;
   const nextAttempted = a.attemptedCount + 1;
-  const nextCorrect = isCorrect ? a.correctCount + 1 : a.correctCount;
+  const nextCorrect = isAnswerCorrect ? a.correctCount + 1 : a.correctCount;
   a.setAttemptedCount(nextAttempted);
-  if (isCorrect) a.setCorrectCount(nextCorrect);
-  if (isCorrect) grantXp(a.addXp, xpEarned);
-  if (isCorrect && xpEarned > 0) a.onQualifyingLessonXpEarned?.();
-  hapticForCorrect(isCorrect);
+  if (isAnswerCorrect) a.setCorrectCount(nextCorrect);
+  if (isAnswerCorrect) grantXp(a.addXp, xpEarned);
+  if (isAnswerCorrect && xpEarned > 0) a.onQualifyingLessonXpEarned?.();
+  hapticForCorrect(isAnswerCorrect);
   const accuracy = Math.round((nextCorrect / nextAttempted) * 100);
   finishOrAdvance(
     a.exerciseIndex + 1,

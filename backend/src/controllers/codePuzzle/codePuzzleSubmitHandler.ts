@@ -28,7 +28,7 @@ function normalizeAnswer(value: string): string {
 export async function codePuzzleSubmitHandler(request: AuthenticatedRequest, response: Response): Promise<void> {
   try {
     const { id } = request.validatedParams as CodePuzzleSubmitParams;
-    const { answer, clientLocalDate } = request.body as CodePuzzleSubmitBody;
+    const { answer, clientLocalDate } = request.validatedBody as CodePuzzleSubmitBody;
 
     if (!answer.trim()) {
       response.status(400).json({ error: "answer is required" });

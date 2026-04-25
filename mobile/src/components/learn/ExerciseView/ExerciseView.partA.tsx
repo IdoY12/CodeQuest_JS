@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import type Exercise from "@/models/Exercise";
+import type ExerciseSubmitResult from "@/models/ExerciseSubmitResult";
 import type { LessonExerciseCompletionContext } from "@/types/lessonExerciseCompletion.types";
 import { useAuthenticatedService } from "@/hooks/useAuthenticatedService";
 import LearningService from "@/services/auth-aware/LearningService";
@@ -23,11 +24,24 @@ export function EvConcept({ exercise, accessToken, onLessonExerciseComplete }: B
     setBusy(true);
 
     try {
-      const result =
-        accessToken && learning
-          ? await learning.submitExercise(exercise.id, CONCEPT_SENTINEL)
-          : evaluateExerciseLocally(exercise, CONCEPT_SENTINEL);
-      onLessonExerciseComplete(CONCEPT_SENTINEL, { source: "curriculum", submitResult: result });
+      const localEvaluation = evaluateExerciseLocally(exercise, CONCEPT_SENTINEL);
+      let submitResult: ExerciseSubmitResult = {
+        xpEarned: localEvaluation.xpEarned,
+        explanation: localEvaluation.explanation,
+      };
+      if (accessToken && learning && localEvaluation.isAnswerCorrect) {
+        const persisted = await learning.submitExercise(exercise.id, CONCEPT_SENTINEL);
+        submitResult = {
+          xpEarned: persisted.xpEarned,
+          explanation: persisted.explanation ?? submitResult.explanation,
+          streakCurrent: persisted.streakCurrent,
+        };
+      }
+      onLessonExerciseComplete(CONCEPT_SENTINEL, {
+        source: "curriculum",
+        isAnswerCorrect: localEvaluation.isAnswerCorrect,
+        submitResult,
+      });
     } finally {
       setBusy(false);
     }

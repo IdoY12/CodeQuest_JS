@@ -7,6 +7,8 @@ import "express-serve-static-core";
 declare module "express-serve-static-core" {
   interface Request {
     validatedParams?: unknown;
+    validatedQuery?: unknown;
+    validatedBody?: unknown;
   }
 }
 

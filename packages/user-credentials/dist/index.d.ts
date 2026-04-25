@@ -11,5 +11,6 @@ export declare const EMAIL_TOO_LONG = "Email must be at most 254 characters.";
 export declare const PASSWORD_TOO_SHORT = "Password must be at least 8 characters.";
 export declare const PASSWORD_TOO_LONG = "Password must be at most 64 characters.";
 export declare const EMAIL_INVALID = "Enter a valid email address.";
+export declare function passwordPolicyError(password: string): string | null;
 export declare function registerValidationError(email: string, username: string, password: string): string | null;
 export declare function usernameValidationError(username: string): string | null;

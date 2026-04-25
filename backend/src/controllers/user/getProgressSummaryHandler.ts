@@ -17,7 +17,7 @@ import type { ProgressSummaryQuery } from "../../validators/userValidators.js";
 
 export async function getProgressSummary(req: AuthenticatedRequest, res: Response) {
   try {
-    const { localDate } = req.query as ProgressSummaryQuery;
+    const { localDate } = req.validatedQuery as ProgressSummaryQuery;
     const userId = req.user!.userId;
 
     await handleStreakAppOpen(prisma, userId, localDate);

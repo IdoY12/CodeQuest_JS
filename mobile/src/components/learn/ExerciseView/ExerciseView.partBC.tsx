@@ -19,7 +19,7 @@ export function EvFindBug({ exercise, lineList, accessToken, onLessonExerciseCom
       {lineList.map((line, idx) => {
         const lineNumber = String(idx + 1);
         const lineExtraStyle = (() => {
-          if (u.lastCheckedAnswer === lineNumber && u.isCorrectNow) return v.correct;
+          if (u.lastCheckedAnswer === lineNumber && u.isAnswerCorrect) return v.correct;
           if (u.selected === lineNumber) return x.lineSelected;
 
           return null;
@@ -30,7 +30,7 @@ export function EvFindBug({ exercise, lineList, accessToken, onLessonExerciseCom
             key={`${line}-${idx}`}
             onPress={() => u.setSelected(lineNumber)}
             style={lineExtraStyle ? [x.line, lineExtraStyle] : x.line}
-            disabled={u.isCorrectNow === true}
+            disabled={u.isAnswerCorrect === true}
           >
             <Text style={x.lineText}>
               {idx + 1}. {line}
@@ -41,7 +41,7 @@ export function EvFindBug({ exercise, lineList, accessToken, onLessonExerciseCom
       <Pressable style={[v.lessonButton, !u.canCheck && v.disabled]} disabled={!u.canCheck} onPress={() => void u.runCheck()}>
         <Text style={v.lessonButtonLabel}>Check Line</Text>
       </Pressable>
-      {u.showResults && u.isCorrectNow ? (
+      {u.showResults && u.isAnswerCorrect ? (
         <>
           <Text style={[v.feedback, v.feedbackGood]}>Great catch.</Text>
           {u.serverResult?.explanation ? <Text style={v.feedback}>{u.serverResult.explanation}</Text> : null}

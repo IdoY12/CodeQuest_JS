@@ -14,7 +14,7 @@ import type { DailyGoalDateKeyParams, PostDailyGoalMarkNotifiedBody } from "../.
 
 export async function postDailyGoalStatusMarkNotified(req: AuthenticatedRequest, res: Response) {
   const { dateKey } = req.validatedParams as DailyGoalDateKeyParams;
-  const { type } = req.body as PostDailyGoalMarkNotifiedBody;
+  const { type } = req.validatedBody as PostDailyGoalMarkNotifiedBody;
 
   const userId = req.user!.userId;
   const progress = await getProgressForActiveUser(prisma, userId);

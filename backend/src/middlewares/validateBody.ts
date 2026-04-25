@@ -8,7 +8,7 @@ export function validateBody<T extends z.ZodTypeAny>(schema: T) {
       res.status(400).json({ error: parsed.error.flatten() });
       return;
     }
-    req.body = parsed.data;
+    (req as Request & { validatedBody: z.infer<T> }).validatedBody = parsed.data;
     next();
   };
 }
@@ -20,7 +20,7 @@ export function validateQuery<T extends z.ZodTypeAny>(schema: T) {
       res.status(400).json({ error: parsed.error.flatten() });
       return;
     }
-    req.query = parsed.data as Request["query"];
+    (req as Request & { validatedQuery: z.infer<T> }).validatedQuery = parsed.data;
     next();
   };
 }

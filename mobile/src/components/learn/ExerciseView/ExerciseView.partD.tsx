@@ -12,7 +12,7 @@ type Base = {
 };
 
 export function EvLineOrdering({ exercise, accessToken, onLessonExerciseComplete }: Base) {
-  const { drag: d, canCheck, runCheck, goNext, showResults, isCorrectNow, serverResult } = useExerciseLineOrderingLesson(
+  const { drag: d, canCheck, runCheck, goNext, showResults, isAnswerCorrect, serverResult } = useExerciseLineOrderingLesson(
     exercise,
     accessToken,
     onLessonExerciseComplete,
@@ -52,7 +52,7 @@ export function EvLineOrdering({ exercise, accessToken, onLessonExerciseComplete
       <Pressable style={[v.lessonButton, !canCheck && v.disabled]} disabled={!canCheck} onPress={() => void runCheck()}>
         <Text style={v.lessonButtonLabel}>Check</Text>
       </Pressable>
-      {showResults && isCorrectNow ? (
+      {showResults && isAnswerCorrect ? (
         <>
           <Text style={[v.feedback, v.feedbackGood]}>Perfect order.</Text>
           {serverResult?.explanation ? <Text style={v.feedback}>{serverResult.explanation}</Text> : null}

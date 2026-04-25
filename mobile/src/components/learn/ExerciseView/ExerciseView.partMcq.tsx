@@ -20,9 +20,9 @@ export function EvMcqTap({
 
   const styleFor = (opt: string) => {
     // Red/green only for what was ACTUALLY SUBMITTED — never for the current tap target.
-    if (u.lastCheckedAnswer === opt && u.isCorrect) return [v.option, v.correct];
+    if (u.lastCheckedAnswer === opt && u.isAnswerCorrect) return [v.option, v.correct];
 
-    if (u.lastCheckedAnswer === opt && !u.isCorrect && u.hasChecked) return [v.option, v.wrong];
+    if (u.lastCheckedAnswer === opt && !u.isAnswerCorrect && u.hasChecked) return [v.option, v.wrong];
     // Neutral accent border so the user can see their tap registered before re-checking.
     if (u.selected === opt) return [v.option, v.optionSelected];
 
@@ -35,14 +35,14 @@ export function EvMcqTap({
     <View style={v.exerciseCard}>
       {variant === "tap_token" ? <Text style={v.hint}>Tap the correct token from this list.</Text> : null}
       {u.options.map((opt, i) => (
-        <Pressable key={`${opt}-${i}`} style={styleFor(opt)} onPress={() => u.setSelected(opt)} disabled={u.isCorrect === true}>
+        <Pressable key={`${opt}-${i}`} style={styleFor(opt)} onPress={() => u.setSelected(opt)} disabled={u.isAnswerCorrect === true}>
           <Text style={v.optionLabel}>{opt}</Text>
         </Pressable>
       ))}
       <Pressable style={[v.lessonButton, !u.canCheck && v.disabled]} disabled={!u.canCheck} onPress={() => void u.runCheck()}>
         <Text style={v.lessonButtonLabel}>Check</Text>
       </Pressable>
-      {u.hasChecked && u.isCorrect ? (
+      {u.hasChecked && u.isAnswerCorrect ? (
         <>
           <Text style={[v.feedback, v.feedbackGood]}>{ok}</Text>
           {u.serverResult?.explanation ? <Text style={v.feedback}>{u.serverResult.explanation}</Text> : null}

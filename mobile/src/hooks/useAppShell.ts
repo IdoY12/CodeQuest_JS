@@ -19,11 +19,13 @@ import { getStreakCalendarDate } from "@/utils/streakCalendar";
 import { syncRegisteredStreakFromServer } from "@/utils/syncRegisteredStreakFromServer";
 import { logApp, logAuth } from "@/utils/logger";
 import { runDailyGoalNotificationCheck } from "@/utils/dailyGoalNotificationCheck";
+import { setBootstrapError } from "@/redux/session-slice";
 
 export const appQueryClient = new QueryClient();
 
 export function useAppShell() {
   const dispatch = useAppDispatch();
+  const bootstrapError = useAppSelector((s) => s.session.bootstrapError);
   const [isConnected, setIsConnected] = useState(true);
   const hasHydrated = useAppSelector((s) => s.session.hasHydrated);
   const isAuthenticated = useAppSelector((s) => s.session.isAuthenticated);
@@ -35,6 +37,11 @@ export function useAppShell() {
     () => void runDailyGoalNotificationCheck(accessToken, isAuthenticated, notificationsEnabled),
     [accessToken, isAuthenticated, notificationsEnabled],
   );
+
+  const retryBootstrap = useCallback(() => {
+    dispatch(setBootstrapError(null));
+    void bootstrapSession(dispatch);
+  }, [dispatch]);
 
   // This effect acts as the "Grand Opening" of the app shell, running exactly once on mount.
   useEffect(() => {
@@ -125,5 +132,5 @@ export function useAppShell() {
     return () => sub.remove();
   }, [accessToken, checkDaily, dispatch, isAuthenticated, isGuest]);
 
-  return { isConnected };
+  return { isConnected, bootstrapError, retryBootstrap };
 }

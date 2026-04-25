@@ -10,10 +10,15 @@ export type DailyXpStreakPersisted = {
 };
 
 export function calendarDaysBetweenEarlierAndLater(earlierDateOnly: string, laterDateOnly: string): number {
+  // Split the date strings (YYYY-MM-DD) and convert each part into a number
   const [y1, m1, d1] = earlierDateOnly.split("-").map(Number);
   const [y2, m2, d2] = laterDateOnly.split("-").map(Number);
+
+  // Convert to UTC timestamps. Note: months are 0-indexed in JS (0=Jan, 11=Dec), so we subtract 1
   const start = Date.UTC(y1, m1 - 1, d1);
   const end = Date.UTC(y2, m2 - 1, d2);
+
+  // Calculate the difference in milliseconds and divide by milliseconds in a day (24*60*60*1000)
   return Math.round((end - start) / 86_400_000);
 }
 

@@ -1,6 +1,5 @@
 import { XP_PER_CORRECT_EXERCISE } from "@project/xp-constants";
 import type Exercise from "@/models/Exercise";
-import type ExerciseSubmitResult from "@/models/ExerciseSubmitResult";
 
 export type LessonExerciseSetters = {
   setExercises: (e: Exercise[]) => void;
@@ -9,16 +8,21 @@ export type LessonExerciseSetters = {
   setAttemptedCount: (n: number) => void;
 };
 
+export type LocalExerciseEvaluation = {
+  isAnswerCorrect: boolean;
+  xpEarned: number;
+  explanation?: string;
+};
+
 function normalise(s: string): string {
   return s.trim().replace(/\s/g, "");
 }
 
-export function evaluateExerciseLocally(exercise: Exercise, answer: string): ExerciseSubmitResult {
-  const isCorrect = normalise(answer) === normalise(exercise.correctAnswer);
+export function evaluateExerciseLocally(exercise: Exercise, answer: string): LocalExerciseEvaluation {
+  const isAnswerCorrect = normalise(answer) === normalise(exercise.correctAnswer);
   return {
-    isCorrect,
-    xpEarned: isCorrect ? XP_PER_CORRECT_EXERCISE : 0,
-    correctAnswer: exercise.correctAnswer,
+    isAnswerCorrect,
+    xpEarned: isAnswerCorrect ? XP_PER_CORRECT_EXERCISE : 0,
     explanation: exercise.explanation ?? undefined,
   };
 }

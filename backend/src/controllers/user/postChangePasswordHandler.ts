@@ -15,7 +15,7 @@ import { comparePassword, hashPassword } from "../../utils/passwordHashing.js";
 import type { PostChangePasswordBody } from "../../validators/userValidators.js";
 
 export async function postChangePassword(req: AuthenticatedRequest, res: Response) {
-  const { currentPassword, newPassword } = req.body as PostChangePasswordBody;
+  const { currentPassword, newPassword } = req.validatedBody as PostChangePasswordBody;
 
   const user = await prisma.user.findUnique({ where: { id: req.user!.userId } });
 

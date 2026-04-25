@@ -9,7 +9,7 @@ export async function learningSubmitExerciseHandler(
   response: Response,
 ): Promise<void> {
   try {
-    const body = request.body as LearningSubmitExerciseBody;
+    const body = request.validatedBody as LearningSubmitExerciseBody;
     logInfo("[TASKS]", "exercise:submit-attempt", {
       userId: request.user?.userId,
       exerciseId: body.exerciseId,

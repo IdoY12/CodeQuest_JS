@@ -13,7 +13,7 @@ import type { AuthenticatedRequest } from "../../@types/auth.js";
 import type { PatchProfileBody } from "../../validators/userValidators.js";
 
 export async function patchProfile(req: AuthenticatedRequest, res: Response) {
-  const body = req.body as PatchProfileBody;
+  const body = req.validatedBody as PatchProfileBody;
 
   if (!body.username) {
     return res.status(400).json({ error: "No profile fields provided" });

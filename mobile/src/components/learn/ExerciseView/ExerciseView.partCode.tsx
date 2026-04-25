@@ -37,7 +37,7 @@ export function EvCodeFill({ exercise, accessToken, onLessonExerciseComplete }: 
       <Pressable style={[v.lessonButton, !u.canCheck && v.disabled]} disabled={!u.canCheck} onPress={() => void u.runCheck()}>
         <Text style={v.lessonButtonLabel}>Submit</Text>
       </Pressable>
-      {u.showResults && u.isCorrectNow ? (
+      {u.showResults && u.isAnswerCorrect ? (
         <>
           <Text style={[v.feedback, v.feedbackGood]}>Nice work.</Text>
           {u.serverResult?.explanation ? <Text style={v.feedback}>{u.serverResult.explanation}</Text> : null}

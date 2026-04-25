@@ -10,6 +10,7 @@ export interface SessionState {
   userId: string | null;
   studyDateKey: string;
   studySecondsToday: number;
+  bootstrapError: string | null;
 }
 
 const initialState: SessionState = {
@@ -22,6 +23,7 @@ const initialState: SessionState = {
   userId: null,
   studyDateKey: new Date().toLocaleDateString("en-CA"),
   studySecondsToday: 0,
+  bootstrapError: null,
 };
 
 type SignInPayload = {
@@ -58,6 +60,7 @@ const sessionSlice = createSlice({
       state.accessToken = null;
       state.refreshToken = null;
       state.userId = null;
+      state.bootstrapError = null;
     },
     signIn: (state, a: PayloadAction<SignInPayload>) => {
       state.isAuthenticated = true;
@@ -65,6 +68,10 @@ const sessionSlice = createSlice({
       state.userId = a.payload.userId;
       state.accessToken = a.payload.accessToken;
       state.refreshToken = a.payload.refreshToken;
+      state.bootstrapError = null;
+    },
+    setBootstrapError: (state, a: PayloadAction<string | null>) => {
+      state.bootstrapError = a.payload;
     },
     signOut: (state) => {
       const h = state.hasHydrated;
@@ -74,6 +81,15 @@ const sessionSlice = createSlice({
   },
 });
 
-export const { hydrateSession, setHasHydrated, setAuthChecked, addStudySeconds, enterGuestMode, signIn, signOut, updateAccessToken } =
-  sessionSlice.actions;
+export const {
+  hydrateSession,
+  setHasHydrated,
+  setAuthChecked,
+  addStudySeconds,
+  enterGuestMode,
+  signIn,
+  signOut,
+  updateAccessToken,
+  setBootstrapError,
+} = sessionSlice.actions;
 export default sessionSlice.reducer;

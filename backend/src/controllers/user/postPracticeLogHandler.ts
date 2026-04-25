@@ -14,7 +14,7 @@ import { logInfo } from "../../utils/logger.js";
 import type { PostPracticeLogBody } from "../../validators/userValidators.js";
 
 export async function postPracticeLog(req: AuthenticatedRequest, res: Response) {
-  const { dateKey, practicedSeconds } = req.body as PostPracticeLogBody;
+  const { dateKey, practicedSeconds } = req.validatedBody as PostPracticeLogBody;
   logInfo("[TASKS]", "practice-log:write-attempt", { userId: req.user?.userId, dateKey });
 
   const userId = req.user!.userId;

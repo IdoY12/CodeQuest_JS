@@ -51,9 +51,7 @@ export async function applyExerciseSubmission(input: SubmitInput): Promise<Exerc
   }
 
   return {
-    isCorrect,
     xpEarned: isCorrect ? XP_PER_CORRECT_EXERCISE : 0,
-    correctAnswer: exercise.correctAnswer,
     explanation: exercise.explanation,
     ...(streakCurrent !== undefined ? { streakCurrent } : {}),
   };

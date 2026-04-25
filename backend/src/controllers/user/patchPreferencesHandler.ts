@@ -15,7 +15,7 @@ import type { PatchPreferencesBody } from "../../validators/userValidators.js";
 
 export async function patchPreferences(req: AuthenticatedRequest, res: Response) {
   logInfo("[AUTH]", "preferences:update-attempt", { userId: req.user?.userId });
-  const data = req.body as PatchPreferencesBody;
+  const data = req.validatedBody as PatchPreferencesBody;
 
   const level = data.experienceLevel;
   await prisma.user.update({

@@ -1,9 +1,10 @@
+import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { AppDispatch } from "@/redux/store";
 import store from "@/redux/store";
 import UserService from "@/services/auth-aware/UserService";
 import { logError } from "@/utils/logger";
-import { enterGuestMode, setAuthChecked } from "@/redux/session-slice";
+import { enterGuestMode, setAuthChecked, setBootstrapError } from "@/redux/session-slice";
 import { setUserIdentity, updatePreferences, type Commitment } from "@/redux/profile-slice";
 import { hydrateXp } from "@/redux/xp-slice";
 import { hydrateStreak } from "@/redux/streak-slice";
@@ -11,6 +12,15 @@ import { hydrateStats } from "@/redux/duel-slice";
 import { getStreakCalendarDate } from "@/utils/streakCalendar";
 import { REDUX_PERSIST_KEY } from "@/utils/hydrateStore";
 import { resetStoresAfterLogout } from "@/utils/resetStoresAfterLogout";
+
+function isBootstrapServerError(error: unknown): boolean {
+  return (
+    axios.isAxiosError(error) &&
+    typeof error.response?.status === "number" &&
+    error.response.status >= 500 &&
+    error.response.status < 600
+  );
+}
 
 export async function bootstrapSession(dispatch: AppDispatch): Promise<void> {
   dispatch(setAuthChecked(false));
@@ -26,6 +36,7 @@ export async function bootstrapSession(dispatch: AppDispatch): Promise<void> {
   const userService = new UserService();
 
   try {
+    dispatch(setBootstrapError(null));
     const me = await userService.getMe();
     dispatch(setUserIdentity({ email: me.email, username: me.username, avatarUrl: me.avatarUrl ?? null }));
     const userPreferences = await userService.getPreferencesGet();
@@ -59,8 +70,16 @@ export async function bootstrapSession(dispatch: AppDispatch): Promise<void> {
     );
   } catch (error) {
     logError("[AUTH]", error, { phase: "bootstrap" });
-    await AsyncStorage.removeItem(REDUX_PERSIST_KEY);
-    resetStoresAfterLogout(dispatch);
+    if (isBootstrapServerError(error)) {
+      dispatch(
+        setBootstrapError(
+          "We could not load your account data because the server had a problem. You are still signed in. Tap Retry to try again.",
+        ),
+      );
+    } else {
+      await AsyncStorage.removeItem(REDUX_PERSIST_KEY);
+      resetStoresAfterLogout(dispatch);
+    }
   } finally {
     dispatch(setAuthChecked(true));
   }

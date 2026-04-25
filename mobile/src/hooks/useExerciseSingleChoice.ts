@@ -15,7 +15,7 @@ export function useExerciseSingleChoice(
   const learning = useAuthenticatedService(LearningService);
   const [selected, setSelected] = useState<string | null>(null);
   const [hasChecked, setHasChecked] = useState(false);
-  const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
+  const [isAnswerCorrect, setIsAnswerCorrect] = useState<boolean | null>(null);
   const [serverResult, setServerResult] = useState<ExerciseSubmitResult | null>(null);
   // Tracks what was SUBMITTED on the last check — distinct from `selected` which updates on
   // every tap. Only lastCheckedAnswer drives red/green highlighting so tapping a new option
@@ -25,35 +25,51 @@ export function useExerciseSingleChoice(
   useEffect(() => {
     setSelected(null);
     setHasChecked(false);
-    setIsCorrect(null);
+    setIsAnswerCorrect(null);
     setServerResult(null);
     setLastCheckedAnswer(null);
   }, [exercise.id]);
 
   // Allow re-checking until the user lands on the correct answer.
-  const canCheck = Boolean(selected) && isCorrect !== true;
+  const canCheck = Boolean(selected) && isAnswerCorrect !== true;
 
   const runCheck = useCallback(async () => {
     if (!selected) return;
     setLastCheckedAnswer(selected);
-    const result =
-      accessToken && learning
-        ? await learning.submitExercise(exercise.id, selected)
-        : evaluateExerciseLocally(exercise, selected);
-    setServerResult(result);
-    setIsCorrect(result.isCorrect);
+    const localEvaluation = evaluateExerciseLocally(exercise, selected);
+    setServerResult({ xpEarned: localEvaluation.xpEarned, explanation: localEvaluation.explanation });
+    setIsAnswerCorrect(localEvaluation.isAnswerCorrect);
     setHasChecked(true);
+    if (accessToken && learning && localEvaluation.isAnswerCorrect) {
+      const persisted = await learning.submitExercise(exercise.id, selected);
+      setServerResult((prev) => ({
+        xpEarned: persisted.xpEarned,
+        explanation: persisted.explanation ?? prev?.explanation,
+        streakCurrent: persisted.streakCurrent ?? prev?.streakCurrent,
+      }));
+    }
   }, [accessToken, exercise, learning, selected]);
 
   const goNext = useCallback(() => {
-    if (!selected || !serverResult) return;
-    onLessonExerciseComplete(selected, { source: "curriculum", submitResult: serverResult });
-  }, [onLessonExerciseComplete, selected, serverResult]);
+    if (!selected || !serverResult || isAnswerCorrect !== true) return;
+    onLessonExerciseComplete(selected, { source: "curriculum", isAnswerCorrect: true, submitResult: serverResult });
+  }, [isAnswerCorrect, onLessonExerciseComplete, selected, serverResult]);
 
   const options = useMemo(() => {
     if (variant === "mcq") return exercise.options.map((o) => o.text);
     return exercise.options.length > 0 ? exercise.options.map((o) => o.text) : exercise.codeSnippet.split(" ");
   }, [exercise.codeSnippet, exercise.options, variant]);
 
-  return { selected, setSelected, hasChecked, isCorrect, serverResult, lastCheckedAnswer, canCheck, runCheck, goNext, options };
+  return {
+    selected,
+    setSelected,
+    hasChecked,
+    isAnswerCorrect,
+    serverResult,
+    lastCheckedAnswer,
+    canCheck,
+    runCheck,
+    goNext,
+    options,
+  };
 }

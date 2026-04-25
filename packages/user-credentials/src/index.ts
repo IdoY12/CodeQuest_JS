@@ -13,6 +13,13 @@ export const PASSWORD_TOO_SHORT = `Password must be at least ${PASSWORD_MIN_LEN}
 export const PASSWORD_TOO_LONG = `Password must be at most ${PASSWORD_MAX_LEN} characters.`;
 export const EMAIL_INVALID = "Enter a valid email address.";
 
+export function passwordPolicyError(password: string): string | null {
+  const pl = password.length;
+  if (pl < PASSWORD_MIN_LEN) return PASSWORD_TOO_SHORT;
+  if (pl > PASSWORD_MAX_LEN) return PASSWORD_TOO_LONG;
+  return null;
+}
+
 export function registerValidationError(email: string, username: string, password: string): string | null {
   const el = email.length;
   if (el < EMAIL_MIN_LEN) return EMAIL_TOO_SHORT;
@@ -20,10 +27,7 @@ export function registerValidationError(email: string, username: string, passwor
   const ul = username.length;
   if (ul < USERNAME_MIN_LEN) return USERNAME_TOO_SHORT;
   if (ul > USERNAME_MAX_LEN) return USERNAME_TOO_LONG;
-  const pl = password.length;
-  if (pl < PASSWORD_MIN_LEN) return PASSWORD_TOO_SHORT;
-  if (pl > PASSWORD_MAX_LEN) return PASSWORD_TOO_LONG;
-  return null;
+  return passwordPolicyError(password);
 }
 
 export function usernameValidationError(username: string): string | null {

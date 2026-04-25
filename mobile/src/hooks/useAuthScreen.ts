@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { registerValidationError } from "@project/user-credentials";
+import { passwordPolicyError, registerValidationError } from "@project/user-credentials";
 import type { AppDispatch } from "@/redux/store";
 import { dispatchSignInSuccess } from "@/utils/dispatchSignInSuccess";
 import { logAuth, logError, logNav } from "@/utils/logger";
@@ -13,10 +13,15 @@ export function useAuthScreen(dispatch: AppDispatch) {
   const [isLogin, setIsLogin] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const passwordHint = useMemo(() => {
+    if (!isLogin || password.length === 0) return null;
+    return passwordPolicyError(password);
+  }, [isLogin, password]);
+
   const canSubmit = useMemo(
     () =>
       email.includes("@") &&
-      (isLogin ? password.length >= 6 : registerValidationError(email, username, password) === null),
+      (isLogin ? passwordPolicyError(password) === null : registerValidationError(email, username, password) === null),
     [email, password, username, isLogin],
   );
 
@@ -65,6 +70,7 @@ export function useAuthScreen(dispatch: AppDispatch) {
     setIsLogin,
     loading,
     error,
+    passwordHint,
     canSubmit,
     onSubmit,
   };

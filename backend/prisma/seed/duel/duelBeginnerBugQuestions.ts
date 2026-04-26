@@ -36,7 +36,7 @@ export function buildBeginnerBugQuestions(): Prisma.DuelQuestionCreateManyInput[
     ...TEMPLATES[i % TEMPLATES.length],
     options: ["1", "2", "3", "4"],
     explanation: "Spot the line that introduces invalid logic or runtime behavior.",
-    type: "FIND_THE_BUG",
+    type: "MCQ",
     difficulty: "JUNIOR",
   }));
 }

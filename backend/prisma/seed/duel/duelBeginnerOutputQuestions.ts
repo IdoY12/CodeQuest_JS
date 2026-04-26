@@ -44,7 +44,7 @@ export function buildBeginnerOutputQuestions(): Prisma.DuelQuestionCreateManyInp
     questionText: `Beginner Output ${i + 1}: What is the output?`,
     ...TEMPLATES[i % TEMPLATES.length],
     explanation: "Read the operator behavior and method result directly from the snippet.",
-    type: "MULTIPLE_CHOICE",
+    type: "MCQ",
     difficulty: "JUNIOR",
   }));
 }

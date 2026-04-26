@@ -39,7 +39,7 @@ export function buildAdvancedTokenQuestions(): Prisma.DuelQuestionCreateManyInpu
     questionText: `Advanced Token ${i + 1}: Complete the snippet.`,
     ...TEMPLATES[i % TEMPLATES.length],
     explanation: "Token completion checks production API familiarity and modern syntax.",
-    type: "TAP_TOKEN",
+    type: "MCQ",
     difficulty: "SENIOR",
   }));
 }

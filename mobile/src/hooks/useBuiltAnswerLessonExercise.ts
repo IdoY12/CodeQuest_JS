@@ -4,10 +4,9 @@ import type ExerciseSubmitResult from "@/models/ExerciseSubmitResult";
 import type { LessonExerciseCompletionContext } from "@/types/lessonExerciseCompletion.types";
 import { useAuthenticatedService } from "@/hooks/useAuthenticatedService";
 import LearningService from "@/services/auth-aware/LearningService";
-import { evaluateExerciseLocally } from "@/utils/lessonExerciseState";
+import { evaluateExerciseLocally, mcqSubkind } from "@/utils/lessonExerciseState";
 import { persistLessonExerciseOnCorrect, useExerciseLineOrdering } from "@/hooks/useLessonExerciseInteractions";
 const CONCEPT_SENTINEL = "concept-card";
-
 export function useBuiltAnswerLessonExercise(
   exercise: Exercise,
   accessToken: string | null,
@@ -19,9 +18,9 @@ export function useBuiltAnswerLessonExercise(
   const [serverResult, setServerResult] = useState<ExerciseSubmitResult | null>(null);
   const [hasChecked, setHasChecked] = useState(false);
   const [isAnswerCorrect, setIsAnswerCorrect] = useState<boolean | null>(null);
-  const t = exercise.type;
-  const isConcept = t === "CONCEPT_CARD",
-    isLine = t === "LINE_ORDERING";
+  const sk = exercise.type === "PUZZLE" ? null : mcqSubkind(exercise);
+  const isConcept = sk === "concept";
+  const isLine = sk === "lineOrder";
   const lineOrder = useExerciseLineOrdering(exercise.id, exercise.codeSnippet, isLine);
 
   useEffect(() => {

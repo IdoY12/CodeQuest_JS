@@ -24,11 +24,12 @@ export function EvMcqTap({ exercise, accessToken, onLessonExerciseComplete }: Ba
     return v.option;
   };
 
-  const ok = exercise.type === "TAP_TOKEN" ? "Token identified." : "Correct!";
+  const tokenStyle = exercise.prompt.toLowerCase().includes("tap");
+  const ok = tokenStyle ? "Token identified." : "Correct!";
 
   return (
     <View style={v.exerciseCard}>
-      {exercise.type === "TAP_TOKEN" ? <Text style={v.hint}>Tap the correct token from this list.</Text> : null}
+      {tokenStyle ? <Text style={v.hint}>Tap the correct token from this list.</Text> : null}
       {u.options.map((opt, i) => (
         <Pressable key={`${opt}-${i}`} style={styleFor(opt)} onPress={() => u.setSelected(opt)} disabled={u.isAnswerCorrect === true}>
           <Text style={v.optionLabel}>{opt}</Text>

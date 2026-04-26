@@ -44,7 +44,7 @@ export function buildAdvancedOutputQuestions(): Prisma.DuelQuestionCreateManyInp
     questionText: `Advanced Output ${i + 1}: What prints first / final value?`,
     ...TEMPLATES[i % TEMPLATES.length],
     explanation: "Advanced questions test event loop order, this binding, and references.",
-    type: "MULTIPLE_CHOICE",
+    type: "MCQ",
     difficulty: "SENIOR",
   }));
 }

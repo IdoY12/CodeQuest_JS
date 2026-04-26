@@ -39,7 +39,7 @@ export function buildBeginnerTokenQuestions(): Prisma.DuelQuestionCreateManyInpu
     questionText: `Beginner Token ${i + 1}: Pick the correct token.`,
     ...TEMPLATES[i % TEMPLATES.length],
     explanation: "Choose the token that makes the code valid and correct.",
-    type: "TAP_TOKEN",
+    type: "MCQ",
     difficulty: "JUNIOR",
   }));
 }

@@ -6,12 +6,8 @@ enum Difficulty {
 }
 
 enum ExerciseType {
-  CONCEPT_CARD
-  MULTIPLE_CHOICE
-  FIND_THE_BUG
-  LINE_ORDERING
-  CODE_FILL
-  TAP_TOKEN
+  MCQ
+  PUZZLE
 }
 
 enum ExperienceLevel {

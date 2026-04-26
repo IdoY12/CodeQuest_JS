@@ -1,7 +1,7 @@
 /**
  * Duel question batch for Prisma seeding (MID / intermediate token completion).
  *
- * Responsibility: TAP_TOKEN style prompts between beginner and advanced depth.
+ * Responsibility: token-pick MCQ prompts between beginner and advanced depth.
  * Layer: backend prisma seed
  * Depends on: @prisma/client types
  * Consumers: persistDuelQuestions.ts
@@ -39,7 +39,7 @@ export function buildMidTokenQuestions(): Prisma.DuelQuestionCreateManyInput[] {
     questionText: `Mid Token ${i + 1}: Pick the correct token.`,
     ...TEMPLATES[i % TEMPLATES.length],
     explanation: "Intermediate: collections, promises, nullish coalescing, and modern array helpers.",
-    type: "TAP_TOKEN",
+    type: "MCQ",
     difficulty: "MID",
   }));
 }

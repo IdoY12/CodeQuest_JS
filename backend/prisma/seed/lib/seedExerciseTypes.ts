@@ -8,7 +8,7 @@
  */
 
 export interface SeedExercise {
-  type: "CONCEPT_CARD" | "MULTIPLE_CHOICE" | "FIND_THE_BUG" | "LINE_ORDERING" | "CODE_FILL" | "TAP_TOKEN";
+  type: "MCQ" | "PUZZLE";
   prompt: string;
   codeSnippet: string;
   correctAnswer: string;

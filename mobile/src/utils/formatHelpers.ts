@@ -15,6 +15,16 @@ export function exerciseLineList(codeSnippet: string): string[] {
   return codeSnippet.split("\n");
 }
 
+/** True when the answer is a 1-based line index into a multi-line snippet (duel bug rounds, some MCQ rows). */
+export function lineBugPickHeuristic(prompt: string, codeSnippet: string, correctAnswer: string): boolean {
+  const lines = exerciseLineList(codeSnippet);
+  const ca = correctAnswer.trim();
+  if (lines.length < 2 || !/^\d+$/.test(ca)) return false;
+  const n = Number(ca);
+  if (n < 1 || n > lines.length) return false;
+  return /line|bug/i.test(prompt);
+}
+
 export function progressWidthStyle(percent: number): ViewStyle {
   const p = Math.min(100, Math.max(0, percent));
   return { width: `${p}%` };

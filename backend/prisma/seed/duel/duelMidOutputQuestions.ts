@@ -49,7 +49,7 @@ export function buildMidOutputQuestions(): Prisma.DuelQuestionCreateManyInput[] 
     questionText: `Mid Output ${i + 1}: What is printed (order / final value)?`,
     ...TEMPLATES[i % TEMPLATES.length],
     explanation: "Intermediate: destructuring, defaults, spreads, and basic async ordering.",
-    type: "MULTIPLE_CHOICE",
+    type: "MCQ",
     difficulty: "MID",
   }));
 }

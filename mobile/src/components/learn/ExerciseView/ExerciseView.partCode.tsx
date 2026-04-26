@@ -1,7 +1,7 @@
 import { Pressable, Text, TextInput, View } from "react-native";
 import { colors } from "@/theme/theme";
 import type Exercise from "@/models/Exercise";
-import { CODE_FILL_DEFAULT_TOKENS } from "@/constants/codeFillDefaults";
+import { DEFAULT_PUZZLE_HINT_TOKENS } from "@/constants/puzzleHintDefaults";
 import { useBuiltAnswerLessonExercise } from "@/hooks/useBuiltAnswerLessonExercise";
 import type { LessonExerciseCompletionContext } from "@/types/lessonExerciseCompletion.types";
 import { v } from "./ExerciseView.styles";
@@ -15,7 +15,7 @@ type Base = {
 
 export function EvCodeFill({ exercise, accessToken, onLessonExerciseComplete }: Base) {
   const u = useBuiltAnswerLessonExercise(exercise, accessToken, onLessonExerciseComplete);
-  const tokens = exercise.options.length > 0 ? exercise.options.map((o) => o.text) : [...CODE_FILL_DEFAULT_TOKENS];
+  const tokens = exercise.options.length > 0 ? exercise.options.map((o) => o.text) : [...DEFAULT_PUZZLE_HINT_TOKENS];
 
   return (
     <View style={v.exerciseCard}>

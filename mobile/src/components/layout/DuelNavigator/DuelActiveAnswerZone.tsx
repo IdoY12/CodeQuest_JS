@@ -1,5 +1,5 @@
 import { Pressable, Text } from "react-native";
-import type { DuelRound } from "@/utils/duelSocketModels";
+import { duelRoundUsesLinePick, type DuelRound } from "@/utils/duelSocketModels";
 import { styles } from "./DuelNavigator.styles";
 
 interface DuelActiveAnswerZoneProps {
@@ -10,7 +10,7 @@ interface DuelActiveAnswerZoneProps {
 }
 
 export function DuelActiveAnswerZone({ round, selected, locked, submit }: DuelActiveAnswerZoneProps) {
-  if (round.type === "FIND_THE_BUG") {
+  if (duelRoundUsesLinePick(round)) {
     return round.codeSnippet.split("\n").map((line, idx) => (
       <Pressable
         key={`${line}-${idx}`}

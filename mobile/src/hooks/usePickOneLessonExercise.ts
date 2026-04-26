@@ -4,7 +4,7 @@ import type ExerciseSubmitResult from "@/models/ExerciseSubmitResult";
 import type { LessonExerciseCompletionContext } from "@/types/lessonExerciseCompletion.types";
 import { useAuthenticatedService } from "@/hooks/useAuthenticatedService";
 import LearningService from "@/services/auth-aware/LearningService";
-import { evaluateExerciseLocally } from "@/utils/lessonExerciseState";
+import { evaluateExerciseLocally, mcqSubkind } from "@/utils/lessonExerciseState";
 import { persistLessonExerciseOnCorrect } from "@/hooks/useLessonExerciseInteractions";
 
 export function usePickOneLessonExercise(
@@ -47,8 +47,7 @@ export function usePickOneLessonExercise(
   }, [isAnswerCorrect, onLessonExerciseComplete, selected, serverResult]);
 
   const options = useMemo(() => {
-    if (exercise.type === "FIND_THE_BUG") return [] as string[];
-    if (exercise.type === "MULTIPLE_CHOICE") return exercise.options.map((o) => o.text);
+    if (mcqSubkind(exercise) === "bugLine") return [] as string[];
     return exercise.options.length > 0 ? exercise.options.map((o) => o.text) : exercise.codeSnippet.split(" ");
   }, [exercise]);
 

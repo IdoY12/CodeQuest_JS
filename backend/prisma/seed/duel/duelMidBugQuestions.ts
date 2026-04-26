@@ -36,7 +36,7 @@ export function buildMidBugQuestions(): Prisma.DuelQuestionCreateManyInput[] {
     ...TEMPLATES[i % TEMPLATES.length],
     options: ["1", "2", "3", "4"],
     explanation: "Intermediate: async boundaries, map return values, bracket vs dot access, optional params.",
-    type: "FIND_THE_BUG",
+    type: "MCQ",
     difficulty: "MID",
   }));
 }

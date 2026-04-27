@@ -31,7 +31,7 @@ export function openSupportUrl(url: string): void {
   void Linking.openURL(url).catch(() => Alert.alert("Unavailable", "Could not open this link right now."));
 }
 
-export async function patchUserPreferences(
+export async function patchLearningSettings(
   user: UserService,
   draftGoal: GoalKey,
   draftLevel: LevelKey,

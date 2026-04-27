@@ -61,10 +61,10 @@ export function useProfileScreen() {
     setDraftNotifications: profileDraft.setDraftNotifications,
   });
 
-  const { onSavePreferences, ...handlers } = useProfileAccountHandlers(profileRedux, profileDraft, user);
+  const { onSaveLearningSettings, ...handlers } = useProfileAccountHandlers(profileRedux, profileDraft, user);
   const { onAvatarPress } = useProfileAvatarHandlers(profileRedux, profileDraft, user);
 
-  return { ...profileRedux, ...profileDraft, onSavePreferences, onAvatarPress, ...handlers };
+  return { ...profileRedux, ...profileDraft, onSaveLearningSettings, onAvatarPress, ...handlers };
 }
 
 export type UseProfileScreenReturn = ReturnType<typeof useProfileScreen>;

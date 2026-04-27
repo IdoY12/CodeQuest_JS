@@ -43,7 +43,7 @@ export function ProfileAuthenticatedLearn({ p }: { p: UseProfileScreenReturn }) 
       <Pressable
         style={[profileSectionCardStyles.saveButton, p.saving && profileSectionCardStyles.saveButtonDisabled]}
         disabled={p.saving}
-        onPress={() => void p.onSavePreferences()}
+        onPress={() => void p.onSaveLearningSettings()}
       >
         <Text style={profileSectionCardStyles.saveButtonLabel}>{p.saving ? "Saving..." : "Save Preferences"}</Text>
       </Pressable>

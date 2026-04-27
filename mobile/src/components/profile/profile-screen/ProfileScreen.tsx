@@ -2,7 +2,7 @@ import React from "react";
 import { Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
-import { commitmentOptions, levels } from "@/constants/profilePreferences";
+import { commitmentOptions, levels } from "@/constants/learningSettings";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { updatePreferences } from "@/redux/profile-slice";
 import { logNav } from "@/utils/logger";

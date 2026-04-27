@@ -3,7 +3,7 @@ import { Alert } from "react-native";
 import { useAppDispatch } from "@/redux/hooks";
 import type UserService from "@/services/auth-aware/UserService";
 import { changePasswordRequest, deleteAccountRequest, updateUsername } from "@/utils/profileAccountMutations";
-import { patchUserPreferences } from "@/utils/profileUiAndPreferences";
+import { patchLearningSettings } from "@/utils/profileUiAndPreferences";
 import { confirmLogout } from "@/utils/confirmLogout";
 import type { ProfileDraftState } from "./useProfileDraftState";
 import type { ProfileReduxState } from "./useProfileRedux";
@@ -11,11 +11,11 @@ import type { ProfileReduxState } from "./useProfileRedux";
 export function useProfileAccountHandlers(r: ProfileReduxState, d: ProfileDraftState, user: UserService | null) {
   const dispatch = useAppDispatch();
 
-  const onSavePreferences = React.useCallback(async () => {
+  const onSaveLearningSettings = React.useCallback(async () => {
     if (!r.accessToken || !user || d.saving) return;
     d.setSaving(true);
     d.setSaveMessage(null);
-    await patchUserPreferences(user, d.draftGoal, d.draftLevel, d.draftCommitment, d.draftNotifications, dispatch, d.setSaveMessage);
+    await patchLearningSettings(user, d.draftGoal, d.draftLevel, d.draftCommitment, d.draftNotifications, dispatch, d.setSaveMessage);
     d.setSaving(false);
   }, [r.accessToken, d.saving, d.draftGoal, d.draftLevel, d.draftCommitment, d.draftNotifications, dispatch, d.setSaving, d.setSaveMessage, user]);
 
@@ -60,7 +60,7 @@ export function useProfileAccountHandlers(r: ProfileReduxState, d: ProfileDraftS
   }, [dispatch, r.accessToken, r.refreshToken]);
 
   return {
-    onSavePreferences,
+    onSaveLearningSettings,
     onSaveUsername,
     onChangePassword,
     onDeleteAccount,

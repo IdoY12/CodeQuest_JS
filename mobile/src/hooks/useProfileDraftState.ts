@@ -1,5 +1,5 @@
 import React from "react";
-import { commitmentOptions, goals, levels } from "@/constants/profilePreferences";
+import { commitmentOptions, goals, levels } from "@/constants/learningSettings";
 import { profileInitials, profileStatsFromRedux, profileSupportRows } from "@/utils/profileUiAndPreferences";
 import type { ProfileReduxState } from "./useProfileRedux";
 

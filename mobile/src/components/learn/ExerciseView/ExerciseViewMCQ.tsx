@@ -4,13 +4,14 @@ import { usePickOneLessonExercise } from "@/hooks/usePickOneLessonExercise";
 import type { LessonExerciseCompletionContext } from "@/types/lessonExerciseCompletion.types";
 import { exerciseViewStyles } from "./ExerciseView.styles";
 
-type ExerciseMcqTapProps = {
+type ExerciseViewMCQProps = {
   exercise: Exercise;
   accessToken: string | null;
   onLessonExerciseComplete: (answer: string, context: LessonExerciseCompletionContext) => void;
 };
 
-export function ExerciseMcqTap({ exercise, accessToken, onLessonExerciseComplete }: ExerciseMcqTapProps) {
+/** List UI for curriculum `MCQ` exercises (typed answer selection). */
+export function ExerciseViewMCQ({ exercise, accessToken, onLessonExerciseComplete }: ExerciseViewMCQProps) {
   const pickOne = usePickOneLessonExercise(exercise, accessToken, onLessonExerciseComplete);
 
   const styleForOptionAfterInteraction = (optionText: string) => {

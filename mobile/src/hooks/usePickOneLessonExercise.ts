@@ -4,7 +4,7 @@ import type ExerciseSubmitResult from "@/models/ExerciseSubmitResult";
 import type { LessonExerciseCompletionContext } from "@/types/lessonExerciseCompletion.types";
 import { useAuthenticatedService } from "@/hooks/useAuthenticatedService";
 import LearningService from "@/services/auth-aware/LearningService";
-import { evaluateExerciseLocally, mcqSubkind } from "@/utils/lessonExerciseState";
+import { evaluateExerciseLocally } from "@/utils/lessonExerciseState";
 import { persistLessonExerciseOnCorrect } from "@/hooks/useLessonExerciseInteractions";
 
 export function usePickOneLessonExercise(
@@ -46,10 +46,10 @@ export function usePickOneLessonExercise(
     onLessonExerciseComplete(selected, { source: "curriculum", isAnswerCorrect: true, submitResult: serverResult });
   }, [isAnswerCorrect, onLessonExerciseComplete, selected, serverResult]);
 
-  const options = useMemo(() => {
-    if (mcqSubkind(exercise) === "bugLine") return [] as string[];
-    return exercise.options.length > 0 ? exercise.options.map((o) => o.text) : exercise.codeSnippet.split(" ");
-  }, [exercise]);
+  const options = useMemo(
+    () => (exercise.options.length > 0 ? exercise.options.map((o) => o.text) : exercise.codeSnippet.split(" ")),
+    [exercise],
+  );
 
   return {
     selected,

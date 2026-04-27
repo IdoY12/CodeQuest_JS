@@ -6,13 +6,13 @@ import { useBuiltAnswerLessonExercise } from "@/hooks/useBuiltAnswerLessonExerci
 import type { LessonExerciseCompletionContext } from "@/types/lessonExerciseCompletion.types";
 import { exerciseViewStyles } from "./ExerciseView.styles";
 
-type ExerciseCodePuzzleFillProps = {
+type ExerciseViewPuzzleProps = {
   exercise: Exercise;
   accessToken: string | null;
   onLessonExerciseComplete: (answer: string, context: LessonExerciseCompletionContext) => void;
 };
 
-export function ExerciseCodePuzzleFill({ exercise, accessToken, onLessonExerciseComplete }: ExerciseCodePuzzleFillProps) {
+export function ExerciseViewPuzzle({ exercise, accessToken, onLessonExerciseComplete }: ExerciseViewPuzzleProps) {
   const builtAnswer = useBuiltAnswerLessonExercise(exercise, accessToken, onLessonExerciseComplete);
   const hintTokens =
     exercise.options.length > 0 ? exercise.options.map((exerciseOption) => exerciseOption.text) : [...DEFAULT_PUZZLE_HINT_TOKENS];

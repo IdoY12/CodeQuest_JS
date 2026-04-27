@@ -9,7 +9,6 @@
  * `duelLive` slice. Everything a component renders from belongs in `duelLive` instead. Keep those two lanes separate.
  */
 import type { Socket } from "socket.io-client";
-import { lineBugPickHeuristic } from "@/utils/formatHelpers";
 
 export interface DuelRound {
   roundNumber: number;
@@ -21,8 +20,17 @@ export interface DuelRound {
 }
 
 /** Line-tap answers for seeded bug questions stay `MCQ`; infer from prompt and numeric line index. */
+function isDuelLineTapRound(prompt: string, codeSnippet: string, correctAnswer: string): boolean {
+  const lines = codeSnippet.split("\n");
+  const ca = correctAnswer.trim();
+  if (lines.length < 2 || !/^\d+$/.test(ca)) return false;
+  const n = Number(ca);
+  if (n < 1 || n > lines.length) return false;
+  return /line|bug/i.test(prompt);
+}
+
 export function duelRoundUsesLinePick(round: DuelRound): boolean {
-  return round.type === "MCQ" && lineBugPickHeuristic(round.prompt, round.codeSnippet, round.correctAnswer ?? "");
+  return round.type === "MCQ" && isDuelLineTapRound(round.prompt, round.codeSnippet, round.correctAnswer ?? "");
 }
 
 export interface DuelReplayRow {

@@ -1,7 +1,7 @@
 import { StyleSheet } from "react-native";
 import { colors, fontSize, radius, spacing } from "@/theme/theme";
 
-/** Shared styles for lesson exercise panels (card, MCQ, code fill, line ordering, find-bug). */
+/** Shared styles for lesson exercise panels (card, MCQ options, PUZZLE fill). */
 export const exerciseViewStyles = StyleSheet.create({
   root: { flex: 1 },
   exerciseCard: {
@@ -36,52 +36,6 @@ export const exerciseViewStyles = StyleSheet.create({
   feedback: { marginTop: spacing.md, fontWeight: "700", color: colors.textPrimary },
   feedbackGood: { color: colors.success },
   feedbackBad: { color: colors.danger },
-  findBugLineRow: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.button,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-  },
-  findBugLineSelected: { borderColor: colors.accent },
-  monospaceLineText: { color: colors.textPrimary, fontFamily: "monospace" },
-  lineOrderingAnswerZone: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.card,
-    padding: spacing.md,
-    marginBottom: spacing.md,
-  },
-  lineOrderingSectionTitle: { color: colors.textSecondary, fontWeight: "700", marginBottom: spacing.sm },
-  lineOrderingEmptyHint: { color: colors.textSecondary, marginTop: spacing.md },
-  lineOrderingSelectedRow: {
-    borderWidth: 1,
-    borderColor: colors.accent,
-    borderRadius: radius.button,
-    padding: spacing.md,
-    marginBottom: spacing.sm,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: "rgba(247,223,30,0.08)",
-  },
-  lineOrderingRemoveGlyph: { color: colors.danger, fontSize: fontSize.md, fontWeight: "800" },
-  lineOrderingPoolRow: {
-    padding: spacing.md,
-    borderRadius: radius.button,
-    borderColor: colors.border,
-    borderWidth: 1,
-    marginTop: spacing.sm,
-  },
-  lineOrderingSecondaryButton: {
-    marginTop: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.button,
-    padding: spacing.md,
-    alignItems: "center",
-  },
-  lineOrderingSecondaryButtonLabel: { color: colors.textPrimary, fontWeight: "700" },
   codePuzzleTextInput: {
     borderWidth: 1,
     borderColor: colors.border,

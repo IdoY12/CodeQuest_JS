@@ -5,7 +5,7 @@ import {
   type DailyXpStreakPersisted,
 } from "@/utils/dailyXpStreakCore";
 
-export interface StreakState {
+interface StreakState {
   streakCurrent: number;
   lastActivityDate: string | null;
   lastCheckedDate: string | null;

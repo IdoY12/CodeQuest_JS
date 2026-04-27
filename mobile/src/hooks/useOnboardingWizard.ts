@@ -8,7 +8,7 @@ import { completeOnboarding, setOnboarding } from "@/redux/profile-slice";
 import { useAuthenticatedService } from "@/hooks/useAuthenticatedService";
 import UserService from "@/services/auth-aware/UserService";
 
-export type UseOnboardingWizardOptions = {
+type UseOnboardingWizardOptions = {
   /** Called after wizard answers are saved and `ONBOARDING_SEEN_STORAGE_KEY` is written (so the root navigator can switch to the app shell). */
   onPersistedToDevice: () => void;
 };

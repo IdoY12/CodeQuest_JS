@@ -10,7 +10,7 @@ import {
   resizeToJpeg,
 } from "@/utils/profileAvatarPick";
 
-export async function persistAvatarUrl(user: UserService, publicUrl: string, dispatch: AppDispatch): Promise<void> {
+async function persistAvatarUrl(user: UserService, publicUrl: string, dispatch: AppDispatch): Promise<void> {
   const saved = await user.patchAvatar(publicUrl);
   dispatch(setUserIdentity({ avatarUrl: saved.avatarUrl }));
 }

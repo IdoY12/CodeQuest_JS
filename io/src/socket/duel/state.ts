@@ -1,6 +1,6 @@
 import type { DuelNamespace, QueueEntry, SessionState } from "./types.js";
 
-export function countAuthenticatedDuelUsers(duel: DuelNamespace, excludeSocketId?: string): number {
+function countAuthenticatedDuelUsers(duel: DuelNamespace, excludeSocketId?: string): number {
   const seen = new Set<string>();
   duel.sockets.forEach((sock, sid) => {
     if (excludeSocketId !== undefined && sid === excludeSocketId) return;
@@ -33,7 +33,7 @@ export function makeSession(sessionId: string, roomId: string, p1: QueueEntry, p
 /** When still alone after {@link SOLO_MATCH_WAIT_MS}, start a solo session (see queue.ts). */
 export const soloMatchTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
-export interface RematchEntry {
+interface RematchEntry {
   player1: QueueEntry;
   player2: QueueEntry;
   isSolo: boolean;

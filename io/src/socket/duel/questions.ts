@@ -10,7 +10,7 @@ function asDifficulty(value: string): Difficulty | null {
   return null;
 }
 
-export async function pickRandomDuelQuestion(difficulty?: Difficulty): Promise<DuelQuestion | null> {
+async function pickRandomDuelQuestion(difficulty?: Difficulty): Promise<DuelQuestion | null> {
   // Two round trips (count + findFirst/skip): extra network latency on each duel round — slower in practice here than one fetch.
   // Raw SQL with ORDER BY RANDOM(): forbidden by ORM-only policy; also forces O(n log n) sort work in the database.
   // findMany + random index in JS: single Prisma round trip; duel pools are small (~40 rows per difficulty), so the payload cost beats a second query.

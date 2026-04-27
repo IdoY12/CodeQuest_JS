@@ -17,11 +17,11 @@
  * trip Redux Toolkit serialization checks and break persistence, those values never need to drive a React re-render,
  * and they are pure transport plumbing rather than UI state.
  */
-import { duelConnectionRefs, type DuelRound } from "@/utils/duelSocketModels";
+import { duelConnectionRefs } from "@/utils/duelSocketModels";
 import { connectDuelSocket } from "@/utils/duelSocketIo";
 import { getStreakCalendarDate } from "@/utils/streakCalendar";
 import store from "@/redux/store";
-import { duelEnded, duelReset, roundReplaced, scoreReplaced, type DuelState } from "@/redux/duel-live-slice";
+import { duelReset } from "@/redux/duel-live-slice";
 
 function emitJoinQueueWhenReady(socket: ReturnType<typeof connectDuelSocket>, username: string): void {
   const body = { username };
@@ -76,16 +76,4 @@ export function duelResetMatch() {
 
 export function duelRequestRematch(sessionId: string) {
   duelConnectionRefs.socket?.emit("rematch_request", { session_id: sessionId });
-}
-
-export function duelSetEnd(duelEnd: DuelState["duelEnd"]) {
-  store.dispatch(duelEnded({ duelEnd }));
-}
-
-export function duelSetRound(round: DuelRound | null) {
-  store.dispatch(roundReplaced({ round }));
-}
-
-export function duelSetScore(score: DuelState["score"]) {
-  store.dispatch(scoreReplaced({ score }));
 }

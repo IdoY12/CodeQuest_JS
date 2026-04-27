@@ -7,3 +7,7 @@ mobile/dist/
 packages/auth-jwt/dist/
 packages/db/dist/
 packages/server-kit/dist/
+packages/exercise-answer/dist/
+packages/streak-logic/dist/
+packages/user-credentials/dist/
+packages/xp-constants/dist/

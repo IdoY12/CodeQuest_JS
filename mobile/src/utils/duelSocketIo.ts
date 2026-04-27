@@ -3,8 +3,6 @@ import { io, type Socket } from "socket.io-client";
 import { bindDuelSocketEvents } from "@/services/duelInboundSocket";
 import { duelConnectionRefs } from "@/utils/duelSocketModels";
 
-export { bindDuelSocketEvents };
-
 export function connectDuelSocket(url: string, authToken: string | null): Socket {
   const tokenKey = authToken ?? "";
   if (duelConnectionRefs.socket && duelConnectionRefs.lastAuthTokenKey === tokenKey) return duelConnectionRefs.socket;

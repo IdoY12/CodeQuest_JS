@@ -5,7 +5,7 @@ import type { LessonExerciseCompletionContext } from "@/types/lessonExerciseComp
 
 type AddXp = (n: number) => void;
 
-export type LessonAnswerOrchestratorArgs = {
+type LessonAnswerOrchestratorArgs = {
   completion: LessonExerciseCompletionContext;
   addXp: AddXp;
   /** Lesson exercise only — invoked only when the user earned XP (correct answer, xpEarned positive). */

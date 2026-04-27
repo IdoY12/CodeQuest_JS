@@ -1,7 +1,8 @@
 import { StyleSheet } from "react-native";
-import { colors, radius, spacing } from "@/theme/theme";
+import { colors, fontSize, radius, spacing } from "@/theme/theme";
 
-export const v = StyleSheet.create({
+/** Shared styles for lesson exercise panels (card, MCQ, code fill, line ordering, find-bug). */
+export const exerciseViewStyles = StyleSheet.create({
   root: { flex: 1 },
   exerciseCard: {
     backgroundColor: colors.card,
@@ -22,7 +23,6 @@ export const v = StyleSheet.create({
   optionLabel: { color: colors.textPrimary },
   correct: { borderColor: colors.success, backgroundColor: "rgba(78,205,196,0.2)" },
   wrong: { borderColor: colors.danger, backgroundColor: "rgba(255,107,107,0.2)" },
-  // Neutral "selected, not yet checked" indicator so the user can see their tap registered.
   optionSelected: { borderColor: colors.accent },
   lessonButton: {
     backgroundColor: colors.accent,
@@ -36,4 +36,68 @@ export const v = StyleSheet.create({
   feedback: { marginTop: spacing.md, fontWeight: "700", color: colors.textPrimary },
   feedbackGood: { color: colors.success },
   feedbackBad: { color: colors.danger },
+  findBugLineRow: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.button,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
+  },
+  findBugLineSelected: { borderColor: colors.accent },
+  monospaceLineText: { color: colors.textPrimary, fontFamily: "monospace" },
+  lineOrderingAnswerZone: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.card,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+  },
+  lineOrderingSectionTitle: { color: colors.textSecondary, fontWeight: "700", marginBottom: spacing.sm },
+  lineOrderingEmptyHint: { color: colors.textSecondary, marginTop: spacing.md },
+  lineOrderingSelectedRow: {
+    borderWidth: 1,
+    borderColor: colors.accent,
+    borderRadius: radius.button,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: "rgba(247,223,30,0.08)",
+  },
+  lineOrderingRemoveGlyph: { color: colors.danger, fontSize: fontSize.md, fontWeight: "800" },
+  lineOrderingPoolRow: {
+    padding: spacing.md,
+    borderRadius: radius.button,
+    borderColor: colors.border,
+    borderWidth: 1,
+    marginTop: spacing.sm,
+  },
+  lineOrderingSecondaryButton: {
+    marginTop: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.button,
+    padding: spacing.md,
+    alignItems: "center",
+  },
+  lineOrderingSecondaryButtonLabel: { color: colors.textPrimary, fontWeight: "700" },
+  codePuzzleTextInput: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.button,
+    backgroundColor: colors.surface,
+    color: colors.textPrimary,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+  },
+  codePuzzleTokenRow: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sm, marginBottom: spacing.md },
+  codePuzzleTokenChip: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.pill,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+  },
+  codePuzzleTokenChipLabel: { color: colors.accent, fontSize: fontSize.sm },
 });

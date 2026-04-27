@@ -4,14 +4,14 @@ import type Exercise from "@/models/Exercise";
 import { exerciseLineList } from "@/utils/formatHelpers";
 import { mcqSubkind } from "@/utils/lessonExerciseState";
 import type { LessonExerciseCompletionContext } from "@/types/lessonExerciseCompletion.types";
-import { EvConcept } from "./ExerciseView.partA";
-import { EvFindBug } from "./ExerciseView.partBC";
-import { EvCodeFill } from "./ExerciseView.partCode";
-import { EvMcqTap } from "./ExerciseView.partMcq";
-import { EvLineOrdering } from "./ExerciseView.partD";
-import { v } from "./ExerciseView.styles";
+import { ExerciseConceptConfirm } from "./ExerciseViewConceptConfirm";
+import { ExerciseFindBugLine } from "./ExerciseViewFindBugLine";
+import { ExerciseCodePuzzleFill } from "./ExerciseViewCodePuzzleFill";
+import { ExerciseMcqTap } from "./ExerciseViewMcqTap";
+import { ExerciseLineOrdering } from "./ExerciseViewLineOrdering";
+import { exerciseViewStyles } from "./ExerciseView.styles";
 
-export type ExerciseViewProps = {
+type ExerciseViewProps = {
   exercise: Exercise;
   accessToken: string | null;
   onLessonExerciseComplete: (answer: string, context: LessonExerciseCompletionContext) => void;
@@ -22,22 +22,22 @@ export function ExerciseView(props: ExerciseViewProps) {
   const sharedProps = { exercise, accessToken: props.accessToken, onLessonExerciseComplete: props.onLessonExerciseComplete };
   let body: ReactNode;
 
-  if (exercise.type === "PUZZLE") body = <EvCodeFill {...sharedProps} />;
+  if (exercise.type === "PUZZLE") body = <ExerciseCodePuzzleFill {...sharedProps} />;
   else {
     switch (mcqSubkind(exercise)) {
       case "concept":
-        body = <EvConcept {...sharedProps} />;
+        body = <ExerciseConceptConfirm {...sharedProps} />;
         break;
       case "bugLine":
-        body = <EvFindBug {...sharedProps} lineList={exerciseLineList(exercise.codeSnippet)} />;
+        body = <ExerciseFindBugLine {...sharedProps} lineList={exerciseLineList(exercise.codeSnippet)} />;
         break;
       case "lineOrder":
-        body = <EvLineOrdering {...sharedProps} />;
+        body = <ExerciseLineOrdering {...sharedProps} />;
         break;
       default:
-        body = <EvMcqTap {...sharedProps} />;
+        body = <ExerciseMcqTap {...sharedProps} />;
     }
   }
 
-  return <View style={v.root}>{body}</View>;
+  return <View style={exerciseViewStyles.root}>{body}</View>;
 }

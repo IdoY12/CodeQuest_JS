@@ -84,5 +84,3 @@ export function useDuelActiveDuelLive() {
   const lastCorrectAnswer = useAppSelector((s) => s.duelLive.lastCorrectAnswer);
   return { round, score, sessionId, duelEnd, opponent, lastCorrectAnswer };
 }
-
-export { connectDuelSocket };

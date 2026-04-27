@@ -1,6 +1,6 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
-export interface SessionState {
+interface SessionState {
   hasHydrated: boolean;
   authChecked: boolean;
   isAuthenticated: boolean;

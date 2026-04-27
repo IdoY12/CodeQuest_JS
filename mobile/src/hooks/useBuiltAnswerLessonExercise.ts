@@ -10,7 +10,7 @@ const CONCEPT_SENTINEL = "concept-card";
 export function useBuiltAnswerLessonExercise(
   exercise: Exercise,
   accessToken: string | null,
-  onLessonExerciseComplete: (a: string, c: LessonExerciseCompletionContext) => void,
+  onLessonExerciseComplete: (answer: string, completionContext: LessonExerciseCompletionContext) => void,
 ) {
   const learning = useAuthenticatedService(LearningService);
   const [input, setInput] = useState("");

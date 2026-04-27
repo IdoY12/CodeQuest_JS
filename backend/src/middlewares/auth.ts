@@ -8,8 +8,6 @@ import {
 import { logError, logInfo, logWarn } from "../utils/logger.js";
 import { verifyAccessToken } from "../utils/sessionJwtTokens.js";
 
-export type { AuthenticatedRequest } from "../@types/auth.js";
-
 export async function authMiddleware(
   request: AuthenticatedRequest,
   response: Response,

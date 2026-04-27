@@ -1,7 +1,7 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { DuelRound, DuelReplayRow } from "@/utils/duelSocketModels";
 
-export interface DuelState {
+interface DuelState {
   playersOnline: number;
   sessionId: string | null;
   opponent: { username: string; avatarUrl: string | null } | null;
@@ -82,12 +82,6 @@ const duelLiveSlice = createSlice({
       state.rematchStatus = "opponent_left";
     },
     duelReset: () => initialState,
-    roundReplaced: (state, action: PayloadAction<{ round: DuelRound | null }>) => {
-      state.round = action.payload.round;
-    },
-    scoreReplaced: (state, action: PayloadAction<{ score: DuelState["score"] }>) => {
-      state.score = action.payload.score;
-    },
   },
 });
 
@@ -101,7 +95,5 @@ export const {
   opponentDisconnected,
   rematchDeclined,
   duelReset,
-  roundReplaced,
-  scoreReplaced,
 } = duelLiveSlice.actions;
 export default duelLiveSlice.reducer;

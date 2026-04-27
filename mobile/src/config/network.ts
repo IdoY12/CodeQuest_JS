@@ -14,13 +14,13 @@ function getExpoHost(): string | null {
   return hostUri.split(":")[0] ?? null;
 }
 
-export function getApiBaseUrl(): string {
+function getApiBaseUrl(): string {
   if (!__DEV__) return PROD_API_BASE_URL;
   const host = getExpoHost() ?? "localhost";
   return `http://${host}:${DEV_BACKEND_PORT}/api`;
 }
 
-export function getDuelSocketUrl(): string {
+function getDuelSocketUrl(): string {
   if (!__DEV__) return PROD_DUEL_SOCKET_URL;
   const host = getExpoHost() ?? "localhost";
   return `http://${host}:${DEV_IO_PORT}/duel`;

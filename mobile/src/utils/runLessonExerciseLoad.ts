@@ -4,7 +4,7 @@ import { fetchCurriculumExercisesForLevel } from "@/utils/fetchCurriculumExercis
 import { applyLessonExercisePayload, type LessonExerciseSetters } from "@/utils/lessonExerciseState";
 import { logError, logTasks } from "@/utils/logger";
 
-export const EXERCISES_PER_BLOCK = 10;
+const EXERCISES_PER_BLOCK = 10;
 
 export async function runLessonExerciseLoad(
   experienceLevel: Experience,

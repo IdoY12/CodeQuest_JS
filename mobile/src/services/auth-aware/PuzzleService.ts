@@ -1,8 +1,8 @@
 import AuthAware from "./AuthAware";
 
 export type Puzzle = { id: number; prompt: string; orderIndex: number };
-export type PuzzleSubmitResponse = { correct: boolean; streakCurrent?: number; xpTotal?: number };
-export type PuzzleSubmitBody = { answer: string; clientLocalDate: string };
+type PuzzleSubmitResponse = { correct: boolean; streakCurrent?: number; xpTotal?: number };
+type PuzzleSubmitBody = { answer: string; clientLocalDate: string };
 
 export default class PuzzleService extends AuthAware {
   async getAllPuzzles(): Promise<Puzzle[]> {

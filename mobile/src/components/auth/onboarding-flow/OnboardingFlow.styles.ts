@@ -1,7 +1,7 @@
 import { StyleSheet } from "react-native";
 import { colors, fontSize, radius, spacing } from "@/theme/theme";
 
-export const o = StyleSheet.create({
+export const onboardingFlowStyles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
   step: { flex: 1, paddingTop: spacing.huge, paddingHorizontal: spacing.xxl, justifyContent: "space-between" },
   mainContent: { flex: 1 },
@@ -35,21 +35,6 @@ export const o = StyleSheet.create({
   node: { alignItems: "center", gap: spacing.sm },
   nodeDot: { width: 14, height: 14, borderRadius: 7, backgroundColor: colors.accent },
   nodeLabel: { color: colors.textSecondary, fontSize: fontSize.xs },
-  ringRow: { flexDirection: "row", gap: spacing.md, justifyContent: "space-between" },
-  ring: {
-    width: "31%",
-    aspectRatio: 1,
-    borderRadius: radius.pill,
-    backgroundColor: colors.card,
-    borderColor: colors.border,
-    borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: spacing.md,
-  },
-  ringOn: { borderColor: colors.accent },
-  ringTitle: { color: colors.textPrimary, fontWeight: "800" },
-  ringSub: { color: colors.textSecondary, fontSize: fontSize.xs, textAlign: "center", marginTop: spacing.xs },
   pathText: { color: colors.textSecondary, fontSize: fontSize.base, lineHeight: 24 },
   previewRow: { marginTop: spacing.xxl, flexDirection: "row", justifyContent: "space-between" },
   err: { marginTop: spacing.md, color: colors.danger, textAlign: "center" },

@@ -6,9 +6,9 @@
 import type { ExperienceLevel } from "@prisma/client";
 import { getRedisClient } from "./redisClient.js";
 
-export const CACHED_EXERCISE_LIST_TTL_SECONDS = 86400;
+const CACHED_EXERCISE_LIST_TTL_SECONDS = 86400;
 
-export function exerciseListCacheKey(experienceLevel: ExperienceLevel): string {
+function exerciseListCacheKey(experienceLevel: ExperienceLevel): string {
   return `exercises:${experienceLevel}`;
 }
 

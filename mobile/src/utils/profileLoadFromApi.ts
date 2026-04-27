@@ -11,7 +11,7 @@ export type DraftSetters = {
   setDraftNotifications: (n: boolean) => void;
 };
 
-export function applyProgressToStore(
+function applyProgressToStore(
   dispatch: AppDispatch,
   goal: GoalKey,
   experienceLevel: LevelKey,
@@ -28,7 +28,7 @@ export function applyProgressToStore(
   );
 }
 
-export function syncDraftsFromProgress(
+function syncDraftsFromProgress(
   setters: DraftSetters,
   goal: GoalKey,
   experienceLevel: LevelKey,

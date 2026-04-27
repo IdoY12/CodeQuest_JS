@@ -3,7 +3,7 @@ import { useAppSelector } from "@/redux/hooks";
 import { logNav } from "@/utils/logger";
 import type { Experience } from "@/redux/profile-slice";
 
-export type BlockRow = {
+type BlockRow = {
   blockIndex: number;
   title: string;
   description: string;

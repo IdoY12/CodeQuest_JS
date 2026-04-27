@@ -4,7 +4,7 @@ import type Exercise from "@/models/Exercise";
 import { lineBugPickHeuristic } from "@/utils/formatHelpers";
 
 /** How to render an `MCQ` row when the API only exposes `MCQ` | `PUZZLE`. */
-export type McqSubkind = "concept" | "bugLine" | "lineOrder" | "mcqTap";
+type McqSubkind = "concept" | "bugLine" | "lineOrder" | "mcqTap";
 
 export function mcqSubkind(exercise: Exercise): McqSubkind {
   if (exercise.options.length === 0) return "concept";

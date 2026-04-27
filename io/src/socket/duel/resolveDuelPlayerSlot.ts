@@ -9,7 +9,7 @@
 
 import type { SessionState } from "./types.js";
 
-export type DuelPlayerSlot = "player1" | "player2";
+type DuelPlayerSlot = "player1" | "player2";
 
 export function resolveDuelPlayerSlot(session: SessionState, socketId: string): DuelPlayerSlot | null {
   if (socketId === session.player1.socketId) return "player1";

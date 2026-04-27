@@ -5,8 +5,6 @@ import { verifyAccessToken as verifyAccessJwt } from "@project/auth-jwt/verifyAc
 import { verifyRefreshToken as verifyRefreshJwt } from "@project/auth-jwt/verifyRefreshToken";
 import config from "config";
 
-export type { AuthTokenPayload } from "@project/auth-jwt/authTokenPayload";
-
 function readJwtAccessSecretFromConfig(): string {
   const value = config.get<string>("app.jwtAccessSecret");
 

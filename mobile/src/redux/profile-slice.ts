@@ -12,8 +12,6 @@ type ProfileState = {
   experienceLevel?: Experience;
   commitment: Commitment;
   notificationsEnabled: boolean;
-  soundsEnabled: boolean;
-  hapticsEnabled: boolean;
 };
 
 const initialState: ProfileState = {
@@ -23,8 +21,6 @@ const initialState: ProfileState = {
   commitment: "15",
   experienceLevel: "JUNIOR",
   notificationsEnabled: true,
-  soundsEnabled: true,
-  hapticsEnabled: true,
 };
 
 const profileSlice = createSlice({
@@ -63,8 +59,6 @@ const profileSlice = createSlice({
       a: PayloadAction<{ goal: Goal; experienceLevel: Experience; commitment: Commitment; notificationsEnabled: boolean }>,
     ) => void Object.assign(state, a.payload),
     setNotificationsEnabled: (s, a: PayloadAction<boolean>) => void (s.notificationsEnabled = a.payload),
-    toggleSounds: (s, a: PayloadAction<boolean>) => void (s.soundsEnabled = a.payload),
-    toggleHaptics: (s, a: PayloadAction<boolean>) => void (s.hapticsEnabled = a.payload),
   },
 });
 
@@ -76,8 +70,6 @@ export const {
   completeOnboarding,
   updatePreferences,
   setNotificationsEnabled,
-  toggleSounds,
-  toggleHaptics,
 } = profileSlice.actions;
 
 export default profileSlice.reducer;

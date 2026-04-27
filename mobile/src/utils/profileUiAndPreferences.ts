@@ -27,14 +27,6 @@ export function profileInitials(username: string): string {
   return (username || "C").trim().charAt(0).toUpperCase();
 }
 
-export function showLanguageComingSoon(): void {
-  Alert.alert("Language", "Language selection is coming soon.");
-}
-
-export function showThemeComingSoon(): void {
-  Alert.alert("Theme", "Theme selection is coming soon.");
-}
-
 export function openSupportUrl(url: string): void {
   void Linking.openURL(url).catch(() => Alert.alert("Unavailable", "Could not open this link right now."));
 }

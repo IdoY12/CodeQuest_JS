@@ -14,8 +14,6 @@ export function useProfileRedux() {
   const experienceLevel = useAppSelector((s) => s.profile.experienceLevel);
   const commitment = useAppSelector((s) => s.profile.commitment);
   const notificationsEnabled = useAppSelector((s) => s.profile.notificationsEnabled);
-  const soundsEnabled = useAppSelector((s) => s.profile.soundsEnabled);
-  const hapticsEnabled = useAppSelector((s) => s.profile.hapticsEnabled);
   const accessToken = useAppSelector((s) => s.session.accessToken);
   const refreshToken = useAppSelector((s) => s.session.refreshToken);
   const studySecondsToday = useAppSelector((s) => s.session.studySecondsToday);
@@ -38,8 +36,6 @@ export function useProfileRedux() {
     experienceLevel,
     commitment,
     notificationsEnabled,
-    soundsEnabled,
-    hapticsEnabled,
     accessToken,
     refreshToken,
     duelWinRate,

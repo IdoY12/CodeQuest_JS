@@ -1,7 +1,6 @@
 import React from "react";
 import { Alert } from "react-native";
 import { useAppDispatch } from "@/redux/hooks";
-import { toggleHaptics, toggleSounds } from "@/redux/profile-slice";
 import type UserService from "@/services/auth-aware/UserService";
 import { changePasswordRequest, deleteAccountRequest, updateUsername } from "@/utils/profileAccountMutations";
 import { patchUserPreferences } from "@/utils/profileUiAndPreferences";
@@ -43,10 +42,6 @@ export function useProfileAccountHandlers(r: ProfileReduxState, d: ProfileDraftS
     d.setBusyAction(null);
   }, [r.accessToken, d.busyAction, d.newPassword, d.currentPassword, d.setBusyAction, d.setCurrentPassword, d.setNewPassword, d.setPasswordModalVisible, d.setSaveMessage, user]);
 
-  const onToggleSounds = React.useCallback((v: boolean) => void dispatch(toggleSounds(v)), [dispatch]);
-
-  const onToggleHaptics = React.useCallback((v: boolean) => void dispatch(toggleHaptics(v)), [dispatch]);
-
   const onDeleteAccount = React.useCallback(async () => {
     if (!r.accessToken || !user || d.confirmDeleteText !== "DELETE" || d.busyAction) return;
     d.setBusyAction("delete");
@@ -68,8 +63,6 @@ export function useProfileAccountHandlers(r: ProfileReduxState, d: ProfileDraftS
     onSavePreferences,
     onSaveUsername,
     onChangePassword,
-    onToggleSounds,
-    onToggleHaptics,
     onDeleteAccount,
     onLogoutPress,
   };

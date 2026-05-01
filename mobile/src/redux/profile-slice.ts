@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-
+achievment
 export type Goal = "JOB" | "WORK" | "FUN" | "PROJECT";
 export type Experience = "JUNIOR" | "MID" | "SENIOR";
 export type Commitment = "10" | "15" | "25";

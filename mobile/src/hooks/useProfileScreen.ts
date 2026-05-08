@@ -1,5 +1,6 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useAppDispatch } from "@/redux/hooks";
+import { setNotificationsEnabled } from "@/redux/profile-slice";
 import type { AppDispatch } from "@/redux/store";
 import { logNav } from "@/utils/logger";
 import type UserService from "@/services/auth-aware/UserService";
@@ -64,7 +65,15 @@ export function useProfileScreen() {
   const { onSaveLearningSettings, ...handlers } = useProfileAccountHandlers(profileRedux, profileDraft, user);
   const { onAvatarPress } = useProfileAvatarHandlers(profileRedux, profileDraft, user);
 
-  return { ...profileRedux, ...profileDraft, onSaveLearningSettings, onAvatarPress, ...handlers };
+  const onNotificationsEnabledChange = useCallback(
+    (notificationsEnabled: boolean) => {
+      profileDraft.setDraftNotifications(notificationsEnabled);
+      dispatch(setNotificationsEnabled(notificationsEnabled));
+    },
+    [dispatch, profileDraft.setDraftNotifications],
+  );
+
+  return { ...profileRedux, ...profileDraft, onSaveLearningSettings, onAvatarPress, onNotificationsEnabledChange, ...handlers };
 }
 
 export type UseProfileScreenReturn = ReturnType<typeof useProfileScreen>;

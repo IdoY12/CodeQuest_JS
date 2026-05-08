@@ -22,12 +22,14 @@ export function ProfileAuthenticatedAccount({ p }: { p: UseProfileScreenReturn }
         </View>
         <Text style={a.chev}>›</Text>
       </Pressable>
-      <View style={profileFormRowsStyles.rowWithSwitch}>
+      <View style={[profileFormRowsStyles.rowWithSwitch, { alignItems: "center" }]}>
         <View style={profileFormRowsStyles.rowLeft}>
           <Text style={profileFormRowsStyles.rowIcon}>🔔</Text>
           <Text style={profileFormRowsStyles.rowText}>Notifications</Text>
         </View>
-        <Switch value={p.draftNotifications} onValueChange={p.setDraftNotifications} />
+        <View style={a.notificationsSwitchWrap}>
+          <Switch value={p.draftNotifications} onValueChange={p.onNotificationsEnabledChange} />
+        </View>
       </View>
     </View>
   );

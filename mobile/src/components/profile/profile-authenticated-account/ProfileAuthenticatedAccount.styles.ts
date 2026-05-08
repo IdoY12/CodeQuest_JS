@@ -15,4 +15,5 @@ export const a = StyleSheet.create({
   },
   rowPress: { opacity: 0.75 },
   chev: { color: colors.textSecondary, fontSize: fontSize.lg },
+  notificationsSwitchWrap: { alignSelf: "stretch", justifyContent: "center" },
 });

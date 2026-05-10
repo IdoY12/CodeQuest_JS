@@ -17,9 +17,6 @@
   "database": {
     "url": "postgresql://postgres:postgres@localhost:5432/codequest_js?schema=public"
   },
-  "redis": {
-    "url": ""
-  },
   "s3": {
     "bucket": "questcode-avatars",
     "connection": {

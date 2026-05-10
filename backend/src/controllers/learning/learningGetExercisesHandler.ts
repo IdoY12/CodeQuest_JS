@@ -3,7 +3,6 @@ import type { Request } from "express";
 import { prisma } from "@project/db";
 import type { ExperienceLevel } from "@prisma/client";
 import { mapExerciseRowToClientDto } from "../../dto/mapExerciseRowToClientDto.js";
-import { readCachedExerciseListJson, writeCachedExerciseListJson } from "../../lib/redis/cachedExerciseList.js";
 import { logError, logInfo } from "../../utils/logger.js";
 
 const levels: ExperienceLevel[] = ["JUNIOR", "MID", "SENIOR"];
@@ -13,18 +12,12 @@ export async function learningGetExercisesHandler(request: Request, response: Re
     const raw = String(request.params.experienceLevel ?? "").toUpperCase();
     const experienceLevel = (levels.includes(raw as ExperienceLevel) ? raw : "JUNIOR") as ExperienceLevel;
     logInfo("[TASKS]", "exercises:fetch", { experienceLevel });
-    const cached = await readCachedExerciseListJson(experienceLevel);
-    if (cached) {
-      response.type("application/json").send(cached);
-      return;
-    }
     const exercises = await prisma.exercise.findMany({
       where: { experienceLevel },
       orderBy: { orderIndex: "asc" },
       include: { options: true },
     });
     const json = JSON.stringify(exercises.map(mapExerciseRowToClientDto));
-    void writeCachedExerciseListJson(experienceLevel, json);
     response.type("application/json").send(json);
   } catch (error) {
     logError("[TASKS]", error, { phase: "learning-exercises", experienceLevel: request.params.experienceLevel });

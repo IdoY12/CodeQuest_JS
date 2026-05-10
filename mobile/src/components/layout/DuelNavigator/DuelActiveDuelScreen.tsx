@@ -11,17 +11,21 @@ import { styles } from "./DuelNavigator.styles";
 export function DuelActiveDuelScreen({ navigation }: ActiveDuelScreenProps) {
   const u = useDuelActiveDuelScreen(navigation);
   const emittedRef = useRef(false);
+
+  // Guard: if we arrive here without a valid session (stale navigation, deep link),
+  // go back immediately rather than waiting on socket events that will never come.
+  useEffect(() => {
+    if (!u.sessionId) navigation.goBack();
+  }, [u.sessionId, navigation]);
+
   useEffect(() => {
     emittedRef.current = false;
     const sid = u.sessionId;
     const leave = () => {
       if (u.skipLeaveAfterEndRef.current || !sid || emittedRef.current) return;
-      emittedRef.current = true;
-      duelLeaveDuel(sid);
+      emittedRef.current = true; duelLeaveDuel(sid);
     };
-    const s1 = navigation.addListener("beforeRemove", leave);
-    const s2 = navigation.addListener("blur", leave);
-    return () => { s1(); s2(); };
+    return navigation.addListener("beforeRemove", leave);
   }, [navigation, u.sessionId]);
 
   if (!u.round) {
@@ -36,9 +40,7 @@ export function DuelActiveDuelScreen({ navigation }: ActiveDuelScreenProps) {
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <ScrollView style={styles.container} contentContainerStyle={styles.duelContent} showsVerticalScrollIndicator={false}>
         <View style={styles.scoreRow}>
-          <Text style={styles.score}>
-            {u.username} {u.myScore}
-          </Text>
+          <Text style={styles.score}>{u.username} {u.myScore}</Text>
           <Text style={styles.score}>Round {u.roundNumber}/5</Text>
           <View style={styles.scoreCellEnd}>
             {u.opponentAvatarUrl ? (
@@ -48,16 +50,12 @@ export function DuelActiveDuelScreen({ navigation }: ActiveDuelScreenProps) {
                 <Text style={styles.duelMiniInitialTxt}>{(u.opponentName || "?").slice(0, 1).toUpperCase()}</Text>
               </View>
             )}
-            <Text style={styles.score} numberOfLines={1}>
-              {u.opponentName} {u.oppScore}
-            </Text>
+            <Text style={styles.score} numberOfLines={1}>{u.opponentName} {u.oppScore}</Text>
           </View>
         </View>
         <Text style={styles.sub}>You can choose up to 3 answers. ({u.attemptsLeft} remaining)</Text>
         <Text style={styles.cardTitle}>{u.round.prompt}</Text>
-        <View style={styles.codeWrap}>
-          <CodeSnippet code={u.round.codeSnippet} />
-        </View>
+        <View style={styles.codeWrap}><CodeSnippet code={u.round.codeSnippet} /></View>
         <View style={styles.card}>
           <DuelActiveAnswerZone round={u.round} selected={u.selected} locked={u.locked} submit={u.submit} />
         </View>
@@ -69,9 +67,7 @@ export function DuelActiveDuelScreen({ navigation }: ActiveDuelScreenProps) {
           <Text style={styles.overlayText}>
             {u.myScore === u.oppScore ? "Tie round" : u.myScore > u.oppScore ? "You lead" : "Opponent leads"}
           </Text>
-          <Text style={styles.overlayText}>
-            Score: {u.myScore} - {u.oppScore}
-          </Text>
+          <Text style={styles.overlayText}>Score: {u.myScore} - {u.oppScore}</Text>
         </View>
       ) : null}
     </SafeAreaView>

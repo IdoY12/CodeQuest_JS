@@ -1,15 +1,14 @@
 import React, { useEffect } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, Text } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppSelector } from "@/redux/hooks";
-import { useDuelResetDuel } from "@/hooks/useDuelSocket";
+import { duelResetMatch } from "@/utils/duelSocketCommands";
 import { guardDuelAccess } from "@/utils/formatHelpers";
 import { logDuel, logNav } from "@/utils/logger";
 import type { DuelHomeScreenProps } from "@/types/duelNavigation.types";
 import { styles } from "./DuelNavigator.styles";
 
 export function DuelHomeScreen({ navigation }: DuelHomeScreenProps) {
-  const { resetDuel } = useDuelResetDuel();
   const duelWins = useAppSelector((s) => s.duel.duelWins);
   const duelLosses = useAppSelector((s) => s.duel.duelLosses);
   const isGuest = useAppSelector((s) => s.session.isGuest);
@@ -19,28 +18,22 @@ export function DuelHomeScreen({ navigation }: DuelHomeScreenProps) {
     return () => logNav("screen:leave", { screen: "DuelHomeScreen" });
   }, []);
 
+  // Reset stale duel state every time the user lands on this screen (initial mount + back navigation).
+  useEffect(() => {
+    return navigation.addListener("focus", duelResetMatch);
+  }, [navigation]);
+
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <Text style={styles.title}>Duels</Text>
-      <Text style={styles.sub}>
-        Wins / Losses: {duelWins} / {duelLosses}
-      </Text>
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Recent Duels</Text>
-        <Text style={styles.sub}>vs AsyncNinja · Win · +0.8s faster</Text>
-        <Text style={styles.sub}>vs ScopeMaster · Loss · -1.4s slower</Text>
-      </View>
+      <Text style={styles.sub}>Wins / Losses: {duelWins} / {duelLosses}</Text>
       <Pressable
         style={styles.matchBtn}
         onPress={() => {
           guardDuelAccess(
             isGuest,
             () => navigation.getParent()?.getParent()?.navigate("Auth" as never),
-            () => {
-              logDuel("matchmaking:start");
-              resetDuel();
-              navigation.navigate("Matchmaking");
-            },
+            () => { logDuel("matchmaking:start"); duelResetMatch(); navigation.navigate("Matchmaking"); },
           );
         }}
       >

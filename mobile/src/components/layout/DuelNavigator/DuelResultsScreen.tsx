@@ -1,25 +1,21 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { logNav } from "@/utils/logger";
+import { duelConnectionRefs } from "@/utils/duelSocketModels";
+import { duelResetMatch } from "@/utils/duelSocketCommands";
 import { useDuelResultsSocket } from "@/hooks/useDuelSocket";
 import type { DuelResultsScreenProps } from "@/types/duelNavigation.types";
 import { styles } from "./DuelNavigator.styles";
 
 export function DuelResultsScreen({ route, navigation }: DuelResultsScreenProps) {
   const { won, score, xpEarned, replay = [], opponentDisconnected } = route.params;
-  const { sessionId, rematchStatus, requestRematch, resetDuel, socket } = useDuelResultsSocket();
+  const { sessionId, rematchStatus, requestRematch } = useDuelResultsSocket();
   const initialSessionIdRef = useRef(sessionId);
   const matchFoundRef = useRef(false);
   const [isWaiting, setIsWaiting] = useState(false);
 
   useEffect(() => { logNav("screen:enter", { screen: "DuelResultsScreen" }); return () => logNav("screen:leave", { screen: "DuelResultsScreen" }); }, []);
-  
-  useLayoutEffect(() => {
-    navigation.setOptions({
-      headerLeft: () => <Pressable onPress={() => { resetDuel(); navigation.popToTop(); }}><Text style={styles.secondaryLabel}>Duel</Text></Pressable>,
-    });
-  }, [navigation, resetDuel]);
 
   useEffect(() => {
     if (rematchStatus === "opponent_left" || opponentDisconnected) { setIsWaiting(false); return; }
@@ -27,13 +23,13 @@ export function DuelResultsScreen({ route, navigation }: DuelResultsScreenProps)
   }, [sessionId, isWaiting, rematchStatus, navigation, opponentDisconnected]);
 
   useEffect(() => {
-    const abandon = () => { if (!matchFoundRef.current && initialSessionIdRef.current) socket?.emit("rematch_abandoned", { session_id: initialSessionIdRef.current }); };
+    const abandon = () => { if (!matchFoundRef.current && initialSessionIdRef.current) duelConnectionRefs.socket?.emit("rematch_abandoned", { session_id: initialSessionIdRef.current }); };
     const unsubRemove = navigation.addListener("beforeRemove", abandon);
     const unsubBlur = navigation.addListener("blur", abandon);
     return () => { unsubRemove(); unsubBlur(); };
-  }, [navigation, socket]);
+  }, [navigation]);
 
-  const goHome = () => { resetDuel(); navigation.popToTop(); };
+  const goHome = () => { duelResetMatch(); navigation.popToTop(); };
 
   if (rematchStatus === "opponent_left" || opponentDisconnected) {
     return (

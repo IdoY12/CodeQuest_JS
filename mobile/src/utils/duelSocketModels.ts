@@ -45,6 +45,7 @@ export const duelConnectionRefs = {
   socket: null as Socket | null,
   lastAuthTokenKey: "__init__",
   userId: null as string | null,
+  disconnectTimer: null as ReturnType<typeof setTimeout> | null,
 };
 
 type ReplayRaw = {

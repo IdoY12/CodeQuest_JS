@@ -64,11 +64,12 @@ export function useDuelActiveDuelScreen(navigation: Nav) {
       dispatch(runStreakAppOpen({ today }));
       dispatch(runStreakQualifyingExercise({ today }));
     } else if (!isGuest && typeof duelEnd.streakCurrent === "number") {
+      const today = getStreakCalendarDate();
       dispatch(
         hydrateStreak({
           streakCurrent: duelEnd.streakCurrent,
-          lastActivityDate: null,
-          lastCheckedDate: null,
+          lastActivityDate: today,
+          lastCheckedDate: today,
         }),
       );
     }

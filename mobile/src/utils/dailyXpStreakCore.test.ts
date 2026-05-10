@@ -99,7 +99,7 @@ describe("applyStreakOnQualifyingXp", () => {
     expect(applyStreakOnQualifyingXp(afterDay1, "2026-04-10")).toEqual({
       streakCount: 1,
       lastActivityDate: "2026-04-10",
-      lastCheckedDate: "2026-04-01",
+      lastCheckedDate: "2026-04-10",
     });
   });
 

@@ -9,8 +9,8 @@ export async function syncRegisteredStreakFromServer(dispatch: AppDispatch, _acc
   dispatch(
     hydrateStreak({
       streakCurrent: progress.streakCurrent,
-      lastActivityDate: null,
-      lastCheckedDate: null,
+      lastActivityDate: progress.streakLastActivityDate,
+      lastCheckedDate: progress.streakLastCheckedDate,
     }),
   );
 }

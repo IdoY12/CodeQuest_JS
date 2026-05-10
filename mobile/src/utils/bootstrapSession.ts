@@ -57,8 +57,8 @@ export async function bootstrapSession(dispatch: AppDispatch): Promise<void> {
     dispatch(
       hydrateStreak({
         streakCurrent: progress.streakCurrent,
-        lastActivityDate: null,
-        lastCheckedDate: null,
+        lastActivityDate: progress.streakLastActivityDate,
+        lastCheckedDate: progress.streakLastCheckedDate,
       }),
     );
     dispatch(

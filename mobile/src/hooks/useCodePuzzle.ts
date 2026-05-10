@@ -64,7 +64,7 @@ export function useCodePuzzle() {
       } else {
         if (typeof data.xpTotal === "number") dispatch(hydrateXp({ xpTotal: data.xpTotal, level: Math.max(1, Math.floor(data.xpTotal / XP_PER_CORRECT_EXERCISE) + 1) }));
         else dispatch(addXp(XP_PER_CORRECT_EXERCISE));
-        if (typeof data.streakCurrent === "number") dispatch(hydrateStreak({ streakCurrent: data.streakCurrent, lastActivityDate: null, lastCheckedDate: null }));
+        if (typeof data.streakCurrent === "number") dispatch(hydrateStreak({ streakCurrent: data.streakCurrent, lastActivityDate: clientLocalDate, lastCheckedDate: clientLocalDate }));
       }
       setMessage(`Puzzle solved! +${XP_PER_CORRECT_EXERCISE} XP.`);
     } catch { setMessage("Failed to submit. Please try again."); }

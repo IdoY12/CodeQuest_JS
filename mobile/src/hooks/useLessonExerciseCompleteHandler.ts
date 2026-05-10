@@ -56,11 +56,12 @@ export function useLessonExerciseCompleteHandler(
       });
 
       if (!isGuest && typeof completion.submitResult.streakCurrent === "number") {
+        const today = getStreakCalendarDate();
         dispatch(
           hydrateStreak({
             streakCurrent: completion.submitResult.streakCurrent,
-            lastActivityDate: null,
-            lastCheckedDate: null,
+            lastActivityDate: today,
+            lastCheckedDate: today,
           }),
         );
       }

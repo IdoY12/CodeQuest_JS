@@ -41,6 +41,8 @@ export async function getProgressSummary(req: AuthenticatedRequest, res: Respons
       xpTotal: progress?.xpTotal ?? 0,
       level: progress?.level ?? 1,
       streakCurrent: progress?.streakCurrent ?? 0,
+      streakLastActivityDate: progress?.streakLastActivityDate ?? null,
+      streakLastCheckedDate: progress?.streakLastCheckedDate ?? null,
       lessonsCompleted: progress?.currentExerciseIndex ?? 0,
       duelWins,
       duelLosses,

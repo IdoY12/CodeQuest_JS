@@ -1,7 +1,10 @@
 /**
- * Shared pure streak rules (local calendar dates, YYYY-MM-DD).
+ * Shared pure streak rules.
  * Used by mobile UI helpers and by server/io persistence — single source for rule math.
  */
+
+/** Gap in streak units that triggers a reset or restart (gap >= 2 means one unit was skipped). */
+const STREAK_RESET_THRESHOLD = 2;
 
 export type DailyXpStreakPersisted = {
   streakCount: number;
@@ -10,23 +13,14 @@ export type DailyXpStreakPersisted = {
 };
 
 export function calendarDaysBetweenEarlierAndLater(earlierDateOnly: string, laterDateOnly: string): number {
-  // Split the date strings (YYYY-MM-DD) and convert each part into a number
-  const [y1, m1, d1] = earlierDateOnly.split("-").map(Number);
-  const [y2, m2, d2] = laterDateOnly.split("-").map(Number);
-
-  // Convert to UTC timestamps. Note: months are 0-indexed in JS (0=Jan, 11=Dec), so we subtract 1
-  const start = Date.UTC(y1, m1 - 1, d1);
-  const end = Date.UTC(y2, m2 - 1, d2);
-
-  // Calculate the difference in milliseconds and divide by milliseconds in a day (24*60*60*1000)
-  return Math.round((end - start) / 86_400_000);
+  return Number(laterDateOnly) - Number(earlierDateOnly);
 }
 
 export function applyStreakOnAppOpen(state: DailyXpStreakPersisted, today: string): DailyXpStreakPersisted {
   const missedAppOpenDay =
-    state.lastCheckedDate !== null && calendarDaysBetweenEarlierAndLater(state.lastCheckedDate, today) >= 2;
+    state.lastCheckedDate !== null && calendarDaysBetweenEarlierAndLater(state.lastCheckedDate, today) >= STREAK_RESET_THRESHOLD;
   const missedExerciseDay =
-    state.lastActivityDate !== null && calendarDaysBetweenEarlierAndLater(state.lastActivityDate, today) >= 2;
+    state.lastActivityDate !== null && calendarDaysBetweenEarlierAndLater(state.lastActivityDate, today) >= STREAK_RESET_THRESHOLD;
   const streakCount = missedAppOpenDay || missedExerciseDay ? 0 : state.streakCount;
   return {
     streakCount,
@@ -41,20 +35,20 @@ export function applyStreakOnQualifyingXp(state: DailyXpStreakPersisted, today: 
     return {
       streakCount: 1,
       lastActivityDate: today,
-      lastCheckedDate: state.lastCheckedDate,
+      lastCheckedDate: today,
     };
   }
   const gap = calendarDaysBetweenEarlierAndLater(state.lastActivityDate, today);
-  if (gap >= 2) {
+  if (gap >= STREAK_RESET_THRESHOLD) {
     return {
       streakCount: 1,
       lastActivityDate: today,
-      lastCheckedDate: state.lastCheckedDate,
+      lastCheckedDate: today,
     };
   }
   return {
     streakCount: state.streakCount + 1,
     lastActivityDate: today,
-    lastCheckedDate: state.lastCheckedDate,
+    lastCheckedDate: today,
   };
 }

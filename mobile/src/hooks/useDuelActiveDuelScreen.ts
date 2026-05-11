@@ -10,12 +10,12 @@ import { logDuel, logNav } from "@/utils/logger";
 import { useDuelActiveDuelLive } from "@/hooks/useDuelSocket";
 import { duelSubmitAnswer, duelPlayerReady } from "@/utils/duelSocketCommands";
 import type { DuelStackParamList } from "@/types/duelNavigation.types";
-import { DUEL_MAX_ATTEMPTS_PER_ROUND } from "@/constants/duelUiConstants";
+import { DUEL_MAX_ATTEMPTS_PER_ROUND } from "@project/duel-constants";
 type Nav = NativeStackNavigationProp<DuelStackParamList, "ActiveDuel">;
 
 export function useDuelActiveDuelScreen(navigation: Nav) {
   const dispatch = useAppDispatch();
-  const { round, score, sessionId, duelEnd, opponent, lastCorrectAnswer, wrongAnswerCount } = useDuelActiveDuelLive();
+  const { round, score, sessionId, duelEnd, opponent, lastCorrectAnswer, wrongAnswerCount, opponentLeft } = useDuelActiveDuelLive();
   const userId = useAppSelector((s) => s.session.userId);
   const isGuest = useAppSelector((s) => s.session.isGuest);
   const username = useAppSelector((s) => s.profile.username);
@@ -24,10 +24,7 @@ export function useDuelActiveDuelScreen(navigation: Nav) {
   const roundStartTimeRef = useRef(Date.now());
   const skipLeaveAfterEndRef = useRef(false);
 
-  useEffect(() => {
-    logNav("screen:enter", { screen: "ActiveDuelScreen" });
-    return () => logNav("screen:leave", { screen: "ActiveDuelScreen" });
-  }, []);
+  useEffect(() => { logNav("screen:enter", { screen: "ActiveDuelScreen" }); return () => logNav("screen:leave", { screen: "ActiveDuelScreen" }); }, []);
 
   useEffect(() => {
     if (!round) return;
@@ -35,6 +32,8 @@ export function useDuelActiveDuelScreen(navigation: Nav) {
     setSubmitted(false);
     roundStartTimeRef.current = Date.now();
   }, [round]);
+  // Unlock after each server-confirmed wrong answer so the player can retry.
+  useEffect(() => { setSubmitted(false); }, [wrongAnswerCount]);
 
   useEffect(() => {
     if (sessionId && userId) duelPlayerReady(sessionId);
@@ -59,10 +58,10 @@ export function useDuelActiveDuelScreen(navigation: Nav) {
     } else if (!isGuest && typeof duelEnd.streakCurrent === "number") {
       dispatch(hydrateStreak({ streakCurrent: duelEnd.streakCurrent, lastActivityDate: today, lastCheckedDate: today }));
     }
-    dispatch(applyDuelResult({ won: duelEnd.won }));
-    navigation.replace("DuelResults", { won: duelEnd.won, score: duelEnd.finalScore, xpEarned: duelEnd.xpEarned, replay: duelEnd.roundReplay, ...(duelEnd.opponentDisconnected ? { opponentDisconnected: true } : {}) });
+    if (!duelEnd.tied) dispatch(applyDuelResult({ won: duelEnd.won }));
+    navigation.replace("DuelResults", { won: duelEnd.won, score: duelEnd.finalScore, xpEarned: duelEnd.xpEarned, replay: duelEnd.roundReplay, ...(duelEnd.opponentDisconnected ? { opponentDisconnected: true } : {}), ...(duelEnd.tied ? { tied: true } : {}) });
   }, [dispatch, duelEnd, isGuest, navigation]);
-  const locked = submitted || wrongAnswerCount >= DUEL_MAX_ATTEMPTS_PER_ROUND;
+  const locked = lastCorrectAnswer !== null || submitted || wrongAnswerCount >= DUEL_MAX_ATTEMPTS_PER_ROUND;
   const submit = (answer: string) => {
     if (!sessionId || !userId || locked) return;
     duelSubmitAnswer({ sessionId, roundNumber: round?.roundNumber ?? 0, answer, timeTakenMs: Date.now() - roundStartTimeRef.current });
@@ -74,6 +73,6 @@ export function useDuelActiveDuelScreen(navigation: Nav) {
     round, username, opponentName: opponent?.username ?? "Opponent", opponentAvatarUrl: opponent?.avatarUrl ?? null,
     roundNumber: round?.roundNumber ?? 0, selected, myScore: score.me, oppScore: score.opp,
     overlayVisible: lastCorrectAnswer !== null, lastCorrectAnswer, locked,
-    attemptsLeft: DUEL_MAX_ATTEMPTS_PER_ROUND - wrongAnswerCount, submit, sessionId, skipLeaveAfterEndRef,
+    attemptsLeft: DUEL_MAX_ATTEMPTS_PER_ROUND - wrongAnswerCount, submit, sessionId, skipLeaveAfterEndRef, opponentLeft,
   };
 }

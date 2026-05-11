@@ -31,7 +31,7 @@ export function DuelActiveDuelScreen({ navigation }: ActiveDuelScreenProps) {
   if (!u.round) {
     return (
       <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
-        <Text style={styles.sub}>Waiting for round start...</Text>
+        <Text style={styles.sub}>{u.opponentLeft ? "Opponent left, calculating result…" : "Waiting for round start..."}</Text>
       </SafeAreaView>
     );
   }

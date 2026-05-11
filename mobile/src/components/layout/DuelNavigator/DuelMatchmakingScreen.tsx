@@ -1,9 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Image, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppSelector } from "@/redux/hooks";
 import { useDuelMatchmakingSocket } from "@/hooks/useDuelSocket";
 import { logDuel, logNav } from "@/utils/logger";
+import { duelLeaveDuel } from "@/utils/duelSocketCommands";
 import type { MatchmakingScreenProps } from "@/types/duelNavigation.types";
 import { styles } from "./DuelNavigator.styles";
 
@@ -20,23 +21,25 @@ export function DuelMatchmakingScreen({ navigation }: MatchmakingScreenProps) {
   const hasJoinedQueueRef = useRef(false);
   const usernameRef = useRef(username);
   const accessTokenRef = useRef(accessToken);
+  const sessionIdRef = useRef<string | null>(null);
+  const navigatedRef = useRef(false);
 
-  useEffect(() => { usernameRef.current = username; accessTokenRef.current = accessToken; }, [username, accessToken]);
+  useEffect(() => { usernameRef.current = username; accessTokenRef.current = accessToken; sessionIdRef.current = sessionId; }, [username, accessToken, sessionId]);
   useEffect(() => { logNav("screen:enter", { screen: "MatchmakingScreen" }); return () => logNav("screen:leave", { screen: "MatchmakingScreen" }); }, []);
   useEffect(() => {
-    if (!userId || !accessToken || hasJoinedQueueRef.current) return;
+    if (!userId || !accessToken || hasJoinedQueueRef.current || queueRejected) return;
     hasJoinedQueueRef.current = true;
     joinQueue({ userId, username: usernameRef.current, token: accessTokenRef.current });
     logDuel("queue:join", { userId });
     const interval = setInterval(() => setSeconds((v) => v + 1), QUEUE_TIMER_INTERVAL_MS);
-    return () => { clearInterval(interval); logDuel("queue:leave", { userId: userId ?? "unknown" }); leaveQueue(); hasJoinedQueueRef.current = false; };
-  }, [accessToken, joinQueue, leaveQueue, userId]);
+    return () => { clearInterval(interval); logDuel("queue:leave", { userId: userId ?? "unknown" }); sessionIdRef.current ? duelLeaveDuel(sessionIdRef.current) : leaveQueue(); hasJoinedQueueRef.current = false; };
+  }, [accessToken, joinQueue, leaveQueue, userId, queueRejected]);
   useEffect(() => {
     if (!sessionId || !opponent) return undefined;
     const timer = setInterval(() => setCountdown((value) => Math.max(0, value - 1)), MATCH_COUNTDOWN_TICK_MS);
     return () => clearInterval(timer);
   }, [sessionId, opponent]);
-  useEffect(() => { if (sessionId && opponent && countdown === 0) navigation.replace("ActiveDuel"); }, [countdown, navigation, opponent, sessionId]);
+  useEffect(() => { if (sessionId && opponent && countdown === 0 && !navigatedRef.current) { navigatedRef.current = true; navigation.replace("ActiveDuel"); } }, [countdown, navigation, opponent, sessionId]);
 
   if (queueRejected) {
     return (

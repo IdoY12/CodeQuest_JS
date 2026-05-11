@@ -1,5 +1,6 @@
 import type { Socket } from "socket.io";
 import { XP_PER_CORRECT_EXERCISE } from "@project/xp-constants";
+import { prisma, getProgressForActiveUser } from "@project/db";
 import { logInfo } from "../../../utils/logger.js";
 import { clearSoloMatchTimer } from "../queue.js";
 import { broadcastQueueStatus, queue, sessions, rematchEntries } from "../state.js";
@@ -15,16 +16,22 @@ function onDuelParticipantGone(duel: DuelNamespace, leaverSocketId: string, sess
   if (session.abandonInProgress) return;
   session.abandonInProgress = true;
   const survivor = session.player1.socketId === leaverSocketId ? session.player2 : session.player1;
+  const survivorIsP1 = survivor === session.player1;
   duel.to(survivor.socketId).emit("opponent_disconnected", { at_round: session.round });
-  setTimeout(() => {
-    duel.to(survivor.socketId).emit("duel_end", {
-      winner_user_id: survivor.userId,
-      my_score: survivor.socketId === session.player1.socketId ? session.score.player1 : session.score.player2,
-      opp_score: survivor.socketId === session.player1.socketId ? session.score.player2 : session.score.player1,
-      xp_earned: XP_PER_CORRECT_EXERCISE,
+  void getProgressForActiveUser(prisma, survivor.userId)
+    .then((p) => p?.streakCurrent ?? 0)
+    .catch(() => 0)
+    .then((streak) => {
+      duel.to(survivor.socketId).emit("duel_end", {
+        winner_user_id: survivor.userId,
+        my_score: survivorIsP1 ? session.score.player1 : session.score.player2,
+        opp_score: survivorIsP1 ? session.score.player2 : session.score.player1,
+        xp_earned: XP_PER_CORRECT_EXERCISE,
+        round_replay: session.roundReplay,
+        streak_current: streak,
+      });
+      sessions.delete(sessionId);
     });
-    sessions.delete(sessionId);
-  }, 5000);
 }
 
 export function registerDisconnect(socket: Socket, duel: DuelNamespace) {

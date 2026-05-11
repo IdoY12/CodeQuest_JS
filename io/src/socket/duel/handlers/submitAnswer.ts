@@ -35,6 +35,8 @@ export function registerSubmitAnswer(socket: Socket, duel: DuelNamespace) {
             ? payload.streak_local_date : null;
 
         if (payload.answer !== correctAnswer) {
+          const attempts = slot === "player1" ? session.player1Attempts : session.player2Attempts;
+          if (attempts >= DUEL_MAX_ATTEMPTS_PER_ROUND) return;
           if (slot === "player1") session.player1Attempts += 1;
           else session.player2Attempts += 1;
           socket.emit("answer_feedback", { isCorrect: false });

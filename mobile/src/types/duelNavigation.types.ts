@@ -18,6 +18,7 @@ export type DuelStackParamList = {
     xpEarned: number;
     replay?: DuelReplayRound[];
     opponentDisconnected?: boolean;
+    tied?: boolean;
   };
 };
 

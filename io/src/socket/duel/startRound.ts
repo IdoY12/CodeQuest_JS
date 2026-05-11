@@ -9,6 +9,7 @@
 
 import { logError, logInfo } from "../../utils/logger.js";
 import { pickQuestionForSession } from "./questions.js";
+import { endSession } from "./endSession.js";
 import { sessions } from "./state.js";
 import type { DuelNamespace, SessionState } from "./types.js";
 
@@ -28,6 +29,7 @@ export async function startRound(io: DuelNamespace, sessionOrId: string | Sessio
 
     if (!question) {
       logInfo("[DUEL]", "question:none-available", { sessionId: session.sessionId });
+      void endSession(io, session);
       return;
     }
     session.currentQuestionId = question.id;

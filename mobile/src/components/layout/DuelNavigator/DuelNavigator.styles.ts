@@ -69,6 +69,4 @@ export const styles = StyleSheet.create({
   },
   replayBarMine: { height: 10, backgroundColor: colors.success },
   replayBarOpp: { height: 10, backgroundColor: colors.duel },
-  navBack: { paddingHorizontal: spacing.md, paddingVertical: spacing.xs },
-  navBackLabel: { color: colors.textPrimary, fontSize: fontSize.base },
 });

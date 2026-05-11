@@ -1,10 +1,4 @@
-/**
- * Finalizes a duel: persist session, grant summary XP sync for clients, then notify clients.
- *
- * Responsibility: write DB, emit duel_end, clear memory session, store rematch entry.
- * Layer: io duel session
- * Consumers: roundTimeoutFlow, submitAnswer
- */
+/** Finalizes a duel: writes DB, emits duel_end, clears session, registers rematch entry. */
 
 import { prisma, getProgressForActiveUser } from "@project/db";
 import { sessions, rematchEntries } from "./state.js";
@@ -13,8 +7,8 @@ import type { DuelNamespace, SessionState } from "./types.js";
 const REMATCH_EXPIRY_MS = 60_000;
 
 export async function endSession(io: DuelNamespace, session: SessionState) {
-  const winnerIsP1 = session.score.player1 >= session.score.player2;
-  const winner = winnerIsP1 ? session.player1 : session.player2;
+  const isTied = session.score.player1 === session.score.player2;
+  const winner = session.score.player1 >= session.score.player2 ? session.player1 : session.player2;
 
   await prisma.duelSession
     .create({
@@ -40,7 +34,11 @@ export async function endSession(io: DuelNamespace, session: SessionState) {
     isSolo,
     requests: new Map(),
     io,
-    timer: setTimeout(() => rematchEntries.delete(session.sessionId), REMATCH_EXPIRY_MS),
+    timer: setTimeout(() => {
+      const entry = rematchEntries.get(session.sessionId);
+      if (entry) entry.requests.forEach((socketId) => entry.io.to(socketId).emit("rematch_declined", { reason: "timeout" }));
+      rematchEntries.delete(session.sessionId);
+    }, REMATCH_EXPIRY_MS),
   });
 
   const [streakP1, streakP2] = await Promise.all([
@@ -52,8 +50,9 @@ export async function endSession(io: DuelNamespace, session: SessionState) {
   const streakP2Out = isSolo ? streakP1 : streakP2;
 
   const base = {
-    winner_user_id: winner.userId,
+    winner_user_id: isTied ? null : winner.userId,
     round_replay: session.roundReplay,
+    ...(isTied ? { tied: true } : {}),
   };
   const payloadP1 = {
     ...base,
@@ -62,19 +61,17 @@ export async function endSession(io: DuelNamespace, session: SessionState) {
     xp_earned: session.xpGrantedP1,
     streak_current: streakP1,
   };
-  const payloadP2 = {
-    ...base,
-    my_score: session.score.player2,
-    opp_score: session.score.player1,
-    xp_earned: session.xpGrantedP2,
-    streak_current: streakP2Out,
-  };
-
   if (isSolo) {
     io.to(session.roomId).emit("duel_end", payloadP1);
     return;
   }
 
   io.to(session.player1.socketId).emit("duel_end", payloadP1);
-  io.to(session.player2.socketId).emit("duel_end", payloadP2);
+  io.to(session.player2.socketId).emit("duel_end", {
+    ...base,
+    my_score: session.score.player2,
+    opp_score: session.score.player1,
+    xp_earned: session.xpGrantedP2,
+    streak_current: streakP2Out,
+  });
 }

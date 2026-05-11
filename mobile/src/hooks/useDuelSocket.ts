@@ -55,5 +55,6 @@ export function useDuelActiveDuelLive() {
   const opponent = useAppSelector((s) => s.duelLive.opponent);
   const lastCorrectAnswer = useAppSelector((s) => s.duelLive.lastCorrectAnswer);
   const wrongAnswerCount = useAppSelector((s) => s.duelLive.wrongAnswerCount);
-  return { round, score, sessionId, duelEnd, opponent, lastCorrectAnswer, wrongAnswerCount };
+  const opponentLeft = useAppSelector((s) => s.duelLive.opponentLeft);
+  return { round, score, sessionId, duelEnd, opponent, lastCorrectAnswer, wrongAnswerCount, opponentLeft };
 }

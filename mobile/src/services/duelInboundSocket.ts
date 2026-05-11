@@ -1,11 +1,10 @@
 /** Incoming duel Socket.IO events — one `duel-live-slice` action per wire event. */
 import type { Socket } from "socket.io-client";
-import { XP_PER_CORRECT_EXERCISE } from "@project/xp-constants";
 import { logDuel, logError } from "@/utils/logger";
 import { duelConnectionRefs, normalizeDuelReplayEntry } from "@/utils/duelSocketModels";
 import store from "@/redux/store";
 import {
-  duelEnded, matchFound, opponentDisconnected, playersOnlineSet, queueRejected, rematchDeclined,
+  duelEnded, matchFound, opponentDisconnected, opponentLeftReceived, playersOnlineSet, queueRejected, rematchDeclined,
   roundResultReceived, roundStarted, wrongAnswerIncremented,
 } from "@/redux/duel-live-slice";
 
@@ -55,19 +54,20 @@ export function bindDuelSocketEvents(socket: Socket) {
   });
   socket.on("duel_end", (p) => {
     const uid = duelConnectionRefs.userId;
-    const od = store.getState().duelLive.duelEnd?.opponentDisconnected === true;
+    const od = store.getState().duelLive.opponentLeft;
     const sc = p.streak_current;
     const streak = typeof sc === "number" ? sc : typeof sc === "string" ? Number(sc) : undefined;
     store.dispatch(duelEnded({ duelEnd: {
-      won: uid ? (p.winner_user_id as string) === uid : (p.winner_user_id as string) === socket.id,
+      won: !p.tied && (uid ? (p.winner_user_id as string) === uid : (p.winner_user_id as string) === socket.id),
       xpEarned: Number(p.xp_earned ?? 0), streakCurrent: streak, finalScore: `${p.my_score ?? 0}-${p.opp_score ?? 0}`,
       roundReplay: Array.isArray(p.round_replay) ? p.round_replay.map(normalizeDuelReplayEntry) : [],
       ...(od ? { opponentDisconnected: true } : {}),
+      ...(p.tied ? { tied: true } : {}),
     } }));
   });
   socket.on("opponent_disconnected", () => {
     logDuel("opponent:disconnected");
-    store.dispatch(opponentDisconnected({ xpEarned: XP_PER_CORRECT_EXERCISE }));
+    store.dispatch(opponentLeftReceived());
   });
   socket.on("rematch_declined", () => store.dispatch(rematchDeclined()));
 }

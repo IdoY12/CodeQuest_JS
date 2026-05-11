@@ -11,11 +11,12 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "@project/exercise-answer": "file:../packages/exercise-answer",
-    "@project/xp-constants": "file:../packages/xp-constants",
-    "@project/user-credentials": "file:../packages/user-credentials",
-    "@project/streak-logic": "file:../packages/streak-logic",
     "@expo/vector-icons": "^15.0.3",
+    "@project/duel-constants": "file:../packages/duel-constants",
+    "@project/exercise-answer": "file:../packages/exercise-answer",
+    "@project/streak-logic": "file:../packages/streak-logic",
+    "@project/user-credentials": "file:../packages/user-credentials",
+    "@project/xp-constants": "file:../packages/xp-constants",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-community/netinfo": "11.4.1",
     "@react-navigation/bottom-tabs": "^7.15.5",
@@ -46,6 +47,7 @@
   },
   "devDependencies": {
     "@types/react": "~19.1.10",
+    "babel-plugin-module-resolver": "^5.0.3",
     "typescript": "~5.9.2",
     "vitest": "^3.2.4"
   },

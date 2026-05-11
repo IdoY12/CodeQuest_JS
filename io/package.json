@@ -21,8 +21,9 @@
     "@prisma/client": "^6.19.0",
     "@project/auth-jwt": "file:../packages/auth-jwt",
     "@project/db": "file:../packages/db",
-    "@project/xp-constants": "file:../packages/xp-constants",
+    "@project/duel-constants": "file:../packages/duel-constants",
     "@project/server-kit": "file:../packages/server-kit",
+    "@project/xp-constants": "file:../packages/xp-constants",
     "config": "^4.4.1",
     "socket.io": "^4.8.3"
   },

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { logNav } from "@/utils/logger";
@@ -9,7 +9,7 @@ import type { DuelResultsScreenProps } from "@/types/duelNavigation.types";
 import { styles } from "./DuelNavigator.styles";
 
 export function DuelResultsScreen({ route, navigation }: DuelResultsScreenProps) {
-  const { won, score, xpEarned, replay = [], opponentDisconnected } = route.params;
+  const { won, score, xpEarned, replay = [], opponentDisconnected, tied } = route.params;
   const { sessionId, rematchStatus, requestRematch } = useDuelResultsSocket();
   const initialSessionIdRef = useRef(sessionId);
   const matchFoundRef = useRef(false);
@@ -25,8 +25,7 @@ export function DuelResultsScreen({ route, navigation }: DuelResultsScreenProps)
   useEffect(() => {
     const abandon = () => { if (!matchFoundRef.current && initialSessionIdRef.current) duelConnectionRefs.socket?.emit("rematch_abandoned", { session_id: initialSessionIdRef.current }); };
     const unsubRemove = navigation.addListener("beforeRemove", abandon);
-    const unsubBlur = navigation.addListener("blur", abandon);
-    return () => { unsubRemove(); unsubBlur(); };
+    return () => unsubRemove();
   }, [navigation]);
 
   const goHome = () => { duelResetMatch(); navigation.popToTop(); };
@@ -43,9 +42,9 @@ export function DuelResultsScreen({ route, navigation }: DuelResultsScreenProps)
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <ScrollView contentContainerStyle={styles.duelContent}>
-        <Text style={styles.title}>{won ? "Victory!" : "Defeat"}</Text>
+        <Text style={styles.title}>{tied ? "Tied!" : won ? "Victory!" : "Defeat"}</Text>
         <Text style={styles.sub}>Final score: {score}</Text>
-        <Text style={styles.sub}>{won ? "You won this duel." : "You lost this duel."} You earned {xpEarned} XP.</Text>
+        <Text style={styles.sub}>{tied ? "It's a tie." : won ? "You won this duel." : "You lost this duel."} You earned {xpEarned} XP.</Text>
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Code Replay</Text>
           {replay.length === 0 ? <Text style={styles.sub}>Replay is unavailable for this duel.</Text> : replay.map((item) => {

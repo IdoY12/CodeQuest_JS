@@ -1,20 +1,12 @@
-/**
- * Maps a socket id to player1 or player2 within an active duel session.
- *
- * Responsibility: prevent non-participant sockets from acting as a player.
- * Layer: io duel namespace
- * Depends on: types.ts SessionState
- * Consumers: playerReady.ts, submitAnswer.ts
- */
-
 import type { SessionState } from "./types.js";
 
 type DuelPlayerSlot = "player1" | "player2";
 
-export function resolveDuelPlayerSlot(session: SessionState, socketId: string): DuelPlayerSlot | null {
+/** Returns which slot a socket occupies; falls back to userId and updates socketId on reconnect. */
+export function resolveDuelPlayerSlot(session: SessionState, socketId: string, userId?: string): DuelPlayerSlot | null {
   if (socketId === session.player1.socketId) return "player1";
-
   if (socketId === session.player2.socketId) return "player2";
-
+  if (userId === session.player1.userId) { session.player1.socketId = socketId; return "player1"; }
+  if (userId === session.player2.userId) { session.player2.socketId = socketId; return "player2"; }
   return null;
 }

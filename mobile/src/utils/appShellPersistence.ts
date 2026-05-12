@@ -12,7 +12,8 @@ import { logError } from "@/utils/logger";
 
 export function subscribeStoreToHybridStorage(appStore: typeof store): () => void {
   let previousSerialized = "";
-  return appStore.subscribe(() => {
+  let writeTimer: ReturnType<typeof setTimeout> | null = null;
+  const unsubscribe = appStore.subscribe(() => {
     const state = appStore.getState();
     const sessionForDisk = { ...state.session, accessToken: null as string | null, refreshToken: null as string | null };
     const serialized = JSON.stringify({
@@ -26,9 +27,11 @@ export function subscribeStoreToHybridStorage(appStore: typeof store): () => voi
     });
     if (serialized === previousSerialized) return;
     previousSerialized = serialized;
-    void AsyncStorage.setItem(REDUX_PERSIST_KEY, serialized);
     void writeSecureSessionTokens(state.session.accessToken, state.session.refreshToken);
+    if (writeTimer) clearTimeout(writeTimer);
+    writeTimer = setTimeout(() => { void AsyncStorage.setItem(REDUX_PERSIST_KEY, serialized); writeTimer = null; }, 500);
   });
+  return () => { if (writeTimer) { clearTimeout(writeTimer); writeTimer = null; } unsubscribe(); };
 }
 
 /** * Setup the notification "office": run once at startup (AppShell) to ensure the 

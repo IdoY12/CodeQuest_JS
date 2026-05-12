@@ -15,7 +15,7 @@ export async function endSession(io: DuelNamespace, session: SessionState) {
       data: {
         player1Id: session.player1.userId,
         player2Id: session.player2.userId,
-        winnerId: winner.userId,
+        winnerId: isTied ? null : winner.userId,
         player1Score: session.score.player1,
         player2Score: session.score.player2,
         roundsPlayed: session.round,

@@ -7,6 +7,7 @@ export function attachAppShellForegroundInfrastructure(setIsConnected: (next: bo
   logApp("launch");
   registerGlobalErrorHandlers();
   void ensureAppShellNotificationSetup();
+  // Intentionally permanent for the app's lifetime — Expo provides no teardown API for this.
   Notifications.setNotificationHandler({
     handleNotification: async () => ({
       shouldShowAlert: true,

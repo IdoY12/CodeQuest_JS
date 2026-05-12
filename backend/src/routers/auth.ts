@@ -21,12 +21,12 @@ import {
   authRegisterRateLimiter,
 } from "../middlewares/authRateLimiters.js";
 import { validateBody } from "../middlewares/validateBody.js";
-import { loginBodySchema, registerBodySchema } from "../validators/authValidators.js";
+import { loginBodySchema, refreshBodySchema, registerBodySchema } from "../validators/authValidators.js";
 
 export const authRouter = Router();
 
 authRouter.post("/register", authRegisterRateLimiter, validateBody(registerBodySchema), authRegisterHandler);
 authRouter.post("/login", authLoginRateLimiter, validateBody(loginBodySchema), authLoginHandler);
-authRouter.post("/refresh", authRefreshRateLimiter, authRefreshHandler);
+authRouter.post("/refresh", authRefreshRateLimiter, validateBody(refreshBodySchema), authRefreshHandler);
 authRouter.get("/me", authMiddleware, authMeHandler);
 authRouter.post("/logout", authLogoutRateLimiter, authLogoutHandler);

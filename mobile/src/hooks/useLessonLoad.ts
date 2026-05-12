@@ -31,17 +31,16 @@ export function useLessonLoad(experienceLevel: Experience, accessToken: string |
   const [attemptedCount, setAttemptedCount] = useState(0);
   const isFocused = useIsFocused();
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
+  const accessTokenRef = useRef(accessToken);
+  accessTokenRef.current = accessToken;
   const trackedRef = useRef(0);
 
   const flushPractice = useCallback(async () => {
-    if (!accessToken || trackedRef.current <= 0 || !user) return;
+    if (!accessTokenRef.current || trackedRef.current <= 0 || !user) return;
     const seconds = drainRefInt(trackedRef);
     const ok = await tryPostPracticeLog(user, seconds);
-
-    if (!ok) {
-      trackedRef.current += seconds;
-    }
-  }, [accessToken, user]);
+    if (!ok) { trackedRef.current += seconds; }
+  }, [user]);
 
   useEffect(() => {
     logNav("screen:enter", { screen: "LessonScreen", experienceLevel });

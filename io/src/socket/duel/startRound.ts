@@ -20,6 +20,7 @@ export async function startRound(io: DuelNamespace, sessionOrId: string | Sessio
     if (!session) return;
 
     session.round += 1;
+    session.readyUserIds.clear();
     session.answered = false;
     session.player1Attempts = 0;
     session.player2Attempts = 0;
@@ -38,6 +39,7 @@ export async function startRound(io: DuelNamespace, sessionOrId: string | Sessio
       correctAnswer: question.correctAnswer,
       explanation: question.explanation,
     };
+    session.askedQuestionIds.add(question.id);
     const options = Array.isArray(question.options) ? (question.options as string[]) : [];
 
     io.to(session.roomId).emit("round_start", {

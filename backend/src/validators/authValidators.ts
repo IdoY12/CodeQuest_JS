@@ -43,5 +43,9 @@ export const loginBodySchema = z.object({
     .max(PASSWORD_MAX_LEN, { message: PASSWORD_TOO_LONG }),
 });
 
+export const refreshBodySchema = z.object({
+  refreshToken: z.string().min(1, { message: "Refresh token is required" }),
+});
+
 export type RegisterBody = z.infer<typeof registerBodySchema>;
 export type LoginBody = z.infer<typeof loginBodySchema>;

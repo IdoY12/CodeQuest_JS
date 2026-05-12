@@ -26,7 +26,7 @@ export function makeSession(sessionId: string, roomId: string, p1: QueueEntry, p
     currentQuestionId: null, currentQuestion: null, answered: false,
     player1Attempts: 0, player2Attempts: 0, roundNonce: 0, roundReplay: [],
     player1StreakLocalDate: null, player2StreakLocalDate: null,
-    xpGrantedP1: 0, xpGrantedP2: 0,
+    xpGrantedP1: 0, xpGrantedP2: 0, askedQuestionIds: new Set<string>(),
   };
 }
 

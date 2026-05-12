@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { AppState, type AppStateStatus } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
 import { XP_PER_CORRECT_EXERCISE } from "@project/xp-constants";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
@@ -17,6 +18,7 @@ const MS_PER_DAY = 1000 * 60 * 60 * 24;
 export function useCodePuzzle() {
   const dispatch = useAppDispatch();
   const isFocused = useIsFocused();
+  const appStateRef = useRef<AppStateStatus>(AppState.currentState);
   const isGuest = useAppSelector((s) => s.session.isGuest);
   const accessToken = useAppSelector((s) => s.session.accessToken);
   const puzzleService = useAuthenticatedService(PuzzleService);
@@ -28,8 +30,13 @@ export function useCodePuzzle() {
   const puzzle = puzzles[currentIndex] ?? null;
 
   useEffect(() => {
+    const sub = AppState.addEventListener("change", (next) => { appStateRef.current = next; });
+    return () => sub.remove();
+  }, []);
+
+  useEffect(() => {
     if (!isFocused) return;
-    const t = setInterval(() => dispatch(addStudySeconds(1)), STUDY_TIMER_INTERVAL_MS);
+    const t = setInterval(() => { if (appStateRef.current === "active") dispatch(addStudySeconds(1)); }, STUDY_TIMER_INTERVAL_MS);
     return () => clearInterval(t);
   }, [dispatch, isFocused]);
 

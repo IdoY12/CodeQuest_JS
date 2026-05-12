@@ -25,8 +25,8 @@ export function useProfileDraftState(r: ProfileReduxState) {
   const [busyAction, setBusyAction] = React.useState<string | null>(null);
 
   const initials = profileInitials(r.username);
-  const stats = profileStatsFromRedux(r);
-  const supportRows = profileSupportRows();
+  const stats = React.useMemo(() => profileStatsFromRedux(r), [r.streakCurrent, r.xp, r.lessonsCompleted]);
+  const supportRows = React.useMemo(() => profileSupportRows(), []);
 
   return {
     draftGoal,

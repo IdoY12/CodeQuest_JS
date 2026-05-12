@@ -2,6 +2,7 @@ import type { MutableRefObject } from "react";
 import { AppState, type AppStateStatus } from "react-native";
 import { runStreakAppOpen } from "@/redux/streak-slice";
 import type { AppDispatch } from "@/redux/store";
+import store from "@/redux/store";
 import { refreshSessionOrLogoutOnForeground } from "@/utils/appShellPersistence";
 import { getStreakCalendarDate } from "@/utils/streakCalendar";
 import { syncDailyPracticeReminder } from "@/utils/dailyGoalNotificationCheck";
@@ -10,13 +11,11 @@ import { syncRegisteredStreakFromServer } from "@/utils/syncRegisteredStreakFrom
 export function attachAppShellSessionForegroundSync(
   appStateRef: MutableRefObject<AppStateStatus>,
   dispatch: AppDispatch,
-  accessToken: string | null,
-  isAuthenticated: boolean,
-  isGuest: boolean,
 ): () => void {
   const sub = AppState.addEventListener("change", (next) => {
     if (appStateRef.current !== "active" && next === "active") {
-      if (isAuthenticated && accessToken) {
+      const { accessToken, isAuthenticated, isGuest } = store.getState().session;
+      if (isAuthenticated && accessToken && !store.getState().duelLive.sessionId) {
         void refreshSessionOrLogoutOnForeground(accessToken, dispatch);
         void syncRegisteredStreakFromServer(dispatch, accessToken);
       }

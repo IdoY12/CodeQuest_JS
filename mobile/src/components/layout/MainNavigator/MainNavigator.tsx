@@ -5,21 +5,20 @@ import { MainTabs } from "./MainNavigatorTabs";
 
 const RootStack = createNativeStackNavigator();
 
+const ROOT_STACK_OPTIONS = { headerShown: false };
+const AUTH_SCREEN_OPTIONS = {
+  presentation: "modal" as const,
+  headerShown: true,
+  headerStyle: { backgroundColor: colors.background },
+  headerTintColor: colors.textPrimary,
+  title: "Sign in",
+};
+
 export function MainNavigator() {
   return (
-    <RootStack.Navigator screenOptions={{ headerShown: false }}>
+    <RootStack.Navigator screenOptions={ROOT_STACK_OPTIONS}>
       <RootStack.Screen name="MainTabs" component={MainTabs} />
-      <RootStack.Screen
-        name="Auth"
-        component={AuthScreen}
-        options={{
-          presentation: "modal",
-          headerShown: true,
-          headerStyle: { backgroundColor: colors.background },
-          headerTintColor: colors.textPrimary,
-          title: "Sign in",
-        }}
-      />
+      <RootStack.Screen name="Auth" component={AuthScreen} options={AUTH_SCREEN_OPTIONS} />
     </RootStack.Navigator>
   );
 }

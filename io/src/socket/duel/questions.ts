@@ -3,24 +3,19 @@ import { prisma } from "@project/db";
 import type { SessionState } from "./types.js";
 
 const LEVELS = new Set<string>(["JUNIOR", "MID", "SENIOR"]);
+const questionCache = new Map<string, DuelQuestion[]>();
 
 function asDifficulty(value: string): Difficulty | null {
   if (LEVELS.has(value)) return value as Difficulty;
-
   return null;
 }
 
-async function pickRandomDuelQuestion(difficulty?: Difficulty): Promise<DuelQuestion | null> {
-  // Two round trips (count + findFirst/skip): extra network latency on each duel round — slower in practice here than one fetch.
-  // Raw SQL with ORDER BY RANDOM(): forbidden by ORM-only policy; also forces O(n log n) sort work in the database.
-  // findMany + random index in JS: single Prisma round trip; duel pools are small (~40 rows per difficulty), so the payload cost beats a second query.
-  const questions = await prisma.duelQuestion.findMany({
-    where: difficulty !== undefined ? { difficulty } : undefined,
-  });
-
-  if (questions.length === 0) return null;
-
-  return questions[Math.floor(Math.random() * questions.length)];
+async function pickRandomDuelQuestion(difficulty?: Difficulty, exclude?: Set<string>): Promise<DuelQuestion | null> {
+  const key = difficulty ?? "all";
+  if (!questionCache.has(key)) questionCache.set(key, await prisma.duelQuestion.findMany({ where: difficulty ? { difficulty } : undefined }));
+  const pool = (questionCache.get(key) ?? []).filter((q) => !exclude?.has(q.id));
+  if (pool.length === 0) return null;
+  return pool[Math.floor(Math.random() * pool.length)];
 }
 
 /**
@@ -30,10 +25,9 @@ async function pickRandomDuelQuestion(difficulty?: Difficulty): Promise<DuelQues
 export async function pickQuestionForSession(session: SessionState) {
   const p1 = asDifficulty(session.player1.experienceLevel);
   const p2 = asDifficulty(session.player2.experienceLevel);
+  const ex = session.askedQuestionIds;
 
-  if (!p1 || !p2) {
-    return pickRandomDuelQuestion();
-  }
+  if (!p1 || !p2) return pickRandomDuelQuestion(undefined, ex);
 
   const odd = session.round % 2 === 1;
   let targetDifficulty: Difficulty;
@@ -52,15 +46,9 @@ export async function pickQuestionForSession(session: SessionState) {
     } else if (hasJunior && hasSenior && !hasMid) {
       targetDifficulty = odd ? "JUNIOR" : "SENIOR";
     } else {
-      return pickRandomDuelQuestion();
+      return pickRandomDuelQuestion(undefined, ex);
     }
   }
 
-  let question = await pickRandomDuelQuestion(targetDifficulty);
-
-  if (!question) {
-    question = await pickRandomDuelQuestion();
-  }
-
-  return question;
+  return (await pickRandomDuelQuestion(targetDifficulty, ex)) ?? pickRandomDuelQuestion(undefined, ex);
 }

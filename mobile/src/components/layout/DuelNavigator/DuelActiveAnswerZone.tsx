@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Pressable, Text } from "react-native";
 import { duelRoundUsesLinePick, type DuelRound } from "@/utils/duelSocketModels";
 import { styles } from "./DuelNavigator.styles";
@@ -9,7 +10,7 @@ interface DuelActiveAnswerZoneProps {
   submit: (answer: string) => void;
 }
 
-export function DuelActiveAnswerZone({ round, selected, locked, submit }: DuelActiveAnswerZoneProps) {
+export const DuelActiveAnswerZone = memo(function DuelActiveAnswerZone({ round, selected, locked, submit }: DuelActiveAnswerZoneProps) {
   if (duelRoundUsesLinePick(round)) {
     return round.codeSnippet.split("\n").map((line, idx) => (
       <Pressable
@@ -37,4 +38,4 @@ export function DuelActiveAnswerZone({ round, selected, locked, submit }: DuelAc
       </Text>
     </Pressable>
   ));
-}
+});

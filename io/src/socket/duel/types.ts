@@ -44,6 +44,7 @@ export interface SessionState {
   xpGrantedP1: number;
   xpGrantedP2: number;
   abandonInProgress?: boolean;
+  askedQuestionIds: Set<string>;
 }
 
 export type DuelNamespace = ReturnType<Server["of"]>;

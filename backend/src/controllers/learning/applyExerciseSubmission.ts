@@ -34,7 +34,7 @@ export async function applyExerciseSubmission(input: SubmitInput): Promise<Exerc
       const nextXp = progress.xpTotal + XP_PER_CORRECT_EXERCISE;
       const nextLevel = Math.max(1, Math.floor(nextXp / XP_PER_CORRECT_EXERCISE) + 1);
       const nextIdx = Math.max(progress.currentExerciseIndex, exercise.orderIndex + 1);
-      await prisma.userProgress.update({
+      const updated = await prisma.userProgress.update({
         where: { id: progress.id },
         data: { xpTotal: nextXp, level: nextLevel, currentExerciseIndex: nextIdx },
       });
@@ -46,7 +46,7 @@ export async function applyExerciseSubmission(input: SubmitInput): Promise<Exerc
           XP_PER_CORRECT_EXERCISE,
         );
       } else {
-        streakCurrent = (await prisma.userProgress.findUnique({ where: { id: progress.id } }))?.streakCurrent;
+        streakCurrent = updated.streakCurrent;
       }
     }
   }

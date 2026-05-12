@@ -64,13 +64,14 @@ export function useProfileScreen() {
 
   const { onSaveLearningSettings, ...handlers } = useProfileAccountHandlers(profileRedux, profileDraft, user);
   const { onAvatarPress } = useProfileAvatarHandlers(profileRedux, profileDraft, user);
+  const { setDraftNotifications } = profileDraft;
 
   const onNotificationsEnabledChange = useCallback(
     (notificationsEnabled: boolean) => {
-      profileDraft.setDraftNotifications(notificationsEnabled);
+      setDraftNotifications(notificationsEnabled);
       dispatch(setNotificationsEnabled(notificationsEnabled));
     },
-    [dispatch, profileDraft.setDraftNotifications],
+    [dispatch, setDraftNotifications],
   );
 
   return { ...profileRedux, ...profileDraft, onSaveLearningSettings, onAvatarPress, onNotificationsEnabledChange, ...handlers };

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { addXp } from "@/redux/xp-slice";
@@ -21,23 +21,23 @@ export function useDuelActiveDuelScreen(navigation: Nav) {
   const username = useAppSelector((s) => s.profile.username);
   const [selected, setSelected] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const locked = lastCorrectAnswer !== null || submitted || wrongAnswerCount >= DUEL_MAX_ATTEMPTS_PER_ROUND;
   const roundStartTimeRef = useRef(Date.now());
   const skipLeaveAfterEndRef = useRef(false);
+  const duelEndNavigatedRef = useRef(false);
+  const lockedRef = useRef(locked);
+  lockedRef.current = locked;
 
   useEffect(() => { logNav("screen:enter", { screen: "ActiveDuelScreen" }); return () => logNav("screen:leave", { screen: "ActiveDuelScreen" }); }, []);
 
   useEffect(() => {
     if (!round) return;
-    setSelected(null);
-    setSubmitted(false);
-    roundStartTimeRef.current = Date.now();
+    setSelected(null); setSubmitted(false); roundStartTimeRef.current = Date.now();
   }, [round]);
   // Unlock after each server-confirmed wrong answer so the player can retry.
   useEffect(() => { setSubmitted(false); }, [wrongAnswerCount]);
 
-  useEffect(() => {
-    if (sessionId && userId) duelPlayerReady(sessionId);
-  }, [sessionId, userId]);
+  useEffect(() => { if (sessionId && userId) duelPlayerReady(sessionId); }, [sessionId, userId]);
 
   // If round_start never arrives within 15 s, surface the "Opponent left" results screen.
   useEffect(() => {
@@ -47,7 +47,8 @@ export function useDuelActiveDuelScreen(navigation: Nav) {
   }, [dispatch, round]);
 
   useEffect(() => {
-    if (!duelEnd) return;
+    if (!duelEnd || duelEndNavigatedRef.current) return;
+    duelEndNavigatedRef.current = true;
     skipLeaveAfterEndRef.current = true;
     logDuel("duel:end", { won: duelEnd.won, xpEarned: duelEnd.xpEarned });
     dispatch(addXp(duelEnd.xpEarned));
@@ -61,18 +62,17 @@ export function useDuelActiveDuelScreen(navigation: Nav) {
     if (!duelEnd.tied) dispatch(applyDuelResult({ won: duelEnd.won }));
     navigation.replace("DuelResults", { won: duelEnd.won, score: duelEnd.finalScore, xpEarned: duelEnd.xpEarned, replay: duelEnd.roundReplay, ...(duelEnd.opponentDisconnected ? { opponentDisconnected: true } : {}), ...(duelEnd.tied ? { tied: true } : {}) });
   }, [dispatch, duelEnd, isGuest, navigation]);
-  const locked = lastCorrectAnswer !== null || submitted || wrongAnswerCount >= DUEL_MAX_ATTEMPTS_PER_ROUND;
-  const submit = (answer: string) => {
-    if (!sessionId || !userId || locked) return;
+  const submit = useCallback((answer: string) => {
+    if (!sessionId || !userId || lockedRef.current) return;
     duelSubmitAnswer({ sessionId, roundNumber: round?.roundNumber ?? 0, answer, timeTakenMs: Date.now() - roundStartTimeRef.current });
     setSelected(answer);
     setSubmitted(true);
-  };
+  }, [sessionId, userId, round?.roundNumber]);
 
   return {
     round, username, opponentName: opponent?.username ?? "Opponent", opponentAvatarUrl: opponent?.avatarUrl ?? null,
     roundNumber: round?.roundNumber ?? 0, selected, myScore: score.me, oppScore: score.opp,
-    overlayVisible: lastCorrectAnswer !== null, lastCorrectAnswer, locked,
-    attemptsLeft: DUEL_MAX_ATTEMPTS_PER_ROUND - wrongAnswerCount, submit, sessionId, skipLeaveAfterEndRef, opponentLeft,
+    overlayVisible: lastCorrectAnswer !== null, lastCorrectAnswer, locked, attemptsLeft: DUEL_MAX_ATTEMPTS_PER_ROUND - wrongAnswerCount,
+    submit, sessionId, skipLeaveAfterEndRef, opponentLeft,
   };
 }

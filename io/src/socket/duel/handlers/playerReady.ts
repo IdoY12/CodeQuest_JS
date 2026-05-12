@@ -10,6 +10,7 @@
 import type { Socket } from "socket.io";
 import { logError, logInfo } from "../../../utils/logger.js";
 import { resolveDuelPlayerSlot } from "../resolveDuelPlayerSlot.js";
+import { isThrottled } from "../../../utils/socketThrottle.js";
 import { sessions } from "../state.js";
 import { startRound } from "../session.js";
 import type { DuelNamespace } from "../types.js";
@@ -19,11 +20,12 @@ export function registerPlayerReady(socket: Socket, duel: DuelNamespace) {
     "player_ready",
     async (payload: { session_id: string; streak_local_date?: string }) => {
       try {
+        if (isThrottled(socket, "player_ready", 1000)) return;
         const session = sessions.get(payload.session_id);
 
         if (!session) return;
 
-        const slot = resolveDuelPlayerSlot(session, socket.id);
+        const slot = resolveDuelPlayerSlot(session, socket.id, socket.data.authenticatedUserId as string | undefined);
 
         if (!slot) {
           logInfo("[DUEL]", "player_ready:rejected-non-participant", { socketId: socket.id });

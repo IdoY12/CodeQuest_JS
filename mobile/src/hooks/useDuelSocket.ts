@@ -1,7 +1,7 @@
 /** Per-screen selector bundles for duel-live state. Each bundle selects only the fields its screen renders.
  * Do not return new objects/arrays from selector bodies — use direct state references only.
  * Runtime socket/userId refs live in duelConnectionRefs (duelSocketModels.ts), not Redux. */
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import store from "@/redux/store";
 import { DUEL_SOCKET_URL } from "../config/network";
@@ -12,14 +12,21 @@ import { duelJoinQueue, duelLeaveQueue, duelRequestRematch } from "@/utils/duelS
 
 export function useDuelSocketBootstrap() {
   const accessToken = useAppSelector((s) => s.session.accessToken);
+  const userId = useAppSelector((s) => s.session.userId);
+  const accessTokenRef = useRef(accessToken);
+  useEffect(() => { accessTokenRef.current = accessToken; }, [accessToken]);
   const url = useMemo(() => DUEL_SOCKET_URL, []);
   useEffect(() => {
-    connectDuelSocket(url, accessToken);
+    connectDuelSocket(url, accessTokenRef.current);
     return () => {
+      if (duelConnectionRefs.disconnectTimer) {
+        clearTimeout(duelConnectionRefs.disconnectTimer);
+        duelConnectionRefs.disconnectTimer = null;
+      }
       duelConnectionRefs.socket?.disconnect();
       duelConnectionRefs.socket = null;
     };
-  }, [accessToken, url]);
+  }, [userId, url]);
 }
 
 export function useDuelMatchmakingSocket() {

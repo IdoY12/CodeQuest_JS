@@ -11,6 +11,7 @@ import type { Socket } from "socket.io";
 import { logError, logInfo } from "../../../utils/logger.js";
 import { advanceDuelRoundNoWinner, applyCorrectDuelAnswer } from "../applyCorrectDuelAnswer.js";
 import { resolveDuelPlayerSlot } from "../resolveDuelPlayerSlot.js";
+import { isThrottled } from "../../../utils/socketThrottle.js";
 import { sessions } from "../state.js";
 import type { DuelNamespace } from "../types.js";
 import { DUEL_MAX_ATTEMPTS_PER_ROUND } from "../../../constants/duelRoundConstants.js";
@@ -20,10 +21,12 @@ export function registerSubmitAnswer(socket: Socket, duel: DuelNamespace) {
     "submit_answer",
     async (payload: { session_id: string; round_number: number; answer: string; time_taken_ms: number; streak_local_date?: string }) => {
       try {
+        if (isThrottled(socket, "submit_answer", 300)) return;
         const session = sessions.get(payload.session_id);
         if (!session || session.answered || !session.currentQuestion) return;
+        if (payload.round_number !== session.round) return;
 
-        const slot = resolveDuelPlayerSlot(session, socket.id);
+        const slot = resolveDuelPlayerSlot(session, socket.id, socket.data.authenticatedUserId as string | undefined);
         if (!slot) {
           logInfo("[DUEL]", "submit_answer:rejected-non-participant", { socketId: socket.id });
           return;

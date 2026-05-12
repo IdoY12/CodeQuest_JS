@@ -7,9 +7,14 @@ import { getStreakCalendarDate } from "@/utils/streakCalendar";
 import store from "@/redux/store";
 import { duelReset } from "@/redux/duel-live-slice";
 
+const pendingEmit = new Map<string, () => void>();
 function emitWhenReady(socket: Socket, event: string, body: object): void {
   if (socket.connected) { socket.emit(event, body); return; }
-  socket.once("connect", () => socket.emit(event, body));
+  const prev = pendingEmit.get(event);
+  if (prev) socket.off("connect", prev);
+  const cb = () => { pendingEmit.delete(event); socket.emit(event, body); };
+  pendingEmit.set(event, cb);
+  socket.once("connect", cb);
 }
 
 export function duelJoinQueue(url: string, payload: { userId: string; username: string; token?: string | null }) {

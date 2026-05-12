@@ -11,7 +11,7 @@ export function useHomeScreen() {
   const streak = useAppSelector((s) => s.streak.streakCurrent);
   const streakDotsFilled = useMemo(() => buildStreakDotHighlights(streak), [streak]);
   const streakShowsDots = shouldShowStreakDotRow(streak);
-  const studySecondsToday = useAppSelector((s) => s.session.studySecondsToday);
+  const practiceMinutesToday = useAppSelector((s) => Math.floor(s.session.studySecondsToday / 60));
   const commitment = useAppSelector((s) => s.profile.commitment);
 
   useEffect(() => {
@@ -24,7 +24,6 @@ export function useHomeScreen() {
     const lf = (level - 1) * XP_PER_CORRECT_EXERCISE;
     return Math.min(100, ((xp - lf) / XP_PER_CORRECT_EXERCISE) * 100);
   }, [level, xp]);
-  const practiceMinutesToday = Math.floor(studySecondsToday / 60);
   const dailyGoalMinutes = Number(commitment);
   const dailyGoalProgressPct = dailyGoalMinutes > 0 ? Math.min(100, (practiceMinutesToday / dailyGoalMinutes) * 100) : 0;
 

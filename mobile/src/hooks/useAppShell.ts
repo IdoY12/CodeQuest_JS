@@ -27,6 +27,7 @@ export function useAppShell() {
   const commitment = useAppSelector((s) => s.profile.commitment);
   const notificationsEnabled = useAppSelector((s) => s.profile.notificationsEnabled);
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
+  const bootstrappedRef = useRef(false);
 
   const retryBootstrap = useCallback(() => {
     dispatch(setBootstrapError(null));
@@ -40,11 +41,12 @@ export function useAppShell() {
   }, [dispatch]);
 
   useEffect(() => {
-    if (!hasHydrated) return;
+    if (!hasHydrated || bootstrappedRef.current) return;
+    bootstrappedRef.current = true;
     logAuth("bootstrap:start", { isAuthenticated, hasAccessToken: Boolean(accessToken) });
     if (isGuest) dispatch(runStreakAppOpen({ today: getStreakCalendarDate() }));
     void bootstrapSession(dispatch);
-  }, [accessToken, dispatch, hasHydrated, isAuthenticated, isGuest]);
+  }, [dispatch, hasHydrated, isAuthenticated, isGuest]);
 
   useEffect(() => {
     if (!hasHydrated) return;
@@ -58,8 +60,8 @@ export function useAppShell() {
 
   useEffect(() => {
     if (!hasHydrated) return;
-    return attachAppShellSessionForegroundSync(appStateRef, dispatch, accessToken, isAuthenticated, isGuest);
-  }, [hasHydrated, dispatch, accessToken, isAuthenticated, isGuest]);
+    return attachAppShellSessionForegroundSync(appStateRef, dispatch);
+  }, [hasHydrated, dispatch]);
 
   return { isConnected, bootstrapError, retryBootstrap };
 }

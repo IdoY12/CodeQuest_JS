@@ -28,12 +28,12 @@ export function DuelMatchmakingScreen({ navigation }: MatchmakingScreenProps) {
   useEffect(() => { logNav("screen:enter", { screen: "MatchmakingScreen" }); return () => logNav("screen:leave", { screen: "MatchmakingScreen" }); }, []);
   useEffect(() => { if (sessionId) return; const i = setInterval(() => setSeconds((v) => v + 1), QUEUE_TIMER_INTERVAL_MS); return () => clearInterval(i); }, [sessionId]);
   useEffect(() => {
-    if (!userId || !accessToken || hasJoinedQueueRef.current || queueRejected) return;
+    if (!userId || !accessTokenRef.current || hasJoinedQueueRef.current || queueRejected) return;
     hasJoinedQueueRef.current = true;
     joinQueue({ userId, username: usernameRef.current, token: accessTokenRef.current });
     logDuel("queue:join", { userId });
     return () => { if (!navigatedRef.current) { logDuel("queue:leave", { userId: userId ?? "unknown" }); sessionIdRef.current ? duelLeaveDuel(sessionIdRef.current) : leaveQueue(); } hasJoinedQueueRef.current = false; };
-  }, [accessToken, joinQueue, leaveQueue, userId, queueRejected]);
+  }, [joinQueue, leaveQueue, userId, queueRejected]);
   useEffect(() => {
     if (!sessionId || !opponent) return undefined;
     const timer = setInterval(() => setCountdown((value) => Math.max(0, value - 1)), MATCH_COUNTDOWN_TICK_MS);

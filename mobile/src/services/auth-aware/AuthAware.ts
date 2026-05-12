@@ -1,7 +1,7 @@
 import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from "axios";
 import { API_BASE_URL } from "@/config/network";
 import store from "@/redux/store";
-import { updateAccessToken } from "@/redux/session-slice";
+import { updateTokens } from "@/redux/session-slice";
 import { resetStoresAfterLogout } from "@/utils/resetStoresAfterLogout";
 import { readSecureSessionTokens, writeSecureSessionTokens } from "@/utils/secureSessionTokens";
 
@@ -31,10 +31,10 @@ export default abstract class AuthAware {
         const refreshToken = secure.refreshToken;
         if (!refreshToken) { resetStoresAfterLogout(store.dispatch); throw error; }
         try {
-          const refreshResponse = await axios.post<{ accessToken: string }>(`${API_BASE_URL}/auth/refresh`, { refreshToken });
-          const nextAccessToken = refreshResponse.data.accessToken;
-          store.dispatch(updateAccessToken(nextAccessToken));
-          await writeSecureSessionTokens(nextAccessToken, refreshToken);
+          const refreshResponse = await axios.post<{ accessToken: string; refreshToken: string }>(`${API_BASE_URL}/auth/refresh`, { refreshToken });
+          const { accessToken: nextAccessToken, refreshToken: nextRefreshToken } = refreshResponse.data;
+          store.dispatch(updateTokens({ accessToken: nextAccessToken, refreshToken: nextRefreshToken }));
+          await writeSecureSessionTokens(nextAccessToken, nextRefreshToken);
           if (config.headers && typeof config.headers.set === "function") {
             config.headers.set("Authorization", `Bearer ${nextAccessToken}`);
           } else {

@@ -26,11 +26,7 @@ const initialState: SessionState = {
   bootstrapError: null,
 };
 
-type SignInPayload = {
-  userId: string;
-  accessToken: string;
-  refreshToken: string;
-};
+type SignInPayload = { userId: string; accessToken: string; refreshToken: string };
 
 const sessionSlice = createSlice({
   name: "session",
@@ -40,56 +36,31 @@ const sessionSlice = createSlice({
       const { hasCompletedOnboarding: _legacyOnboardingRemoved, ...rest } = a.payload;
       Object.assign(state, rest);
     },
-    setHasHydrated: (state, a: PayloadAction<boolean>) => {
-      state.hasHydrated = a.payload;
-    },
-    setAuthChecked: (state, a: PayloadAction<boolean>) => {
-      state.authChecked = a.payload;
-    },
+    setHasHydrated: (state, a: PayloadAction<boolean>) => { state.hasHydrated = a.payload; },
+    setAuthChecked: (state, a: PayloadAction<boolean>) => { state.authChecked = a.payload; },
     addStudySeconds: (state, a: PayloadAction<number>) => {
       const dateKey = new Date().toLocaleDateString("en-CA");
-      if (state.studyDateKey !== dateKey) {
-        state.studyDateKey = dateKey;
-        state.studySecondsToday = 0;
-      }
+      if (state.studyDateKey !== dateKey) { state.studyDateKey = dateKey; state.studySecondsToday = 0; }
       state.studySecondsToday += a.payload;
     },
     enterGuestMode: (state) => {
-      state.isAuthenticated = false;
-      state.isGuest = true;
-      state.accessToken = null;
-      state.refreshToken = null;
-      state.userId = null;
-      state.bootstrapError = null;
+      Object.assign(state, { isAuthenticated: false, isGuest: true, accessToken: null, refreshToken: null, userId: null, bootstrapError: null });
     },
     signIn: (state, a: PayloadAction<SignInPayload>) => {
-      state.isAuthenticated = true;
-      state.isGuest = false;
-      state.userId = a.payload.userId;
+      const { userId, accessToken, refreshToken } = a.payload;
+      Object.assign(state, { isAuthenticated: true, isGuest: false, userId, accessToken, refreshToken, bootstrapError: null });
+    },
+    setBootstrapError: (state, a: PayloadAction<string | null>) => { state.bootstrapError = a.payload; },
+    signOut: (state) => { const h = state.hasHydrated; return { ...initialState, hasHydrated: h, authChecked: true }; },
+    updateTokens: (state, a: PayloadAction<{ accessToken: string; refreshToken: string }>) => {
       state.accessToken = a.payload.accessToken;
       state.refreshToken = a.payload.refreshToken;
-      state.bootstrapError = null;
     },
-    setBootstrapError: (state, a: PayloadAction<string | null>) => {
-      state.bootstrapError = a.payload;
-    },
-    signOut: (state) => {
-      const h = state.hasHydrated;
-      return { ...initialState, hasHydrated: h, authChecked: true };
-    },
-    updateAccessToken: (state, a: PayloadAction<string>) => { state.accessToken = a.payload; },
   },
 });
 
 export const {
-  hydrateSession,
-  setHasHydrated,
-  setAuthChecked,
-  addStudySeconds,
-  enterGuestMode,
-  signIn,
-  signOut,
-  updateAccessToken,
-  setBootstrapError,
+  hydrateSession, setHasHydrated, setAuthChecked, addStudySeconds,
+  enterGuestMode, signIn, signOut, updateTokens, setBootstrapError,
 } = sessionSlice.actions;
 export default sessionSlice.reducer;

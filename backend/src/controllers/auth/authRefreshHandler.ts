@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { prisma } from "@project/db";
 import { logError, logInfo } from "../../utils/logger.js";
-import { signAccessToken, verifyRefreshToken } from "../../utils/sessionJwtTokens.js";
+import { signAccessToken, signRefreshToken, verifyRefreshToken } from "../../utils/sessionJwtTokens.js";
 
 export async function authRefreshHandler(request: Request, response: Response): Promise<void> {
   const refreshTokenValue = String(request.body?.refreshToken ?? "");
@@ -21,13 +21,11 @@ export async function authRefreshHandler(request: Request, response: Response): 
       response.status(401).json({ error: "Invalid refresh token" });
       return;
     }
-    const accessToken = signAccessToken({
-      userId: user.id,
-      email: user.email,
-      tokenVersion: user.tokenVersion,
-    });
+    const tokenPayload = { userId: user.id, email: user.email, tokenVersion: user.tokenVersion };
+    const accessToken = signAccessToken(tokenPayload);
+    const refreshToken = signRefreshToken(tokenPayload);
     logInfo("[AUTH]", "refresh:success", { userId: payload.userId });
-    response.json({ accessToken });
+    response.json({ accessToken, refreshToken });
   } catch (error) {
     logError("[AUTH]", error, { phase: "refresh" });
     response.status(401).json({ error: "Invalid refresh token" });

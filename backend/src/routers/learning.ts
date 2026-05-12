@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { learningGetExercisesHandler } from "../controllers/learning/learningGetExercisesHandler.js";
 import { learningGetResumeHandler } from "../controllers/learning/learningGetResumeHandler.js";
+import { learningResetProgressHandler } from "../controllers/learning/learningResetProgressHandler.js";
 import { learningSubmitExerciseHandler } from "../controllers/learning/learningSubmitExerciseHandler.js";
 import { authMiddleware } from "../middlewares/auth.js";
 import { validateBody } from "../middlewares/validateBody.js";
@@ -16,3 +17,4 @@ learningRouter.post(
   learningSubmitExerciseHandler,
 );
 learningRouter.get("/resume", authMiddleware, learningGetResumeHandler);
+learningRouter.delete("/progress", authMiddleware, learningResetProgressHandler);

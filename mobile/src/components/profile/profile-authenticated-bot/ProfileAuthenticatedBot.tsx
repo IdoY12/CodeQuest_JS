@@ -22,6 +22,13 @@ export function ProfileAuthenticatedBot({ p }: { p: UseProfileScreenReturn }) {
       </View>
       <View style={b.dangerCard}>
         <Text style={b.dangerHeader}>Danger Zone</Text>
+        <Pressable style={({ pressed }) => [b.row, pressed && b.rowPress]} onPress={p.onResetLearningProgress}>
+          <View style={profileFormRowsStyles.rowLeft}>
+            <Text style={profileFormRowsStyles.rowIcon}>🔄</Text>
+            <Text style={[profileFormRowsStyles.rowText, b.dangerLbl]}>Reset Learn Progress</Text>
+          </View>
+          <Text style={b.chev}>›</Text>
+        </Pressable>
         <Pressable style={({ pressed }) => [b.row, pressed && b.rowPress]} onPress={() => p.setDeleteModalVisible(true)}>
           <View style={profileFormRowsStyles.rowLeft}>
             <Text style={profileFormRowsStyles.rowIcon}>🗑️</Text>

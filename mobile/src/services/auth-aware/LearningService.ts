@@ -26,4 +26,8 @@ export default class LearningService extends AuthAware {
     });
     return data;
   }
+
+  async resetProgress(): Promise<void> {
+    await this.axiosInstance.delete("/learning/progress");
+  }
 }

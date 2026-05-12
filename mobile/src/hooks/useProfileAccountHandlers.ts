@@ -1,7 +1,9 @@
 import React from "react";
 import { Alert } from "react-native";
 import { useAppDispatch } from "@/redux/hooks";
+import LearningService from "@/services/auth-aware/LearningService";
 import type UserService from "@/services/auth-aware/UserService";
+import { resetLesson } from "@/redux/lesson-slice";
 import { changePasswordRequest, deleteAccountRequest, updateUsername } from "@/utils/profileAccountMutations";
 import { patchLearningSettings } from "@/utils/profileUiAndPreferences";
 import { confirmLogout } from "@/utils/confirmLogout";
@@ -58,6 +60,13 @@ export function useProfileAccountHandlers(r: ProfileReduxState, d: ProfileDraftS
       { text: "Log Out", style: "destructive", onPress: () => void confirmLogout(dispatch, r.accessToken, r.refreshToken) },
     ]);
   }, [dispatch, r.accessToken, r.refreshToken]);
+  const onResetLearningProgress = React.useCallback(() => {
+    if (!r.accessToken) return;
+    Alert.alert("Reset Learn Progress", "This will permanently delete all your learning progress and cannot be undone.", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Reset", style: "destructive", onPress: async () => { try { await new LearningService().resetProgress(); } catch { /**/ } dispatch(resetLesson()); } },
+    ]);
+  }, [dispatch, r.accessToken]);
 
   return {
     onSaveLearningSettings,
@@ -65,5 +74,6 @@ export function useProfileAccountHandlers(r: ProfileReduxState, d: ProfileDraftS
     onChangePassword,
     onDeleteAccount,
     onLogoutPress,
+    onResetLearningProgress,
   };
 }

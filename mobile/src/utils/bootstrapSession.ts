@@ -23,7 +23,7 @@ function isBootstrapServerError(error: unknown): boolean {
 }
 
 export async function bootstrapSession(dispatch: AppDispatch): Promise<void> {
-  dispatch(setAuthChecked(false));
+  if (!store.getState().session.authChecked) dispatch(setAuthChecked(false));
   const token = store.getState().session.accessToken;
   const isAuthed = store.getState().session.isAuthenticated;
 

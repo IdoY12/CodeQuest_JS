@@ -27,7 +27,6 @@ export function useAppShell() {
   const commitment = useAppSelector((s) => s.profile.commitment);
   const notificationsEnabled = useAppSelector((s) => s.profile.notificationsEnabled);
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
-  const bootstrappedRef = useRef(false);
 
   const retryBootstrap = useCallback(() => {
     dispatch(setBootstrapError(null));
@@ -41,8 +40,7 @@ export function useAppShell() {
   }, [dispatch]);
 
   useEffect(() => {
-    if (!hasHydrated || bootstrappedRef.current) return;
-    bootstrappedRef.current = true;
+    if (!hasHydrated) return;
     logAuth("bootstrap:start", { isAuthenticated, hasAccessToken: Boolean(accessToken) });
     if (isGuest) dispatch(runStreakAppOpen({ today: getStreakCalendarDate() }));
     void bootstrapSession(dispatch);

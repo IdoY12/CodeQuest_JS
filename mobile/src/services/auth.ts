@@ -2,7 +2,7 @@ import axios from "axios";
 import { API_BASE_URL } from "@/config/network";
 import type AuthResponse from "@/models/AuthResponse";
 
-function authErrorMessage(error: unknown): string {
+export function apiErrorMessage(error: unknown): string {
   if (axios.isAxiosError(error) && error.response?.data && typeof error.response.data === "object" && "error" in error.response.data) {
     return String((error.response.data as { error: unknown }).error);
   }
@@ -16,8 +16,12 @@ class AuthService {
   }
 
   async register(email: string, username: string, password: string): Promise<AuthResponse> {
-    const { data } = await axios.post<AuthResponse>(`${API_BASE_URL}/auth/register`, { email, username, password });
-    return data;
+    try {
+      const { data } = await axios.post<AuthResponse>(`${API_BASE_URL}/auth/register`, { email, username, password });
+      return data;
+    } catch (e) {
+      throw new Error(apiErrorMessage(e));
+    }
   }
 
   async loginWithGoogle(idToken: string): Promise<AuthResponse> {
@@ -25,7 +29,7 @@ class AuthService {
       const { data } = await axios.post<AuthResponse>(`${API_BASE_URL}/auth/google`, { idToken });
       return data;
     } catch (e) {
-      throw new Error(authErrorMessage(e));
+      throw new Error(apiErrorMessage(e));
     }
   }
 }

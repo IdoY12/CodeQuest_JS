@@ -1,0 +1,61 @@
+import { randomBytes } from "node:crypto";
+import { prisma, type User } from "@project/db";
+import { USERNAME_MAX_LEN, USERNAME_MIN_LEN } from "@project/user-credentials";
+import { isUniqueConstraintError } from "../../utils/dbErrors.js";
+
+const USERNAME_SUFFIX_RETRIES = 12;
+const USERNAME_RANDOM_RETRIES = 8;
+
+function deriveGoogleUsername(email: string, displayName?: string): string {
+  const named = displayName?.trim().replace(/\s+/g, "_").slice(0, USERNAME_MAX_LEN);
+  const local = (email.split("@")[0] || "user").slice(0, USERNAME_MAX_LEN);
+  let u = named && named.length >= USERNAME_MIN_LEN ? named : local;
+  if (u.length < USERNAME_MIN_LEN) u = `${local}_gq`.slice(0, USERNAME_MAX_LEN).padEnd(USERNAME_MIN_LEN, "_");
+  return u.slice(0, USERNAME_MAX_LEN);
+}
+
+function usernameWithCollisionSuffix(base: string): string {
+  const suffix = randomBytes(3).toString("hex");
+  const cap = USERNAME_MAX_LEN - 1 - suffix.length;
+  return `${base.slice(0, cap)}_${suffix}`;
+}
+
+function randomUsername(): string {
+  return `g${randomBytes(12).toString("hex")}`.slice(0, USERNAME_MAX_LEN).padEnd(USERNAME_MIN_LEN, "x");
+}
+
+export async function createGoogleUserWithProgress(googleId: string, email: string, displayName?: string): Promise<User> {
+  let candidate = deriveGoogleUsername(email, displayName);
+  const max = USERNAME_SUFFIX_RETRIES + USERNAME_RANDOM_RETRIES;
+  for (let attempt = 0; attempt < max; attempt++) {
+    try {
+      return await prisma.$transaction(async (tx) => {
+        const created = await tx.user.create({
+          data: {
+            email,
+            googleId,
+            username: candidate,
+            hashedPassword: null,
+            activeExperienceLevel: "JUNIOR",
+          },
+        });
+        await tx.userProgress.create({
+          data: {
+            userId: created.id,
+            experienceLevel: "JUNIOR",
+            notificationsEnabled: true,
+            dailyCommitmentMinutes: 15,
+          },
+        });
+        return created;
+      });
+    } catch (error) {
+      if (!isUniqueConstraintError(error, "username")) throw error;
+      candidate =
+        attempt + 1 < USERNAME_SUFFIX_RETRIES
+          ? usernameWithCollisionSuffix(deriveGoogleUsername(email, displayName))
+          : randomUsername();
+    }
+  }
+  throw new Error("Google signup: username collision after retries");
+}

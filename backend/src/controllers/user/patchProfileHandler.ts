@@ -8,8 +8,10 @@
  */
 
 import type { Response } from "express";
+import { USERNAME_TAKEN_MESSAGE } from "@project/user-credentials";
 import { prisma } from "@project/db";
 import type { AuthenticatedRequest } from "../../@types/auth.js";
+import { isUniqueConstraintError } from "../../utils/dbErrors.js";
 import type { PatchProfileBody } from "../../validators/userValidators.js";
 
 export async function patchProfile(req: AuthenticatedRequest, res: Response) {
@@ -18,10 +20,16 @@ export async function patchProfile(req: AuthenticatedRequest, res: Response) {
   if (!body.username) {
     return res.status(400).json({ error: "No profile fields provided" });
   }
-  const user = await prisma.user.update({
-    where: { id: req.user!.userId },
-    data: { username: body.username },
-  });
-
-  return res.json({ id: user.id, username: user.username, avatarUrl: user.avatarUrl });
+  try {
+    const user = await prisma.user.update({
+      where: { id: req.user!.userId },
+      data: { username: body.username },
+    });
+    return res.json({ id: user.id, username: user.username, avatarUrl: user.avatarUrl });
+  } catch (error) {
+    if (isUniqueConstraintError(error, "username")) {
+      return res.status(409).json({ error: USERNAME_TAKEN_MESSAGE });
+    }
+    throw error;
+  }
 }

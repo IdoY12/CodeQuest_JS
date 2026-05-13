@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { prisma } from "@project/db";
 import { logError, logInfo, logWarn } from "../../utils/logger.js";
+import { USERNAME_TAKEN_MESSAGE } from "@project/user-credentials";
 import {
   DATABASE_UNAVAILABLE_MESSAGE,
   isDatabaseUnavailableError,
@@ -51,6 +52,11 @@ export async function authRegisterHandler(request: Request, response: Response):
     });
   } catch (error) {
     logError("[AUTH]", error, { phase: "register" });
+
+    if (isUniqueConstraintError(error, "username")) {
+      response.status(409).json({ error: USERNAME_TAKEN_MESSAGE });
+      return;
+    }
 
     if (isUniqueConstraintError(error, "email")) {
       response.status(409).json({ error: "Email already exists" });

@@ -1,8 +1,10 @@
 import { usernameValidationError } from "@project/user-credentials";
+import axios from "axios";
 import { Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { AppDispatch } from "@/redux/store";
 import type UserService from "@/services/auth-aware/UserService";
+import { apiErrorMessage } from "@/services/auth";
 import { logError } from "@/utils/logger";
 import { setUserIdentity } from "@/redux/profile-slice";
 import { REDUX_PERSIST_KEY } from "@/utils/hydrateStore";
@@ -28,6 +30,10 @@ export async function updateUsername(
     setMessage("Username updated.");
   } catch (error) {
     logError("[PROFILE]", error, { phase: "update-username" });
+    if (axios.isAxiosError(error) && error.response?.status === 409) {
+      Alert.alert("Update failed", apiErrorMessage(error));
+      return;
+    }
     Alert.alert("Update failed", "Could not update username right now.");
   }
 }

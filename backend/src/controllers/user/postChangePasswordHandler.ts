@@ -21,6 +21,8 @@ export async function postChangePassword(req: AuthenticatedRequest, res: Respons
 
   if (!user) return res.status(404).json({ error: "User not found" });
 
+  if (!user.hashedPassword) return res.status(400).json({ error: "This account uses Google sign-in" });
+
   const isPasswordValid = await comparePassword(currentPassword, user.hashedPassword);
 
   if (!isPasswordValid) return res.status(401).json({ error: "Current password is incorrect" });

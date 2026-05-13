@@ -20,6 +20,11 @@ export async function authLoginHandler(request: Request, response: Response): Pr
       response.status(401).json({ error: "Invalid credentials" });
       return;
     }
+    if (!user.hashedPassword) {
+      logWarn("[AUTH]", "login:oauth-only-account", { email });
+      response.status(401).json({ error: "Sign in with Google for this account" });
+      return;
+    }
     const isPasswordValid = await comparePassword(password, user.hashedPassword);
 
     if (!isPasswordValid) {

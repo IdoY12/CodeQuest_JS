@@ -6,6 +6,9 @@
     "bodyParserJsonLimit": "APP_BODY_PARSER_JSON_LIMIT",
     "jwtAccessSecret": "JWT_ACCESS_SECRET",
     "jwtRefreshSecret": "JWT_REFRESH_SECRET",
+    "googleWebClientId": "GOOGLE_WEB_CLIENT_ID",
+    "googleIosClientId": "GOOGLE_IOS_CLIENT_ID",
+    "googleClientSecret": "GOOGLE_CLIENT_SECRET",
     "cors": {
       "origin": "CORS_ORIGIN"
     }

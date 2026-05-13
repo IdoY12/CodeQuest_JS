@@ -22,8 +22,6 @@ export const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   secondaryPressed: { opacity: 0.85 },
-  socialRow: { flexDirection: "row", alignItems: "center", justifyContent: "center" },
-  socialIcon: { marginRight: spacing.sm },
   secondaryLabel: { color: colors.textPrimary, fontWeight: "700" },
   terms: { marginTop: spacing.xl, color: colors.textSecondary, fontSize: fontSize.sm, textAlign: "center" },
   switchAuthBtn: { marginTop: spacing.lg, alignItems: "center" },

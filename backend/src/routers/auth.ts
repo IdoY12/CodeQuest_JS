@@ -8,6 +8,7 @@
  */
 
 import { Router } from "express";
+import { authGoogleHandler } from "../controllers/auth/authGoogleHandler.js";
 import { authLoginHandler } from "../controllers/auth/authLoginHandler.js";
 import { authLogoutHandler } from "../controllers/auth/authLogoutHandler.js";
 import { authMeHandler } from "../controllers/auth/authMeHandler.js";
@@ -21,12 +22,13 @@ import {
   authRegisterRateLimiter,
 } from "../middlewares/authRateLimiters.js";
 import { validateBody } from "../middlewares/validateBody.js";
-import { loginBodySchema, refreshBodySchema, registerBodySchema } from "../validators/authValidators.js";
+import { googleAuthBodySchema, loginBodySchema, refreshBodySchema, registerBodySchema } from "../validators/authValidators.js";
 
 export const authRouter = Router();
 
 authRouter.post("/register", authRegisterRateLimiter, validateBody(registerBodySchema), authRegisterHandler);
 authRouter.post("/login", authLoginRateLimiter, validateBody(loginBodySchema), authLoginHandler);
+authRouter.post("/google", authLoginRateLimiter, validateBody(googleAuthBodySchema), authGoogleHandler);
 authRouter.post("/refresh", authRefreshRateLimiter, validateBody(refreshBodySchema), authRefreshHandler);
 authRouter.get("/me", authMiddleware, authMeHandler);
 authRouter.post("/logout", authLogoutRateLimiter, authLogoutHandler);

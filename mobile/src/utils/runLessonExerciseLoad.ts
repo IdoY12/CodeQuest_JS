@@ -1,4 +1,5 @@
 import type { Experience } from "@/redux/profile-slice";
+import { lessonResumeSync } from "@/redux/lesson-slice";
 import LearningService from "@/services/auth-aware/LearningService";
 import { fetchCurriculumExercisesForLevel } from "@/utils/fetchCurriculumExercisesForLevel";
 import { applyLessonExercisePayload, type LessonExerciseSetters } from "@/utils/lessonExerciseState";
@@ -18,7 +19,6 @@ export async function runLessonExerciseLoad(
   setLoading(true);
 
   try {
-    const learning = new LearningService();
     const allExercises = await fetchCurriculumExercisesForLevel(experienceLevel, jwt);
     const blockStart = blockIndex * EXERCISES_PER_BLOCK;
     const blockExercises = allExercises.slice(blockStart, blockStart + EXERCISES_PER_BLOCK);
@@ -27,9 +27,11 @@ export async function runLessonExerciseLoad(
     let startIndex =
       savedLocalIndex > 0 && savedLocalIndex < blockExercises.length ? savedLocalIndex : 0;
 
-    if (jwt) {
+    if (jwt && !lessonResumeSync.has(experienceLevel)) {
       try {
+        const learning = new LearningService();
         const resume = await learning.getResumeForLevel(experienceLevel);
+        lessonResumeSync.mark(experienceLevel);
         const resumeWithinBlock = resume.currentExerciseIndex - blockStart;
         if (resumeWithinBlock > 0 && resumeWithinBlock < blockExercises.length) {
           startIndex = resumeWithinBlock;
@@ -39,7 +41,7 @@ export async function runLessonExerciseLoad(
       }
     }
 
-    logTasks("lesson:loaded-api", { experienceLevel, blockIndex, count: blockExercises.length, startIndex });
+    logTasks("lesson:block-resolved", { experienceLevel, blockIndex, count: blockExercises.length, startIndex });
 
     if (active()) applyLessonExercisePayload(set, blockExercises, startIndex);
   } catch (e) {

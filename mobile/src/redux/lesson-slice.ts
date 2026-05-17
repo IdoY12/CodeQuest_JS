@@ -1,6 +1,16 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type Exercise from "@/models/Exercise";
 
+const lessonResumeSyncedLevels = new Set<string>();
+
+/** Session-only: first successful GET /learning/resume per level; cleared by resetLesson. Not persisted. */
+export const lessonResumeSync = {
+  has: (level: string) => lessonResumeSyncedLevels.has(level),
+  mark: (level: string) => {
+    lessonResumeSyncedLevels.add(level);
+  },
+};
+
 /** Stable key used to store/retrieve progress for one level × block combination. */
 export const blockProgressKey = (level: string, blockIndex: number) => `${level}_block${blockIndex}`;
 
@@ -44,7 +54,10 @@ const lessonSlice = createSlice({
     hydrateLesson: (state, action: PayloadAction<Partial<LessonState>>) => {
       Object.assign(state, action.payload);
     },
-    resetLesson: () => initialState,
+    resetLesson: () => {
+      lessonResumeSyncedLevels.clear();
+      return initialState;
+    },
   },
 });
 

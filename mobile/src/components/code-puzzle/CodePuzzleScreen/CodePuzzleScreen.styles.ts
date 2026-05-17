@@ -3,7 +3,9 @@ import { colors, fontSize, radius, spacing } from "@/theme/theme";
 
 export const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  content: { flex: 1, padding: spacing.xxl, paddingTop: spacing.giant, gap: spacing.lg },
+  scroll: { flex: 1 },
+  loadingInner: { flex: 1, justifyContent: "center", alignItems: "center", paddingHorizontal: spacing.xxl },
+  scrollInner: { flexGrow: 1, padding: spacing.xxl, paddingTop: spacing.giant, gap: spacing.lg },
   title: { color: colors.textPrimary, fontSize: fontSize.xl, fontWeight: "800" },
   counter: { color: colors.textMuted, fontSize: fontSize.sm },
   prompt: { color: colors.textSecondary, fontSize: fontSize.md, lineHeight: 28 },
@@ -39,6 +41,7 @@ export const styles = StyleSheet.create({
   },
   submitLabel: { color: "#111", fontWeight: "800", fontSize: fontSize.md },
   message: { color: colors.textSecondary, fontSize: fontSize.md, lineHeight: 24 },
+  footerSpacer: { flex: 1 },
   showAnswerBtn: {
     minHeight: 48,
     borderRadius: radius.button,

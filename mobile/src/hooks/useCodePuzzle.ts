@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type SetStateAction } from "react";
 import { AppState, type AppStateStatus } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
 import { XP_PER_CORRECT_EXERCISE } from "@project/xp-constants";
@@ -25,7 +25,6 @@ export function useCodePuzzle() {
   const [loading, setLoading] = useState(true);
   const [input, setInput] = useState("");
   const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
-  const [triedSubmit, setTriedSubmit] = useState(false);
   const [refOpen, setRefOpen] = useState(false);
   const puzzle = puzzles[puzzleIndex] ?? null;
 
@@ -35,7 +34,7 @@ export function useCodePuzzle() {
     const studyTimerId = setInterval(() => appRef.current === "active" && dispatch(addStudySeconds(1)), 1000);
     return () => { clearInterval(studyTimerId); appStateSubscription.remove(); };
   }, [dispatch, focused]);
-  useEffect(() => { setTriedSubmit(false); setRefOpen(false); }, [puzzle?.id]);
+  useEffect(() => { setRefOpen(false); }, [puzzle?.id]);
   useEffect(() => {
     let cancelled = false;
     setLoading(true); setFeedbackMessage(null);
@@ -58,7 +57,6 @@ export function useCodePuzzle() {
     const calendarDateISO = getStreakCalendarDate();
     try {
       const submitResult = await puzzleService.submitPuzzle(puzzle.id, { answer: input, clientLocalDate: calendarDateISO });
-      setTriedSubmit(true);
       if (!submitResult.correct) { setFeedbackMessage("Not quite. Try another valid one-line expression."); return; }
       if (isGuest) {
         dispatch(runStreakAppOpen({ today: calendarDateISO })); dispatch(runStreakQualifyingExercise({ today: calendarDateISO })); dispatch(addXp(XP_PER_CORRECT_EXERCISE));
@@ -69,11 +67,12 @@ export function useCodePuzzle() {
         if (typeof submitResult.streakCurrent === "number") dispatch(hydrateStreak({ streakCurrent: submitResult.streakCurrent, lastActivityDate: calendarDateISO, lastCheckedDate: calendarDateISO }));
       }
       setFeedbackMessage(`Puzzle solved! +${XP_PER_CORRECT_EXERCISE} XP.`);
-    } catch { setTriedSubmit(true); setFeedbackMessage("Failed to submit. Please try again."); }
+    } catch { setFeedbackMessage("Failed to submit. Please try again."); }
   }, [dispatch, input, isGuest, puzzle, puzzleService]);
   const revealReferenceAnswer = useCallback(() => setRefOpen(true), []);
+  const setCurrentIndex = useCallback((u: SetStateAction<number>) => { setRefOpen(false); setPuzzleIndex(u); }, []);
   return {
-    loading, puzzle, puzzles, currentIndex: puzzleIndex, setCurrentIndex: setPuzzleIndex, input, setInput, message: feedbackMessage, onSubmit,
-    attemptedSubmit: triedSubmit, revealReferenceAnswer, referenceSnippet: puzzle && refOpen ? puzzle.acceptedAnswers[0] ?? "" : null,
+    loading, puzzle, puzzles, currentIndex: puzzleIndex, setCurrentIndex, input, setInput, message: feedbackMessage, onSubmit,
+    revealReferenceAnswer, referenceSnippet: puzzle && refOpen ? puzzle.acceptedAnswers[0] ?? "" : null,
   };
 }

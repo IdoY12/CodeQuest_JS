@@ -2,5 +2,6 @@ model CodePuzzle {
   id              Int      @id @default(autoincrement())
   prompt          String
   acceptedAnswers String[]
+  testCases       Json?
   orderIndex      Int      @unique
 }

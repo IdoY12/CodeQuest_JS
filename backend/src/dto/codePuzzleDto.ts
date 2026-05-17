@@ -1,6 +1,7 @@
 export type CodePuzzleDto = {
   id: number;
   prompt: string;
+  acceptedAnswers: string[];
   orderIndex: number;
 };
 

@@ -17,7 +17,7 @@ export async function codePuzzleAllHandler(_request: Request, response: Response
     logInfo("[TASKS]", "code-puzzle:all");
     const puzzles = await prisma.codePuzzle.findMany({
       orderBy: { orderIndex: "asc" },
-      select: { id: true, prompt: true, orderIndex: true },
+      select: { id: true, prompt: true, acceptedAnswers: true, orderIndex: true },
     });
     const body: CodePuzzleDto[] = puzzles;
     response.json(body);

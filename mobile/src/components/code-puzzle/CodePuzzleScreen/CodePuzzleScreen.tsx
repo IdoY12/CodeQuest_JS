@@ -6,7 +6,11 @@ import { useCodePuzzle } from "@/hooks/useCodePuzzle";
 import { styles } from "./CodePuzzleScreen.styles";
 
 export function CodePuzzleScreen({ navigation }: CodePuzzleScreenProps) {
-  const { loading, puzzle, puzzles, currentIndex, setCurrentIndex, input, setInput, message, onSubmit } = useCodePuzzle();
+  const {
+    loading, puzzle, puzzles, currentIndex, setCurrentIndex,
+    input, setInput, message, onSubmit, attemptedSubmit,
+    revealReferenceAnswer, referenceSnippet,
+  } = useCodePuzzle();
 
   if (loading) {
     return (
@@ -17,6 +21,8 @@ export function CodePuzzleScreen({ navigation }: CodePuzzleScreenProps) {
       </SafeAreaView>
     );
   }
+
+  const lastPuzzleIndex = puzzles.length - 1;
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
@@ -30,13 +36,23 @@ export function CodePuzzleScreen({ navigation }: CodePuzzleScreenProps) {
           multiline={false} accessibilityLabel="Code puzzle answer input"
         />
         <View style={styles.navRow}>
-          <Pressable style={[styles.navButton, currentIndex === 0 && styles.navButtonDisabled]} onPress={() => { setCurrentIndex((i) => Math.max(0, i - 1)); setInput(""); }} disabled={currentIndex === 0} accessibilityLabel="Previous puzzle">
+          <Pressable
+            style={[styles.navButton, currentIndex === 0 && styles.navButtonDisabled]}
+            onPress={() => { setCurrentIndex((i) => Math.max(0, i - 1)); setInput(""); }}
+            disabled={currentIndex === 0} accessibilityLabel="Previous puzzle"
+          >
             <Text style={styles.navLabel}>← Prev</Text>
           </Pressable>
           <Pressable style={styles.navButton} onPress={() => setInput("")} accessibilityLabel="Reset answer">
             <Text style={styles.navLabel}>Reset</Text>
           </Pressable>
-          <Pressable style={[styles.navButton, currentIndex === puzzles.length - 1 && styles.navButtonDisabled]} onPress={() => { setCurrentIndex((i) => Math.min(puzzles.length - 1, i + 1)); setInput(""); }} disabled={currentIndex === puzzles.length - 1} accessibilityLabel="Next puzzle">
+          <Pressable
+            style={[styles.navButton, currentIndex === lastPuzzleIndex && styles.navButtonDisabled]}
+            onPress={() => {
+              setCurrentIndex((index) => Math.min(lastPuzzleIndex, index + 1)); setInput("");
+            }}
+            disabled={currentIndex === lastPuzzleIndex} accessibilityLabel="Next puzzle"
+          >
             <Text style={styles.navLabel}>Next →</Text>
           </Pressable>
         </View>
@@ -44,6 +60,17 @@ export function CodePuzzleScreen({ navigation }: CodePuzzleScreenProps) {
           <Text style={styles.submitLabel}>Submit Puzzle</Text>
         </Pressable>
         {message ? <Text style={styles.message}>{message}</Text> : null}
+        {attemptedSubmit ? (
+          <Pressable style={styles.showAnswerBtn} onPress={revealReferenceAnswer} accessibilityLabel="Show reference answer">
+            <Text style={styles.showAnswerLabel}>Show Answer</Text>
+          </Pressable>
+        ) : null}
+        {referenceSnippet !== null ? (
+          <View accessibilityLabel="Reference answer read-only">
+            <Text style={styles.refHeading}>Reference answer:</Text>
+            <Text selectable style={styles.refBody}>{referenceSnippet}</Text>
+          </View>
+        ) : null}
         <Pressable style={styles.secondaryButton} onPress={() => navigation.goBack()} accessibilityLabel="Close code puzzle">
           <Text style={styles.secondaryLabel}>Back to Home</Text>
         </Pressable>

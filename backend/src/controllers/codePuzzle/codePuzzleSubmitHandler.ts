@@ -1,10 +1,6 @@
 /**
- * Validates a submitted answer against the puzzle's acceptedAnswers array.
- * Optional Bearer auth: when present and answer is correct, persists XP + streak for the signed-in user.
- *
- * Responsibility: answer normalisation, correctness check, optional progress write.
- * Layer: backend code-puzzles controller
- * Consumers: codePuzzles router
+ * Validates via acceptedAnswers, then sandbox (testCases).
+ * Signed-in correct answers update XP/streak. Consumers: codePuzzles router.
  */
 
 import type { Response } from "express";
@@ -20,6 +16,7 @@ import type { AuthenticatedRequest } from "../../@types/auth.js";
 import type { CodePuzzleSubmitDto } from "../../dto/codePuzzleDto.js";
 import { logError } from "../../utils/logger.js";
 import type { CodePuzzleSubmitBody, CodePuzzleSubmitParams } from "../../validators/codePuzzleValidators.js";
+import { codePuzzleAllTestCasesPass } from "./codePuzzleSandbox.js";
 
 function normalizeAnswer(value: string): string {
   return value.replace(/\s+/g, "").trim().replace(/;$/, "");
@@ -40,10 +37,10 @@ export async function codePuzzleSubmitHandler(request: AuthenticatedRequest, res
       response.status(404).json({ error: "Puzzle not found" });
       return;
     }
-    const normalizedInput = normalizeAnswer(answer);
-    const isAnswerCorrect = puzzle.acceptedAnswers.some(
-      (accepted) => normalizeAnswer(accepted) === normalizedInput,
-    );
+    const normalized = normalizeAnswer(answer);
+    const isAnswerCorrect =
+      puzzle.acceptedAnswers.some((accepted) => normalizeAnswer(accepted) === normalized) ||
+      (puzzle.testCases !== null && codePuzzleAllTestCasesPass(answer, puzzle.testCases));
 
     const userId = request.user?.userId;
     let streakCurrent: number | undefined;

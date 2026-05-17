@@ -1,6 +1,6 @@
 import AuthAware from "./AuthAware";
 
-export type Puzzle = { id: number; prompt: string; orderIndex: number };
+export type Puzzle = { id: number; prompt: string; acceptedAnswers: string[]; orderIndex: number };
 type PuzzleSubmitResponse = { correct: boolean; streakCurrent?: number; xpTotal?: number };
 type PuzzleSubmitBody = { answer: string; clientLocalDate: string };
 

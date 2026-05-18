@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { AppDispatch } from "@/redux/store";
-import { hydrateSession, setHasHydrated } from "@/redux/session-slice";
+import { hydrateSession, reconcileStudyCalendarDay, setHasHydrated } from "@/redux/session-slice";
 import { hydrateProfile } from "@/redux/profile-slice";
 import { hydrateXp } from "@/redux/xp-slice";
 import { hydrateStreak } from "@/redux/streak-slice";
@@ -62,6 +62,7 @@ export async function hydrateStoreFromStorage(dispatch: AppDispatch): Promise<vo
   } catch (error) {
     logError("[APP]", error, { phase: "hydrate-redux" });
   } finally {
+    dispatch(reconcileStudyCalendarDay());
     dispatch(setHasHydrated(true));
     logAuth("storage:hydrated", { value: true });
   }

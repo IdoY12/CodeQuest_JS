@@ -2,7 +2,7 @@ import vm from "node:vm";
 import { isDeepStrictEqual } from "node:util";
 import type { Prisma } from "@prisma/client";
 
-export const CODE_PUZZLE_VM_TIMEOUT_MS = 100;
+const CODE_PUZZLE_VM_TIMEOUT_MS = 100;
 
 type CaseRow = { inputContext: Record<string, unknown>; expectedOutput: unknown };
 

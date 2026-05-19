@@ -6,7 +6,7 @@ import { comparePassword } from "../../utils/passwordHashing.js";
 import { signAccessToken, signRefreshToken } from "../../utils/sessionJwtTokens.js";
 import { resolveExperienceLevel } from "@project/db";
 import type { LoginBody } from "../../validators/authValidators.js";
-import { ensureUserProgressForLogin, touchUserLastActive } from "./authLoginPersistence.js";
+import { ensureUserProgressForLogin, touchUserLastActive } from "../../services/auth/loginSideEffects.js";
 
 export async function authLoginHandler(request: Request, response: Response): Promise<void> {
   const { email, password } = request.validatedBody as LoginBody;

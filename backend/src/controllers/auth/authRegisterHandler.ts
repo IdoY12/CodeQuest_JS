@@ -9,7 +9,7 @@ import {
 } from "../../utils/dbErrors.js";
 import { signAccessToken, signRefreshToken } from "../../utils/sessionJwtTokens.js";
 import type { RegisterBody } from "../../validators/authValidators.js";
-import { createRegisteredUserWithDefaults } from "./authRegisterPersistence.js";
+import { createRegisteredUserWithDefaults } from "../../services/auth/registerUser.js";
 
 export async function authRegisterHandler(request: Request, response: Response): Promise<void> {
   const { email, username, password } = request.validatedBody as RegisterBody;

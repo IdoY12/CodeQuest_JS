@@ -1,5 +1,5 @@
 import { prisma, type User } from "@project/db";
-import { createGoogleUserWithProgress } from "./authGoogleCreateUser.js";
+import { createGoogleUserWithProgress } from "./createGoogleUser.js";
 
 export class GoogleSignInBlockedError extends Error {
   constructor(m: string) {

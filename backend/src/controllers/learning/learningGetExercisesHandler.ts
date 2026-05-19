@@ -2,7 +2,7 @@ import type { Response } from "express";
 import type { Request } from "express";
 import { prisma } from "@project/db";
 import type { ExperienceLevel } from "@prisma/client";
-import { mapExerciseRowToClientDto } from "../../dto/mapExerciseRowToClientDto.js";
+import { mapExerciseRowToClientDto } from "../../mappers/mapExerciseRowToClientDto.js";
 import { logError, logInfo } from "../../utils/logger.js";
 
 const levels: ExperienceLevel[] = ["JUNIOR", "MID", "SENIOR"];

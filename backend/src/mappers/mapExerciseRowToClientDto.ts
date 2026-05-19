@@ -1,4 +1,4 @@
-import type { ClientExerciseDto, ExerciseWithOptions } from "./clientExerciseDto.js";
+import type { ClientExerciseDto, ExerciseWithOptions } from "../dto/clientExerciseDto.js";
 
 export function mapExerciseRowToClientDto(row: ExerciseWithOptions): ClientExerciseDto {
   return {

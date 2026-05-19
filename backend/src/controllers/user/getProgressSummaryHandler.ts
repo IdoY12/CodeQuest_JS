@@ -8,11 +8,9 @@
  */
 
 import type { Response } from "express";
-import { prisma } from "@project/db";
+import { getProgressForActiveUser, handleStreakAppOpenForUser, prisma } from "@project/db";
 import type { AuthenticatedRequest } from "../../@types/auth.js";
-import { getProgressForActiveUser } from "@project/db";
 import { logError } from "../../utils/logger.js";
-import { handleStreakAppOpen } from "../../services/streakService.js";
 import type { ProgressSummaryQuery } from "../../validators/userValidators.js";
 
 export async function getProgressSummary(req: AuthenticatedRequest, res: Response) {
@@ -20,7 +18,7 @@ export async function getProgressSummary(req: AuthenticatedRequest, res: Respons
     const { localDate } = req.validatedQuery as ProgressSummaryQuery;
     const userId = req.user!.userId;
 
-    await handleStreakAppOpen(prisma, userId, localDate);
+    await handleStreakAppOpenForUser(prisma, userId, localDate);
 
     const progress = await getProgressForActiveUser(prisma, userId);
 

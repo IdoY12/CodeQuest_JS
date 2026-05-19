@@ -4,12 +4,13 @@
  */
 
 import type { Response } from "express";
-import { applyAuthenticatedPuzzleSolve, prisma } from "@project/db";
+import { prisma } from "@project/db";
+import { applyAuthenticatedPuzzleSolve } from "../../services/codePuzzle/applyAuthenticatedPuzzleSolve.js";
 import type { AuthenticatedRequest } from "../../@types/auth.js";
 import type { CodePuzzleSubmitDto } from "../../dto/codePuzzleDto.js";
 import { logError } from "../../utils/logger.js";
 import type { CodePuzzleSubmitBody, CodePuzzleSubmitParams } from "../../validators/codePuzzleValidators.js";
-import { codePuzzleAllTestCasesPass } from "./codePuzzleSandbox.js";
+import { codePuzzleAllTestCasesPass } from "../../services/codePuzzle/codePuzzleSandbox.js";
 
 function normalizeAnswer(value: string): string {
   return value.replace(/\s+/g, "").trim().replace(/;$/, "");

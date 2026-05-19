@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AppState, type AppStateStatus } from "react-native";
 import { QueryClient } from "@tanstack/react-query";
-import { attachAppShellForegroundInfrastructure } from "@/appShellForegroundSetup";
-import { attachAppShellSessionForegroundSync } from "@/appShellSessionForeground";
+import { attachAppShellForegroundInfrastructure } from "@/utils/appShellForegroundSetup";
+import { attachAppShellSessionForegroundSync } from "@/utils/appShellSessionForeground";
 import store from "@/redux/store";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { bootstrapSession } from "@/utils/bootstrapSession";

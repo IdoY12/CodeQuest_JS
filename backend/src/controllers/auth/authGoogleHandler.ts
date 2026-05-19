@@ -5,8 +5,8 @@ import { DATABASE_UNAVAILABLE_MESSAGE, isDatabaseUnavailableError } from "../../
 import { signAccessToken, signRefreshToken } from "../../utils/sessionJwtTokens.js";
 import { verifyGoogleIdToken } from "../../utils/googleIdTokenVerify.js";
 import type { GoogleAuthBody } from "../../validators/authValidators.js";
-import { GoogleSignInBlockedError, findOrCreateGoogleUser } from "./authGooglePersistence.js";
-import { ensureUserProgressForLogin, touchUserLastActive } from "./authLoginPersistence.js";
+import { GoogleSignInBlockedError, findOrCreateGoogleUser } from "../../services/auth/googleAccountLinking.js";
+import { ensureUserProgressForLogin, touchUserLastActive } from "../../services/auth/loginSideEffects.js";
 
 export async function authGoogleHandler(request: Request, response: Response): Promise<void> {
   const { idToken } = request.validatedBody as GoogleAuthBody;

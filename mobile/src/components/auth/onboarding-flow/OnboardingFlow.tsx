@@ -1,7 +1,7 @@
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useOnboardingWizard } from "@/hooks/useOnboardingWizard";
 import { logOnboarding } from "@/utils/logger";
-import { ONBOARDING_COMMITMENTS, ONBOARDING_GOALS, ONBOARDING_LEVELS } from "@/utils/onboardingCatalog";
+import { ONBOARDING_COMMITMENTS, ONBOARDING_GOALS, ONBOARDING_LEVELS } from "@/constants/onboardingCatalog";
 import { OnboardingGoalOptionCard, OnboardingWizardStepFrame } from "./OnboardingFlowStepAndChoiceWidgets";
 import { OnboardingLearningPathPreview } from "./OnboardingFlowLearningPathPreview";
 import { onboardingFlowStyles } from "./OnboardingFlow.styles";

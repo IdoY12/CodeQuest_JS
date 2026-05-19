@@ -26,4 +26,3 @@ export async function ensureUserProgressForLogin(user: User): Promise<UserProgre
 
   return progress;
 }
-

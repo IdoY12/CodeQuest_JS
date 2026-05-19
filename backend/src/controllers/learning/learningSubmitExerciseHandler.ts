@@ -1,7 +1,7 @@
 import type { Response } from "express";
 import type { AuthenticatedRequest } from "../../@types/auth.js";
 import { logError, logInfo } from "../../utils/logger.js";
-import { applyExerciseSubmission } from "./applyExerciseSubmission.js";
+import { applyExerciseSubmission } from "../../services/learning/applyExerciseSubmission.js";
 import type { LearningSubmitExerciseBody } from "../../validators/learningValidators.js";
 
 export async function learningSubmitExerciseHandler(

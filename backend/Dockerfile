@@ -23,4 +23,4 @@ RUN npm --prefix backend run build
 
 WORKDIR /repo/backend
 EXPOSE 4000
-CMD ["node", "dist/index.js"]
+CMD ["node", "--no-node-snapshot", "dist/index.js"]

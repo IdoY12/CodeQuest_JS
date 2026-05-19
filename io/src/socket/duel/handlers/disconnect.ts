@@ -1,6 +1,6 @@
 import type { Socket } from "socket.io";
 import { XP_PER_CORRECT_EXERCISE } from "@project/xp-constants";
-import { applyXpReward } from "../rewards.js";
+import { applyXpReward } from "../services/rewards.js";
 import { logInfo } from "../../../utils/logger.js";
 import { clearSoloMatchTimer } from "../queue.js";
 import { broadcastQueueStatus, queue, sessions, rematchEntries } from "../state.js";

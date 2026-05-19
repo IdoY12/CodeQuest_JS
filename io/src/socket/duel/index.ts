@@ -1,6 +1,6 @@
 import type { Server, Socket } from "socket.io";
 import { logInfo } from "../../utils/logger.js";
-import { attachDuelConnectionAuthentication } from "./attachDuelConnectionAuthentication.js";
+import { attachDuelConnectionAuthentication } from "./middleware/attachDuelConnectionAuthentication.js";
 import { registerDisconnect } from "./handlers/disconnect.js";
 import { registerJoinQueue } from "./handlers/joinQueue.js";
 import { registerLeaveQueue } from "./handlers/leaveQueue.js";

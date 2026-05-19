@@ -8,7 +8,7 @@
  */
 
 import { logError, logInfo } from "../../utils/logger.js";
-import { pickQuestionForSession } from "./questions.js";
+import { pickQuestionForSession } from "./services/questions.js";
 import { endSession } from "./endSession.js";
 import { sessions } from "./state.js";
 import type { DuelNamespace, SessionState } from "./types.js";

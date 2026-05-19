@@ -1,7 +1,7 @@
 import type { Server } from "socket.io";
 import { prisma } from "@project/db";
-import { logInfo } from "../../utils/logger.js";
-import { verifySocketAccessToken } from "../../utils/verifySocketAccessToken.js";
+import { verifySocketAccessToken } from "../../../auth/verifySocketAccessToken.js";
+import { logInfo } from "../../../utils/logger.js";
 
 export function attachDuelConnectionAuthentication(duelNamespace: ReturnType<Server["of"]>): void {
   duelNamespace.use(async (socket, next) => {

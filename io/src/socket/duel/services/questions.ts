@@ -1,6 +1,6 @@
 import type { Difficulty, DuelQuestion } from "@prisma/client";
 import { prisma } from "@project/db";
-import type { SessionState } from "./types.js";
+import type { SessionState } from "../types.js";
 
 const LEVELS = new Set<string>(["JUNIOR", "MID", "SENIOR"]);
 const questionCache = new Map<string, DuelQuestion[]>();

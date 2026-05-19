@@ -19,6 +19,7 @@
   "dependencies": {
     "@prisma/client": "^6.19.0",
     "@project/streak-logic": "file:../streak-logic",
+    "@project/xp-constants": "file:../xp-constants",
     "config": "^4.4.1"
   },
   "devDependencies": {

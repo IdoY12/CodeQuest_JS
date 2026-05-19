@@ -9,4 +9,6 @@ export type CodePuzzleSubmitDto = {
   correct: boolean;
   streakCurrent?: number;
   xpTotal?: number;
+  xpEarned?: number;
+  puzzleSolveCount?: number;
 };

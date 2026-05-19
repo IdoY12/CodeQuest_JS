@@ -10,6 +10,7 @@ model User {
   updatedAt              DateTime          @updatedAt
   lastActiveAt           DateTime?
   activeExperienceLevel  ExperienceLevel?
+  puzzleXpSolveCounts    Json                  @default("{}")
 
   progressRows    UserProgress[]
   duelSessionsP1  DuelSession[] @relation("Player1Sessions")

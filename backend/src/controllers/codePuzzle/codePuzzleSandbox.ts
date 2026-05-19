@@ -22,14 +22,13 @@ export function codePuzzleAllTestCasesPass(answer: string, raw: Prisma.JsonValue
   const cases = parseCases(raw);
   if (!cases) return false;
   const preparedAnswer = answer.trim().replace(/;$/, "");
-  for (const row of cases) {
+  return cases.every((row) => {
     try {
-      if (!isDeepStrictEqual(runExpression(preparedAnswer, row.inputContext), row.expectedOutput)) return false;
+      return isDeepStrictEqual(runExpression(preparedAnswer, row.inputContext), row.expectedOutput);
     } catch {
       return false;
     }
-  }
-  return true;
+  });
 }
 
 function parseCases(raw: Prisma.JsonValue | null): CaseRow[] | null {
@@ -54,9 +53,9 @@ function installPuzzleContext(inputContext: Record<string, unknown>): ivm.Contex
   jail.setSync("__mathMin", new ivm.Reference(Math.min));
   jail.setSync("__objectKeys", new ivm.Reference(Object.keys));
   puzzleGlobalsScript.runSync(context, { timeout: CODE_PUZZLE_VM_TIMEOUT_MS });
-  for (const [key, value] of Object.entries(inputContext)) {
+  Object.entries(inputContext).forEach(([key, value]) => {
     jail.setSync(key, new ivm.ExternalCopy(value).copyInto());
-  }
+  });
   return context;
 }
 

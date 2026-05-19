@@ -1,17 +1,10 @@
 /**
  * Validates via acceptedAnswers, then sandbox (testCases).
- * Signed-in correct answers update XP/streak. Consumers: codePuzzles router.
+ * Signed-in correct answers update XP/streak with per-puzzle cap. Consumers: codePuzzles router.
  */
 
 import type { Response } from "express";
-import {
-  activeExperienceLevelOf,
-  ensureProgressRow,
-  getProgressForActiveUser,
-  handleStreakQualifyingXpForUser,
-  prisma,
-} from "@project/db";
-import { XP_PER_CORRECT_EXERCISE } from "@project/xp-constants";
+import { applyAuthenticatedPuzzleSolve, prisma } from "@project/db";
 import type { AuthenticatedRequest } from "../../@types/auth.js";
 import type { CodePuzzleSubmitDto } from "../../dto/codePuzzleDto.js";
 import { logError } from "../../utils/logger.js";
@@ -43,31 +36,19 @@ export async function codePuzzleSubmitHandler(request: AuthenticatedRequest, res
       (puzzle.testCases !== null && codePuzzleAllTestCasesPass(answer, puzzle.testCases));
 
     const userId = request.user?.userId;
-    let streakCurrent: number | undefined;
-    let xpTotal: number | undefined;
+    let extras: Partial<CodePuzzleSubmitDto> = {};
 
-    if (isAnswerCorrect && userId && clientLocalDate) {
-      const level = await activeExperienceLevelOf(prisma, userId);
-      await ensureProgressRow(prisma, userId, level);
-      const progress = await getProgressForActiveUser(prisma, userId);
-      if (progress) {
-        const nextXp = progress.xpTotal + XP_PER_CORRECT_EXERCISE;
-        const nextLevel = Math.max(1, Math.floor(nextXp / XP_PER_CORRECT_EXERCISE) + 1);
-        await prisma.userProgress.update({
-          where: { id: progress.id },
-          data: { xpTotal: nextXp, level: nextLevel },
-        });
-        streakCurrent = await handleStreakQualifyingXpForUser(prisma, userId, clientLocalDate, XP_PER_CORRECT_EXERCISE);
-        xpTotal = nextXp;
-      }
+    if (isAnswerCorrect && userId) {
+      const applied = await applyAuthenticatedPuzzleSolve(prisma, userId, id, clientLocalDate);
+      extras = {
+        puzzleSolveCount: applied.puzzleSolveCount,
+        ...(clientLocalDate
+          ? { xpEarned: applied.xpEarned, xpTotal: applied.xpTotal, streakCurrent: applied.streakCurrent }
+          : {}),
+      };
     }
 
-    const body: CodePuzzleSubmitDto = {
-      correct: isAnswerCorrect,
-      ...(streakCurrent !== undefined ? { streakCurrent } : {}),
-      ...(xpTotal !== undefined ? { xpTotal } : {}),
-    };
-    response.json(body);
+    response.json({ correct: isAnswerCorrect, ...extras });
   } catch (error) {
     logError("[TASKS]", error, { phase: "code-puzzle-submit" });
     response.status(500).json({ error: "Failed to submit answer" });

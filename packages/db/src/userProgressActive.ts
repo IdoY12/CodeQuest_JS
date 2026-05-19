@@ -1,16 +1,18 @@
-import type { ExperienceLevel, PrismaClient } from "@prisma/client";
+import type { ExperienceLevel, Prisma, PrismaClient } from "@prisma/client";
+
+export type DbClient = PrismaClient | Prisma.TransactionClient;
 
 export function resolveExperienceLevel(level: ExperienceLevel | null | undefined): ExperienceLevel {
   return level ?? "JUNIOR";
 }
 
-export async function activeExperienceLevelOf(prisma: PrismaClient, userId: string): Promise<ExperienceLevel> {
+export async function activeExperienceLevelOf(prisma: DbClient, userId: string): Promise<ExperienceLevel> {
   const userRecord = await prisma.user.findUnique({ where: { id: userId }, select: { activeExperienceLevel: true } });
 
   return userRecord?.activeExperienceLevel ?? "JUNIOR";
 }
 
-export async function getProgressForActiveUser(prisma: PrismaClient, userId: string) {
+export async function getProgressForActiveUser(prisma: DbClient, userId: string) {
   const level = await activeExperienceLevelOf(prisma, userId);
 
   return prisma.userProgress.findUnique({
@@ -19,7 +21,7 @@ export async function getProgressForActiveUser(prisma: PrismaClient, userId: str
 }
 
 export async function ensureProgressRow(
-  prisma: PrismaClient,
+  prisma: DbClient,
   userId: string,
   experienceLevel: ExperienceLevel,
 ): Promise<void> {

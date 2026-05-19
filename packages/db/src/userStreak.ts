@@ -1,10 +1,10 @@
-import type { PrismaClient, UserProgress } from "@prisma/client";
+import type { UserProgress } from "@prisma/client";
 import {
   applyStreakOnAppOpen,
   applyStreakOnQualifyingXp,
   type DailyXpStreakPersisted,
 } from "@project/streak-logic";
-import { getProgressForActiveUser } from "./userProgressActive.js";
+import { getProgressForActiveUser, type DbClient } from "./userProgressActive.js";
 
 function progressToStreakState(row: UserProgress): DailyXpStreakPersisted {
   return {
@@ -15,7 +15,7 @@ function progressToStreakState(row: UserProgress): DailyXpStreakPersisted {
 }
 
 export async function handleStreakAppOpenForUser(
-  prisma: PrismaClient,
+  prisma: DbClient,
   userId: string,
   todayLocalDate: string,
 ): Promise<number> {
@@ -34,7 +34,7 @@ export async function handleStreakAppOpenForUser(
 }
 
 export async function handleStreakQualifyingXpForUser(
-  prisma: PrismaClient,
+  prisma: DbClient,
   userId: string,
   todayLocalDate: string,
   xpEarned: number,

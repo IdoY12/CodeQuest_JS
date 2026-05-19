@@ -1,7 +1,13 @@
 import AuthAware from "./AuthAware";
 
 export type Puzzle = { id: number; prompt: string; acceptedAnswers: string[]; orderIndex: number };
-type PuzzleSubmitResponse = { correct: boolean; streakCurrent?: number; xpTotal?: number };
+export type PuzzleSubmitResponse = {
+  correct: boolean;
+  streakCurrent?: number;
+  xpTotal?: number;
+  xpEarned?: number;
+  puzzleSolveCount?: number;
+};
 type PuzzleSubmitBody = { answer: string; clientLocalDate: string };
 
 export default class PuzzleService extends AuthAware {

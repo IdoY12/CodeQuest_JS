@@ -1,6 +1,6 @@
-/** Duel Socket.IO client factory; inbound handlers live in `services/duelInboundSocket`. */
+/** Duel Socket.IO client factory; inbound handlers live in `utils/duelInboundSocket`. */
 import { io, type Socket } from "socket.io-client";
-import { bindDuelSocketEvents } from "@/services/duelInboundSocket";
+import { bindDuelSocketEvents } from "@/utils/duelInboundSocket";
 import { duelConnectionRefs } from "@/utils/duelSocketModels";
 
 export function connectDuelSocket(url: string, authToken: string | null): Socket {

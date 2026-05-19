@@ -1,16 +1,14 @@
 import { useCallback, useEffect, useRef, useState, type SetStateAction } from "react";
 import { AppState, type AppStateStatus } from "react-native";
 import { useIsFocused } from "@react-navigation/native";
-import { XP_PER_CORRECT_EXERCISE } from "@project/xp-constants";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { setCachedAllPuzzles } from "@/redux/puzzle-slice";
 import store from "@/redux/store";
-import { addXp, hydrateXp } from "@/redux/xp-slice";
-import { runStreakAppOpen, runStreakQualifyingExercise, hydrateStreak } from "@/redux/streak-slice";
-import { getStreakCalendarDate } from "@/utils/streakCalendar";
 import { addStudySeconds } from "@/redux/session-slice";
 import { useAuthenticatedService } from "@/hooks/useAuthenticatedService";
 import PuzzleService, { type Puzzle } from "@/services/auth-aware/PuzzleService";
+import { applyGuestPuzzleSolve, applyRegisteredPuzzleSolve } from "@/utils/puzzleSubmitRewards";
+import { getStreakCalendarDate } from "@/utils/streakCalendar";
 
 const MS_DAY = 1000 * 60 * 60 * 24;
 
@@ -19,6 +17,7 @@ export function useCodePuzzle() {
   const focused = useIsFocused();
   const appRef = useRef(AppState.currentState as AppStateStatus);
   const isGuest = useAppSelector((s) => s.session.isGuest);
+  const xpSolveCounts = useAppSelector((s) => s.puzzle.xpSolveCounts);
   const puzzleService = useAuthenticatedService(PuzzleService);
   const [puzzles, setPuzzles] = useState<Puzzle[]>([]);
   const [puzzleIndex, setPuzzleIndex] = useState(0);
@@ -58,17 +57,13 @@ export function useCodePuzzle() {
     try {
       const submitResult = await puzzleService.submitPuzzle(puzzle.id, { answer: input, clientLocalDate: calendarDateISO });
       if (!submitResult.correct) { setFeedbackMessage("Not quite. Try another valid one-line expression."); return; }
-      if (isGuest) {
-        dispatch(runStreakAppOpen({ today: calendarDateISO })); dispatch(runStreakQualifyingExercise({ today: calendarDateISO })); dispatch(addXp(XP_PER_CORRECT_EXERCISE));
-      } else {
-        typeof submitResult.xpTotal === "number"
-          ? dispatch(hydrateXp({ xpTotal: submitResult.xpTotal, level: Math.max(1, Math.floor(submitResult.xpTotal / XP_PER_CORRECT_EXERCISE) + 1) }))
-          : dispatch(addXp(XP_PER_CORRECT_EXERCISE));
-        if (typeof submitResult.streakCurrent === "number") dispatch(hydrateStreak({ streakCurrent: submitResult.streakCurrent, lastActivityDate: calendarDateISO, lastCheckedDate: calendarDateISO }));
-      }
-      setFeedbackMessage(`Puzzle solved! +${XP_PER_CORRECT_EXERCISE} XP.`);
+      setFeedbackMessage(
+        isGuest
+          ? applyGuestPuzzleSolve(dispatch, puzzle.id, xpSolveCounts, calendarDateISO)
+          : applyRegisteredPuzzleSolve(dispatch, submitResult, calendarDateISO),
+      );
     } catch { setFeedbackMessage("Failed to submit. Please try again."); }
-  }, [dispatch, input, isGuest, puzzle, puzzleService]);
+  }, [dispatch, input, isGuest, puzzle, puzzleService, xpSolveCounts]);
   const revealReferenceAnswer = useCallback(() => setRefOpen(true), []);
   const setCurrentIndex = useCallback((u: SetStateAction<number>) => { setRefOpen(false); setPuzzleIndex(u); }, []);
   return {

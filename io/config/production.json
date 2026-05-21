@@ -1,0 +1,17 @@
+{
+  "env": "production",
+  "app": {
+    "name": "codequest-io prod",
+    "validateSecurity": true,
+    "jwtAccessSecret": ""
+  },
+  "database": {
+    "url": ""
+  },
+  "io": {
+    "cors": {
+      "origin": "",
+      "methods": ["GET", "POST", "PATCH", "DELETE"]
+    }
+  }
+}

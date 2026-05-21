@@ -1,5 +1,12 @@
 node_modules
 
+# Environment files (never commit secrets)
+.env
+.env.local
+backend/.env
+io/.env
+mobile/.env
+
 # Build output (rebuild via `npm run build` per package)
 backend/dist/
 io/dist/

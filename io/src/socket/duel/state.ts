@@ -18,6 +18,34 @@ export const queue: QueueEntry[] = [];
 
 export const sessions = new Map<string, SessionState>();
 
+export function findActiveSessionForUser(userId: string): SessionState | undefined {
+  for (const session of sessions.values()) {
+    if (session.player1.userId === userId || session.player2.userId === userId) return session;
+  }
+  return undefined;
+}
+
+export function userInActiveDuel(userId: string): boolean {
+  return findActiveSessionForUser(userId) !== undefined;
+}
+
+export function evictUserFromQueue(duel: DuelNamespace, userId: string, onEvict: (socketId: string) => void): void {
+  for (let i = queue.length - 1; i >= 0; i--) {
+    if (queue[i].userId !== userId) continue;
+    const socketId = queue[i].socketId;
+    onEvict(socketId);
+    queue.splice(i, 1);
+    duel.to(socketId).emit("queue_rejected", { reason: "superseded_by_other_device" });
+  }
+}
+
+/** Atomically marks the current round resolved; returns false if already claimed. */
+export function tryClaimDuelRound(session: SessionState): boolean {
+  if (session.answered) return false;
+  session.answered = true;
+  return true;
+}
+
 export function makeSession(sessionId: string, roomId: string, p1: QueueEntry, p2: QueueEntry): SessionState {
   return {
     sessionId, roomId, player1: p1, player2: p2,

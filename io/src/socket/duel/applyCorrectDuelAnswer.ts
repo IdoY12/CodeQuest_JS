@@ -19,7 +19,6 @@ export function advanceDuelRoundNoWinner(
   session: SessionState,
   question: CachedQuestion,
 ): void {
-  session.answered = true;
   duel.to(session.roomId).emit("round_result", {
     winner_user_id: null, correct_answer: question.correctAnswer, explanation: question.explanation,
     scores: { player1: session.score.player1, player2: session.score.player2 },
@@ -40,8 +39,6 @@ export function applyCorrectDuelAnswer(
   answeredByPlayer1: boolean,
   timeTakenMs: number,
 ): void {
-  session.answered = true;
-
   const player1TimeMs = answeredByPlayer1 ? timeTakenMs : 0;
   const player2TimeMs = answeredByPlayer1 ? 0 : timeTakenMs;
 

@@ -25,7 +25,7 @@ export function registerPlayerReady(socket: Socket, duel: DuelNamespace) {
 
         if (!session) return;
 
-        const slot = resolveDuelPlayerSlot(session, socket.id, socket.data.authenticatedUserId as string | undefined);
+        const slot = resolveDuelPlayerSlot(session, socket, socket.data.authenticatedUserId as string | undefined);
 
         if (!slot) {
           logInfo("[DUEL]", "player_ready:rejected-non-participant", { socketId: socket.id });

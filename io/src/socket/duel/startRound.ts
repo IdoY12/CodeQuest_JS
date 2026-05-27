@@ -7,11 +7,27 @@
  * Consumers: playerReady, submitAnswer (via session barrel)
  */
 
+import type { DuelQuestion } from "@prisma/client";
 import { logError, logInfo } from "../../utils/logger.js";
 import { pickQuestionForSession } from "./services/questions.js";
 import { endSession } from "./endSession.js";
 import { sessions } from "./state.js";
 import type { DuelNamespace, SessionState } from "./types.js";
+
+export function roundStartPayload(session: SessionState, question: DuelQuestion) {
+  const options = Array.isArray(question.options) ? (question.options as string[]) : [];
+  return {
+    round_number: session.round,
+    question: {
+      id: question.id,
+      code_snippet: question.codeSnippet,
+      prompt: question.questionText,
+      type: question.type,
+      options,
+    },
+    starts_at: Date.now(),
+  };
+}
 
 export async function startRound(io: DuelNamespace, sessionOrId: string | SessionState) {
   try {
@@ -40,19 +56,7 @@ export async function startRound(io: DuelNamespace, sessionOrId: string | Sessio
       explanation: question.explanation,
     };
     session.askedQuestionIds.add(question.id);
-    const options = Array.isArray(question.options) ? (question.options as string[]) : [];
-
-    io.to(session.roomId).emit("round_start", {
-      round_number: session.round,
-      question: {
-        id: question.id,
-        code_snippet: question.codeSnippet,
-        prompt: question.questionText,
-        type: question.type,
-        options,
-      },
-      starts_at: Date.now(),
-    });
+    io.to(session.roomId).emit("round_start", roundStartPayload(session, question));
   } catch (error) {
     logError("[DUEL]", error, { phase: "start-round" });
   }

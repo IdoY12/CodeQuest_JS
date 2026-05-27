@@ -1,0 +1,92 @@
+# AI Rules — Iron Rules (Non-Negotiable)
+
+> These rules apply to every change, suggestion, and output. No exceptions.
+
+---
+
+## 1. Dead Code — #1 Priority
+
+- Any code, file, or folder that is no longer used **must be deleted immediately**.
+- After every change, scan the entire project for dead code, unused files, and unused folders.
+- Dead code confuses engineers during code review. Zero tolerance.
+
+---
+
+## 2. Architecture — Never Break It
+
+- Preserve the existing folder structure and naming conventions at all times.
+- Example: `/mobile/services` must contain **only** API request files and folders — nothing else.
+- Do not rename, restructure, or reorganize unless explicitly instructed.
+- File and folder names must clearly reflect their contents.
+
+---
+
+## 3. File Size — Max 80 Lines
+
+- Every file must stay at or under **80 lines**.
+- Exceeding 80 lines requires explicit developer approval.
+- If a file grows beyond 80 lines, split it — do not ask, just split it cleanly.
+
+---
+
+## 4. DRY — Our Holy Grail
+
+- Do not repeat logic. Ever.
+- Before writing anything, check if it already exists.
+- Abstract and reuse. If two things do the same thing, they must be one thing.
+
+---
+
+## 5. Minimalism
+
+- Write the minimum code needed to solve the problem.
+- Use the minimum number of files and folders.
+- If something can be reduced or consolidated — do it.
+- Flat file structure over deep nesting. Always.
+
+---
+
+## 6. Readability
+
+- Every variable, function, file, and folder name must be self-explanatory.
+- A developer who has never seen this project must understand it immediately — zero guesswork.
+- No clever tricks. No ambiguous abbreviations. Clear, obvious, readable.
+
+---
+
+## 7. Restricted Folders — No New Files Without Approval
+
+- **Do not create new files** inside `mobile/src/hooks` or `mobile/src/utils`.
+- This restriction is absolute unless the developer explicitly approves it in writing.
+
+---
+
+## 8. Post-Change Verification
+
+- After every change, verify that no new bugs were introduced elsewhere in the codebase.
+- Changes must not break existing functionality. Always check side effects.
+
+---
+
+## 9. When Writing Prompts for Agents (e.g. Cursor)
+
+- **Do not tell the agent which files or folders to access.**
+- **Do not tell the agent what code to write.**
+- The agent knows the codebase. Describe only the problem to solve.
+- Let the agent decide the implementation. Focus on the "what", never the "how".
+
+---
+
+## Summary
+
+| Rule | One-liner |
+|------|-----------|
+| Dead code | Delete immediately, always |
+| Architecture | Never break conventions |
+| File size | Max 80 lines |
+| DRY | One source of truth |
+| Minimalism | Least code, least files |
+| Readability | Self-explanatory everything |
+| Restricted folders | No new files in hooks/utils |
+| Post-change check | Verify no regressions |
+| Agent prompts | Problem only, never implementation |

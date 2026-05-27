@@ -7,6 +7,7 @@ import { registerLeaveQueue } from "./handlers/leaveQueue.js";
 import { registerPlayerReady } from "./handlers/playerReady.js";
 import { registerRematchAbandoned, registerRematchRequest } from "./handlers/rematchRequest.js";
 import { registerSubmitAnswer } from "./handlers/submitAnswer.js";
+import { syncActiveDuelOnConnect } from "./syncActiveDuelOnConnect.js";
 import { broadcastQueueStatus } from "./state.js";
 
 export function attachDuelNamespace(io: Server) {
@@ -14,7 +15,10 @@ export function attachDuelNamespace(io: Server) {
   attachDuelConnectionAuthentication(duel);
   duel.on("connection", (socket: Socket) => {
     logInfo("[DUEL]", "socket:connected", { socketId: socket.id });
-    if (socket.data.authenticatedUserId) broadcastQueueStatus(duel);
+    if (socket.data.authenticatedUserId) {
+      broadcastQueueStatus(duel);
+      void syncActiveDuelOnConnect(socket);
+    }
     registerJoinQueue(socket, duel);
     registerLeaveQueue(socket, duel);
     registerPlayerReady(socket, duel);

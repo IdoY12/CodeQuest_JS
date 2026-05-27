@@ -3,6 +3,7 @@ import { Image, Pressable, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAppSelector } from "@/redux/hooks";
 import { useDuelMatchmakingSocket } from "@/hooks/useDuelSocket";
+import { duelQueueRejectMessage } from "@/utils/formatHelpers";
 import { logDuel, logNav } from "@/utils/logger";
 import { duelLeaveDuel } from "@/utils/duelSocketCommands";
 import type { MatchmakingScreenProps } from "@/types/duelNavigation.types";
@@ -44,7 +45,7 @@ export function DuelMatchmakingScreen({ navigation }: MatchmakingScreenProps) {
   if (queueRejected) {
     return (
       <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
-        <Text style={styles.sub}>Session expired. Please log out and back in to play duels.</Text>
+        <Text style={styles.sub}>{duelQueueRejectMessage(queueRejected)}</Text>
         <Pressable style={styles.secondaryBtn} onPress={() => navigation.goBack()}>
           <Text style={styles.secondaryLabel}>Go Back</Text>
         </Pressable>
@@ -55,9 +56,7 @@ export function DuelMatchmakingScreen({ navigation }: MatchmakingScreenProps) {
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
       <Text style={styles.searching}>Searching for an opponent...</Text>
-      <Text style={styles.sub}>
-        ⚡ {playersOnline === 1 ? "1 player" : `${playersOnline} players`} online
-      </Text>
+      <Text style={styles.sub}>⚡ {playersOnline === 1 ? "1 player" : `${playersOnline} players`} online</Text>
       <Text style={styles.sub}>Estimated wait: {seconds}s</Text>
       {opponent ? (
         <View style={styles.matchOppRow}>

@@ -30,7 +30,7 @@ export function bindDuelSocketEvents(socket: Socket) {
   socket.on("connect_error", (e) => logError("[DUEL]", e, { phase: "socket-connect" }));
   socket.on("queue_rejected", (p: { reason?: string }) => {
     logDuel("queue:rejected", { reason: p?.reason });
-    store.dispatch(queueRejected(p?.reason ?? "auth_required"));
+    store.dispatch(queueRejected(p?.reason ?? "authentication_required"));
   });
   socket.on("queue_status", (p) => store.dispatch(playersOnlineSet(p.players_online ?? 0)));
   socket.on("match_found", (p) => {

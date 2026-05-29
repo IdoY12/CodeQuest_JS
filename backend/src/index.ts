@@ -9,7 +9,7 @@
 
 import config from "config";
 import http from "http";
-import { connectDatabase } from "@project/db";
+import { connectDatabase, prisma } from "@project/db";
 import { validateBackendProductionSecuritySettings } from "@project/server-kit/validateBackendSecurity";
 import { app } from "./app.js";
 import { logError, logInfo } from "./utils/logger.js";
@@ -37,3 +37,11 @@ server.listen(port, host, () => {
     lanUrlExample: `http://192.168.1.158:${port}`,
   });
 });
+
+async function shutdown() {
+  server.close();
+  await prisma.$disconnect();
+  process.exit(0);
+}
+process.on("SIGTERM", shutdown);
+process.on("SIGINT", shutdown);

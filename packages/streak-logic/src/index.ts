@@ -13,7 +13,7 @@ export type DailyXpStreakPersisted = {
 };
 
 export function calendarDaysBetweenEarlierAndLater(earlierDateOnly: string, laterDateOnly: string): number {
-  return Number(laterDateOnly) - Number(earlierDateOnly);
+  return (new Date(laterDateOnly).getTime() - new Date(earlierDateOnly).getTime()) / 86_400_000;
 }
 
 export function applyStreakOnAppOpen(state: DailyXpStreakPersisted, today: string): DailyXpStreakPersisted {

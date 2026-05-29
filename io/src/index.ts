@@ -5,7 +5,7 @@
 import config from "config";
 import http from "http";
 import { Server } from "socket.io";
-import { connectDatabase } from "@project/db";
+import { connectDatabase, prisma } from "@project/db";
 import { resolveSocketIoCors } from "@project/server-kit/cors";
 import { logError, logInfo } from "@project/server-kit/logger";
 import { validateIoProductionSecuritySettings } from "@project/server-kit/validateIoSecurity";
@@ -61,3 +61,12 @@ server.listen(port, host, () => {
     localUrl: `http://localhost:${port}`,
   });
 });
+
+async function shutdown() {
+  io.close();
+  server.close();
+  await prisma.$disconnect();
+  process.exit(0);
+}
+process.on("SIGTERM", shutdown);
+process.on("SIGINT", shutdown);

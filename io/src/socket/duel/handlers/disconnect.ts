@@ -1,6 +1,7 @@
 import type { Socket } from "socket.io";
 import { XP_PER_CORRECT_EXERCISE } from "@project/xp-constants";
 import { applyXpReward } from "../services/rewards.js";
+import { persistDuelSession } from "../persistence.js";
 import { logInfo } from "../../../utils/logger.js";
 import { clearSoloMatchTimer } from "../queue.js";
 import { broadcastQueueStatus, queue, sessions, rematchEntries } from "../state.js";
@@ -17,6 +18,7 @@ function onDuelParticipantGone(duel: DuelNamespace, leaverSocketId: string, sess
   session.abandonInProgress = true;
   const survivor = session.player1.socketId === leaverSocketId ? session.player2 : session.player1;
   const survivorIsP1 = survivor === session.player1;
+  void persistDuelSession(session, survivor.userId);
   duel.to(survivor.socketId).emit("opponent_disconnected", { at_round: session.round });
   const survivorStreakDate = survivorIsP1 ? session.player1StreakLocalDate : session.player2StreakLocalDate;
   void applyXpReward(survivor.userId, XP_PER_CORRECT_EXERCISE, survivorStreakDate)

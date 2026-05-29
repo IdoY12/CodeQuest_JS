@@ -7,6 +7,8 @@ import { readSecureSessionTokens, writeSecureSessionTokens } from "@/utils/secur
 
 type RetryableConfig = InternalAxiosRequestConfig & { _retry?: boolean };
 
+let refreshInFlight: Promise<{ accessToken: string; refreshToken: string }> | null = null;
+
 export default abstract class AuthAware {
   protected axiosInstance: AxiosInstance;
 
@@ -31,8 +33,13 @@ export default abstract class AuthAware {
         const refreshToken = secure.refreshToken;
         if (!refreshToken) { resetStoresAfterLogout(store.dispatch); throw error; }
         try {
-          const refreshResponse = await axios.post<{ accessToken: string; refreshToken: string }>(`${API_BASE_URL}/auth/refresh`, { refreshToken });
-          const { accessToken: nextAccessToken, refreshToken: nextRefreshToken } = refreshResponse.data;
+          if (!refreshInFlight) {
+            refreshInFlight = axios
+              .post<{ accessToken: string; refreshToken: string }>(`${API_BASE_URL}/auth/refresh`, { refreshToken })
+              .then((r) => r.data)
+              .finally(() => { refreshInFlight = null; });
+          }
+          const { accessToken: nextAccessToken, refreshToken: nextRefreshToken } = await refreshInFlight;
           store.dispatch(updateTokens({ accessToken: nextAccessToken, refreshToken: nextRefreshToken }));
           await writeSecureSessionTokens(nextAccessToken, nextRefreshToken);
           if (config.headers && typeof config.headers.set === "function") {

@@ -1,5 +1,6 @@
 /** Finalizes a duel: writes DB, emits duel_end, clears session, registers rematch entry. */
 
+import { persistDuelSession } from "./persistence.js";
 import { prisma, getProgressForActiveUser } from "@project/db";
 import { sessions, rematchEntries } from "./state.js";
 import type { DuelNamespace, SessionState } from "./types.js";
@@ -10,20 +11,7 @@ export async function endSession(io: DuelNamespace, session: SessionState) {
   const isTied = session.score.player1 === session.score.player2;
   const winner = session.score.player1 >= session.score.player2 ? session.player1 : session.player2;
 
-  await prisma.duelSession
-    .create({
-      data: {
-        player1Id: session.player1.userId,
-        player2Id: session.player2.userId,
-        winnerId: isTied ? null : winner.userId,
-        player1Score: session.score.player1,
-        player2Score: session.score.player2,
-        roundsPlayed: session.round,
-        roundReplay: session.roundReplay,
-        endedAt: new Date(),
-      },
-    })
-    .catch(() => null);
+  await persistDuelSession(session);
 
   sessions.delete(session.sessionId);
 

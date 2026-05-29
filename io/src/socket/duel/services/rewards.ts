@@ -1,4 +1,4 @@
-import { XP_PER_CORRECT_EXERCISE } from "@project/xp-constants";
+import { levelFromXpTotal } from "@project/xp-constants";
 import { activeExperienceLevelOf, getProgressForActiveUser, handleStreakQualifyingXpForUser, prisma } from "@project/db";
 
 export async function applyXpReward(userId: string, xpToAdd: number, streakLocalDate: string | null): Promise<number> {
@@ -15,16 +15,18 @@ export async function applyXpReward(userId: string, xpToAdd: number, streakLocal
   if (!progress) return 0;
 
   const nextXp = progress.xpTotal + xpToAdd;
-  const nextLevel = Math.max(1, Math.floor(nextXp / XP_PER_CORRECT_EXERCISE) + 1);
   try {
     await prisma.userProgress.update({
       where: { id: progress.id },
       data: {
-        xpTotal: nextXp,
-        level: nextLevel,
+        xpTotal: { increment: xpToAdd },
+        level: levelFromXpTotal(nextXp),
       },
     });
-  } catch {}
+  } catch (err) {
+    console.error("applyXpReward: failed to persist XP for user", userId, err);
+    return 0;
+  }
 
   if (streakLocalDate && /^\d{4}-\d{2}-\d{2}$/.test(streakLocalDate)) {
     return handleStreakQualifyingXpForUser(prisma, userId, streakLocalDate, xpToAdd);

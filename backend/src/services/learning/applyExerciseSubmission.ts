@@ -1,6 +1,6 @@
-import { ensureProgressRow, handleStreakQualifyingXpForUser, prisma } from "@project/db";
+import { ensureProgressRow, handleStreakQualifyingXpForUser, prisma, type DbClient } from "@project/db";
 import { normaliseExerciseAnswer } from "@project/exercise-answer";
-import { XP_PER_CORRECT_EXERCISE } from "@project/xp-constants";
+import { levelFromXpTotal, XP_PER_CORRECT_EXERCISE } from "@project/xp-constants";
 import type { ExerciseSubmitResponseDto } from "../../dto/exerciseSubmitResponseDto.js";
 
 const dateKeyRegex = /^\d{4}-\d{2}-\d{2}$/;
@@ -23,24 +23,25 @@ export async function applyExerciseSubmission(input: SubmitInput): Promise<Exerc
   let streakCurrent: number | undefined;
 
   if (isCorrect) {
-    await ensureProgressRow(prisma, input.userId, exercise.experienceLevel);
-    const progress = await prisma.userProgress.findUnique({
-      where: {
-        userId_experienceLevel: { userId: input.userId, experienceLevel: exercise.experienceLevel },
-      },
-    });
+    await prisma.$transaction(async (tx: DbClient) => {
+      await ensureProgressRow(tx, input.userId, exercise.experienceLevel);
+      const progress = await tx.userProgress.findUnique({
+        where: {
+          userId_experienceLevel: { userId: input.userId, experienceLevel: exercise.experienceLevel },
+        },
+      });
 
-    if (progress) {
+      if (!progress) return;
+
       const nextXp = progress.xpTotal + XP_PER_CORRECT_EXERCISE;
-      const nextLevel = Math.max(1, Math.floor(nextXp / XP_PER_CORRECT_EXERCISE) + 1);
       const nextIdx = Math.max(progress.currentExerciseIndex, exercise.orderIndex + 1);
-      const updated = await prisma.userProgress.update({
+      const updated = await tx.userProgress.update({
         where: { id: progress.id },
-        data: { xpTotal: nextXp, level: nextLevel, currentExerciseIndex: nextIdx },
+        data: { xpTotal: nextXp, level: levelFromXpTotal(nextXp), currentExerciseIndex: nextIdx },
       });
       if (input.clientLocalDate && dateKeyRegex.test(input.clientLocalDate)) {
         streakCurrent = await handleStreakQualifyingXpForUser(
-          prisma,
+          tx,
           input.userId,
           input.clientLocalDate,
           XP_PER_CORRECT_EXERCISE,
@@ -48,7 +49,7 @@ export async function applyExerciseSubmission(input: SubmitInput): Promise<Exerc
       } else {
         streakCurrent = updated.streakCurrent;
       }
-    }
+    });
   }
 
   return {

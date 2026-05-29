@@ -55,6 +55,10 @@ export async function patchAvatar(req: AuthenticatedRequest, res: Response) {
     return res.status(400).json({ error: "Avatar URL is not from configured storage bucket" });
   }
 
+  if (!nextKey.startsWith(`avatars/${req.user!.userId}/`)) {
+    return res.status(403).json({ error: "Forbidden" });
+  }
+
   const current = await prisma.user.findUnique({
     where: { id: req.user!.userId },
     select: { avatarUrl: true },

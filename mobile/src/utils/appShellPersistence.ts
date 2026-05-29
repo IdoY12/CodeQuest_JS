@@ -9,6 +9,7 @@ import { REDUX_PERSIST_KEY } from "@/utils/hydrateStore";
 import { clearSecureSessionTokens, writeSecureSessionTokens } from "@/utils/secureSessionTokens";
 import { resetStoresAfterLogout } from "@/utils/resetStoresAfterLogout";
 import { logError } from "@/utils/logger";
+import { isAuthFailure } from "@/utils/bootstrapSession";
 
 export function subscribeStoreToHybridStorage(appStore: typeof store): () => void {
   let previousSerialized = "";
@@ -66,10 +67,12 @@ export async function refreshSessionOrLogoutOnForeground(accessToken: string, di
   try {
     const me = await new UserService().getMe();
     dispatch(setUserIdentity({ email: me.email, username: me.username, avatarUrl: me.avatarUrl ?? null }));
-  } catch {
-    await AsyncStorage.removeItem(REDUX_PERSIST_KEY);
-    await clearSecureSessionTokens();
-    resetStoresAfterLogout(dispatch);
+  } catch (error) {
+    if (isAuthFailure(error)) {
+      await AsyncStorage.removeItem(REDUX_PERSIST_KEY);
+      await clearSecureSessionTokens();
+      resetStoresAfterLogout(dispatch);
+    }
   }
 }
 

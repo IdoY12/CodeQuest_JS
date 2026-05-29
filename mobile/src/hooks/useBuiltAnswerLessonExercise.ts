@@ -6,6 +6,7 @@ import { useAuthenticatedService } from "@/hooks/useAuthenticatedService";
 import LearningService from "@/services/auth-aware/LearningService";
 import { evaluateExerciseLocally } from "@/utils/lessonExerciseState";
 import { persistLessonExerciseOnCorrect } from "@/hooks/useLessonExerciseInteractions";
+import { logError } from "@/utils/logger";
 
 export function useBuiltAnswerLessonExercise(
   exercise: Exercise,
@@ -28,13 +29,17 @@ export function useBuiltAnswerLessonExercise(
   const canCheck = input.trim().length > 0 && isAnswerCorrect !== true;
 
   const runCheck = useCallback(async () => {
-    const answer = input.trim();
-    const ev = evaluateExerciseLocally(exercise, answer);
-    setServerResult({ xpEarned: ev.xpEarned, explanation: ev.explanation });
-    setIsAnswerCorrect(ev.isAnswerCorrect);
-    setHasChecked(true);
-    if (accessToken && learning && ev.isAnswerCorrect) {
-      await persistLessonExerciseOnCorrect(learning, exercise.id, answer, setServerResult);
+    try {
+      const answer = input.trim();
+      const ev = evaluateExerciseLocally(exercise, answer);
+      setServerResult({ xpEarned: ev.xpEarned, explanation: ev.explanation });
+      setIsAnswerCorrect(ev.isAnswerCorrect);
+      setHasChecked(true);
+      if (accessToken && learning && ev.isAnswerCorrect) {
+        await persistLessonExerciseOnCorrect(learning, exercise.id, answer, setServerResult);
+      }
+    } catch (error) {
+      logError("[LESSON]", error, { phase: "run-check" });
     }
   }, [accessToken, exercise, input, learning]);
 

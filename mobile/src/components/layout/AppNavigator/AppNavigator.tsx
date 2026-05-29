@@ -26,7 +26,9 @@ export const AppNavigator = React.memo(function AppNavigator() {
   const routeNameRef = React.useRef<string | undefined>(undefined);
 
   React.useEffect(() => {
-    void AsyncStorage.getItem(ONBOARDING_SEEN_STORAGE_KEY).then((value) => setOnboardingSeenOnDevice(value === "1"));
+    void AsyncStorage.getItem(ONBOARDING_SEEN_STORAGE_KEY)
+      .then((value) => setOnboardingSeenOnDevice(value === "1"))
+      .catch(() => setOnboardingSeenOnDevice(false));
   }, []);
 
   React.useEffect(() => {

@@ -14,9 +14,11 @@ import { attachDuelNamespace } from "./socket/duel/index.js";
 // Global error handlers to prevent the process from crashing silently
 process.on("unhandledRejection", (reason) => {
   logError("[IO]", reason, { type: "unhandledRejection" });
+  process.exit(1);
 });
 process.on("uncaughtException", (error) => {
   logError("[IO]", error, { type: "uncaughtException" });
+  process.exit(1);
 });
 
 // Security validation and Database connection before starting the server

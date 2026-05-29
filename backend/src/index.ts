@@ -16,9 +16,11 @@ import { logError, logInfo } from "./utils/logger.js";
 
 process.on("unhandledRejection", (reason) => {
   logError("[APP]", reason, { type: "unhandledRejection" });
+  process.exit(1);
 });
 process.on("uncaughtException", (error) => {
   logError("[APP]", error, { type: "uncaughtException" });
+  process.exit(1);
 });
 
 validateBackendProductionSecuritySettings();

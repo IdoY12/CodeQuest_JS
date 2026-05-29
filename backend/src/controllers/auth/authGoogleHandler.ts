@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { randomUUID } from "crypto";
 import { resolveExperienceLevel } from "@project/db";
 import { logError, logInfo } from "../../utils/logger.js";
 import { DATABASE_UNAVAILABLE_MESSAGE, isDatabaseUnavailableError } from "../../utils/dbErrors.js";
@@ -7,6 +8,7 @@ import { verifyGoogleIdToken } from "../../utils/googleIdTokenVerify.js";
 import type { GoogleAuthBody } from "../../validators/authValidators.js";
 import { GoogleSignInBlockedError, findOrCreateGoogleUser } from "../../services/auth/googleAccountLinking.js";
 import { ensureUserProgressForLogin, touchUserLastActive } from "../../services/auth/loginSideEffects.js";
+import { storeRefreshToken } from "../../utils/storeRefreshToken.js";
 
 export async function authGoogleHandler(request: Request, response: Response): Promise<void> {
   const { idToken } = request.validatedBody as GoogleAuthBody;
@@ -24,6 +26,9 @@ export async function authGoogleHandler(request: Request, response: Response): P
     const progress = await ensureUserProgressForLogin(user);
     await touchUserLastActive(user.id);
     const tp = { userId: user.id, email: user.email, tokenVersion: user.tokenVersion };
+    const accessToken = signAccessToken(tp);
+    const refreshToken = signRefreshToken(tp);
+    await storeRefreshToken(user.id, refreshToken, randomUUID());
     logInfo("[AUTH]", "google:success", { userId: user.id });
     response.status(isNew ? 201 : 200).json({
       user: {
@@ -36,8 +41,8 @@ export async function authGoogleHandler(request: Request, response: Response): P
         dailyCommitmentMinutes: progress.dailyCommitmentMinutes ?? 15,
         notificationsEnabled: progress.notificationsEnabled ?? true,
       },
-      accessToken: signAccessToken(tp),
-      refreshToken: signRefreshToken(tp),
+      accessToken,
+      refreshToken,
     });
   } catch (error) {
     if (error instanceof GoogleSignInBlockedError) {

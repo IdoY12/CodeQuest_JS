@@ -11,9 +11,9 @@ import { prisma } from "@project/db";
 import { invalidateCachedTokenVersionForUser } from "./authenticatedUserTokenVersionCache.js";
 
 export async function revokeAllSessionsForUser(userId: string): Promise<void> {
-  await prisma.user.update({
-    where: { id: userId },
-    data: { tokenVersion: { increment: 1 } },
-  });
+  await prisma.$transaction([
+    prisma.refreshToken.deleteMany({ where: { userId } }),
+    prisma.user.update({ where: { id: userId }, data: { tokenVersion: { increment: 1 } } }),
+  ]);
   invalidateCachedTokenVersionForUser(userId);
 }

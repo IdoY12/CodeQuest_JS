@@ -1,18 +1,18 @@
 /**
  * POST /api/user/change-password — verifies current password then rotates hash + JWTs.
  *
- * Responsibility: bcrypt compare/update and tokenVersion bump with cache invalidation.
+ * Responsibility: bcrypt compare/update and session revocation.
  * Layer: backend user HTTP handlers
- * Depends on: Prisma, password helpers, token cache
+ * Depends on: Prisma, password helpers, revokeAllSessionsForUser
  * Consumers: user router
  */
 
 import type { Response } from "express";
 import { prisma } from "@project/db";
 import type { AuthenticatedRequest } from "../../@types/auth.js";
-import { invalidateCachedTokenVersionForUser } from "../../utils/authenticatedUserTokenVersionCache.js";
 import { comparePassword, hashPassword } from "../../utils/passwordHashing.js";
 import type { PostChangePasswordBody } from "../../validators/userValidators.js";
+import { revokeAllSessionsForUser } from "../../utils/revokeAllSessionsForUser.js";
 
 export async function postChangePassword(req: AuthenticatedRequest, res: Response) {
   const { currentPassword, newPassword } = req.validatedBody as PostChangePasswordBody;
@@ -28,12 +28,9 @@ export async function postChangePassword(req: AuthenticatedRequest, res: Respons
   if (!isPasswordValid) return res.status(401).json({ error: "Current password is incorrect" });
   await prisma.user.update({
     where: { id: req.user!.userId },
-    data: {
-      hashedPassword: await hashPassword(newPassword),
-      tokenVersion: { increment: 1 },
-    },
+    data: { hashedPassword: await hashPassword(newPassword) },
   });
-  invalidateCachedTokenVersionForUser(req.user!.userId);
+  await revokeAllSessionsForUser(req.user!.userId);
 
   return res.json({ ok: true });
 }

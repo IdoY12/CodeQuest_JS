@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { randomUUID } from "crypto";
 import { prisma } from "@project/db";
 import { logError, logInfo, logWarn } from "../../utils/logger.js";
 import { DATABASE_UNAVAILABLE_MESSAGE, isDatabaseUnavailableError } from "../../utils/dbErrors.js";
@@ -7,6 +8,7 @@ import { signAccessToken, signRefreshToken } from "../../utils/sessionJwtTokens.
 import { resolveExperienceLevel } from "@project/db";
 import type { LoginBody } from "../../validators/authValidators.js";
 import { ensureUserProgressForLogin, touchUserLastActive } from "../../services/auth/loginSideEffects.js";
+import { storeRefreshToken } from "../../utils/storeRefreshToken.js";
 
 export async function authLoginHandler(request: Request, response: Response): Promise<void> {
   const { email, password } = request.validatedBody as LoginBody;
@@ -44,6 +46,7 @@ export async function authLoginHandler(request: Request, response: Response): Pr
       email: user.email,
       tokenVersion: user.tokenVersion,
     });
+    await storeRefreshToken(user.id, refreshToken, randomUUID());
     logInfo("[AUTH]", "login:success", { userId: user.id });
     response.json({
       user: {

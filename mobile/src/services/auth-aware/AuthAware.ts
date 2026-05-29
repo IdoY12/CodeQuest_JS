@@ -29,8 +29,13 @@ export default abstract class AuthAware {
         const config = error.config as RetryableConfig | undefined;
         if (status !== 401 || !config || config._retry) throw error;
         config._retry = true;
-        const secure = await readSecureSessionTokens();
-        const refreshToken = secure.refreshToken;
+        let refreshToken: string | null;
+        try {
+          refreshToken = (await readSecureSessionTokens()).refreshToken;
+        } catch {
+          resetStoresAfterLogout(store.dispatch);
+          throw error;
+        }
         if (!refreshToken) { resetStoresAfterLogout(store.dispatch); throw error; }
         try {
           if (!refreshInFlight) {

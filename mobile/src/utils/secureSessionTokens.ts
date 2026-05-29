@@ -27,17 +27,15 @@ export async function writeSecureSessionTokens(
 }
 
 /**
- * Fetches tokens from the secure vault.
+ * Fetches tokens from the secure vault. Throws if SecureStore is unavailable.
  */
 export async function readSecureSessionTokens(): Promise<{
   accessToken: string | null;
   refreshToken: string | null;
 }> {
-  // Promise.all runs both fetches at the same time to save time.
   const [accessToken, refreshToken] = await Promise.all([
-    // If the vault is empty or locked, we return 'null' instead of crashing the app.
-    SecureStore.getItemAsync(SECURE_STORAGE_ACCESS_TOKEN_KEY).catch(() => null),
-    SecureStore.getItemAsync(SECURE_STORAGE_REFRESH_TOKEN_KEY).catch(() => null),
+    SecureStore.getItemAsync(SECURE_STORAGE_ACCESS_TOKEN_KEY),
+    SecureStore.getItemAsync(SECURE_STORAGE_REFRESH_TOKEN_KEY),
   ]);
   return { accessToken, refreshToken };
 }

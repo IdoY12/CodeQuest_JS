@@ -1,0 +1,13 @@
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String
+  family    String
+  tokenHash String   @unique
+  used      Boolean  @default(false)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}

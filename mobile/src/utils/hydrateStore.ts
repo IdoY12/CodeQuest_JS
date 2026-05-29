@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { AppDispatch } from "@/redux/store";
-import { hydrateSession, reconcileStudyCalendarDay, setHasHydrated } from "@/redux/session-slice";
+import { hydrateSession, reconcileStudyCalendarDay, setBootstrapError, setHasHydrated } from "@/redux/session-slice";
 import { hydrateProfile } from "@/redux/profile-slice";
 import { hydrateXp } from "@/redux/xp-slice";
 import { hydrateStreak } from "@/redux/streak-slice";
@@ -8,7 +8,7 @@ import { hydrateLesson } from "@/redux/lesson-slice";
 import { hydrateStats } from "@/redux/duel-slice";
 import { hydratePuzzle } from "@/redux/puzzle-slice";
 import { logAuth, logError } from "@/utils/logger";
-import { readSecureSessionTokens, writeSecureSessionTokens } from "@/utils/secureSessionTokens";
+import { readSecureSessionTokens } from "@/utils/secureSessionTokens";
 
 export const REDUX_PERSIST_KEY = "codequest-redux-store";
 
@@ -22,25 +22,6 @@ type PersistedReduxSnapshot = {
   puzzle?: Record<string, unknown>;
 };
 
-async function mergeHydratedSessionTokens<T extends Record<string, unknown>>(session: T) {
-  // 1. Get the tokens from the "Vault" (The most reliable source for security).
-  const secure = await readSecureSessionTokens();
-
-  // 2. The Logic: "Which token is better?"
-  // Priority 1: Use the one from the Secure Vault.
-  // Priority 2: If vault is empty, maybe there's one in the Redux backup (session.accessToken).
-  // Priority 3: Fallback to null.
-  const accessToken = secure.accessToken ?? (session.accessToken as string | null) ?? null;
-  const refreshToken = secure.refreshToken ?? (session.refreshToken as string | null) ?? null;
-
-  // 3. Sync: Now that we found the best token, save it back to the vault
-  // to make sure BOTH sources are now identical.
-  await writeSecureSessionTokens(accessToken, refreshToken);
-
-  // 4. Return: We combine the original session data with the verified tokens.
-  return { ...session, accessToken, refreshToken };
-}
-
 export async function hydrateStoreFromStorage(dispatch: AppDispatch): Promise<void> {
   try {
     const raw = await AsyncStorage.getItem(REDUX_PERSIST_KEY);
@@ -51,7 +32,8 @@ export async function hydrateStoreFromStorage(dispatch: AppDispatch): Promise<vo
 
     if (!parsed.profile || !parsed.session) return;
 
-    const sessionWithTokens = await mergeHydratedSessionTokens(parsed.session);
+    const secure = await readSecureSessionTokens();
+    const sessionWithTokens = { ...parsed.session, accessToken: secure.accessToken, refreshToken: secure.refreshToken };
     dispatch(hydrateSession(sessionWithTokens as never));
     dispatch(hydrateProfile(parsed.profile as never));
     if (parsed.xp) dispatch(hydrateXp(parsed.xp as never));
@@ -61,6 +43,7 @@ export async function hydrateStoreFromStorage(dispatch: AppDispatch): Promise<vo
     if (parsed.puzzle) dispatch(hydratePuzzle(parsed.puzzle as never));
   } catch (error) {
     logError("[APP]", error, { phase: "hydrate-redux" });
+    dispatch(setBootstrapError("Could not access your stored credentials. Please log in again."));
   } finally {
     dispatch(reconcileStudyCalendarDay());
     dispatch(setHasHydrated(true));

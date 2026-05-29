@@ -13,6 +13,7 @@ model User {
   puzzleXpSolveCounts    Json                  @default("{}")
 
   progressRows    UserProgress[]
+  refreshTokens   RefreshToken[]
   duelSessionsP1  DuelSession[] @relation("Player1Sessions")
   duelSessionsP2  DuelSession[] @relation("Player2Sessions")
   wonSessions     DuelSession[] @relation("WinnerSessions")

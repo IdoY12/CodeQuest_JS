@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { randomUUID } from "crypto";
 import { prisma } from "@project/db";
 import { logError, logInfo, logWarn } from "../../utils/logger.js";
 import { USERNAME_TAKEN_MESSAGE } from "@project/user-credentials";
@@ -10,6 +11,7 @@ import {
 import { signAccessToken, signRefreshToken } from "../../utils/sessionJwtTokens.js";
 import type { RegisterBody } from "../../validators/authValidators.js";
 import { createRegisteredUserWithDefaults } from "../../services/auth/registerUser.js";
+import { storeRefreshToken } from "../../utils/storeRefreshToken.js";
 
 export async function authRegisterHandler(request: Request, response: Response): Promise<void> {
   const { email, username, password } = request.validatedBody as RegisterBody;
@@ -35,6 +37,7 @@ export async function authRegisterHandler(request: Request, response: Response):
       email: user.email,
       tokenVersion: user.tokenVersion,
     });
+    await storeRefreshToken(user.id, refreshToken, randomUUID());
     logInfo("[AUTH]", "register:success", { userId: user.id, email: user.email });
     response.status(201).json({
       user: {

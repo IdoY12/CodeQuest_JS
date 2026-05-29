@@ -77,7 +77,6 @@ const sessionSlice = createSlice({
         accessToken: null,
         refreshToken: null,
         userId: null,
-        bootstrapError: null,
       });
     },
 

@@ -50,4 +50,5 @@ export const m = StyleSheet.create({
     justifyContent: "center",
   },
   dangerTxt: { color: colors.background, fontWeight: "800" },
+  errorTxt: { color: colors.danger, marginBottom: spacing.sm },
 });

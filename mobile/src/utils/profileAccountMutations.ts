@@ -4,7 +4,7 @@ import { Alert } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import type { AppDispatch } from "@/redux/store";
 import type UserService from "@/services/auth-aware/UserService";
-import { apiErrorMessage } from "@/services/auth";
+import { apiErrorMessage, serverErrorMessage } from "@/services/auth";
 import { logError } from "@/utils/logger";
 import { setUserIdentity } from "@/redux/profile-slice";
 import { REDUX_PERSIST_KEY } from "@/utils/hydrateStore";
@@ -51,7 +51,7 @@ export async function changePasswordRequest(
     setMessage("Password changed.");
   } catch (error) {
     logError("[PROFILE]", error, { phase: "change-password" });
-    Alert.alert("Could not change password", "Check your current password and try again.");
+    Alert.alert("Could not change password", serverErrorMessage(error) ?? "Check your current password and try again.");
   }
 }
 

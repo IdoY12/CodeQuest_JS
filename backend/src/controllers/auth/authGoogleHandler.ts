@@ -3,6 +3,7 @@ import { randomUUID } from "crypto";
 import { resolveExperienceLevel } from "@project/db";
 import { logError, logInfo } from "../../utils/logger.js";
 import { DATABASE_UNAVAILABLE_MESSAGE, isDatabaseUnavailableError } from "../../utils/dbErrors.js";
+import { authAccountFields } from "../../utils/authAccountFields.js";
 import { signAccessToken, signRefreshToken } from "../../utils/sessionJwtTokens.js";
 import { verifyGoogleIdToken } from "../../utils/googleIdTokenVerify.js";
 import type { GoogleAuthBody } from "../../validators/authValidators.js";
@@ -40,6 +41,7 @@ export async function authGoogleHandler(request: Request, response: Response): P
         experienceLevel: resolveExperienceLevel(progress.experienceLevel),
         dailyCommitmentMinutes: progress.dailyCommitmentMinutes ?? 15,
         notificationsEnabled: user.notificationsEnabled,
+        ...authAccountFields(user),
         ...(isNew ? { blockProgress: (progress.blockProgress ?? {}) as Record<string, number> } : {}),
       },
       accessToken,

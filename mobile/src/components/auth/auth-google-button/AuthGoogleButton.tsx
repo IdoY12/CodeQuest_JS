@@ -8,6 +8,7 @@ import authService from "@/services/auth";
 import { buildGuestLocalState } from "@/services/authGuestState";
 import { logAuth, logError } from "@/utils/logger";
 import { googleAuthRequestConfig, googleSignInUnavailableReason } from "@/config/googleOAuth";
+import { handleGoogleAuthResponse } from "./handleGoogleAuthResponse";
 import { styles } from "../auth-screen/AuthScreen.styles";
 import googleLogo from "../../../../assets/google-g-logo.png";
 
@@ -38,11 +39,8 @@ export function AuthGoogleButton({ dispatch }: { dispatch: AppDispatch }) {
     if (req) logAuth("google:request", { redirectUri: req.redirectUri, clientId: req.clientId });
   }, [req]);
   useEffect(() => {
-    if (res?.type !== "success") return;
-    const id =
-      res.authentication?.idToken ?? (typeof res.params?.id_token === "string" ? res.params.id_token : undefined);
-    if (!id) return;
-    void finish(id);
+    const id = handleGoogleAuthResponse(res);
+    if (id) void finish(id);
   }, [res, finish]);
   const start = useCallback(() => {
     const unavailable = googleSignInUnavailableReason();

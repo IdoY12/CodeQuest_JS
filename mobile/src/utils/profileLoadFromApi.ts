@@ -55,6 +55,8 @@ export async function fetchAndApplyProfile(
         username: profile.username,
         email: profile.email,
         avatarUrl: profile.avatarUrl,
+        hasPassword: profile.hasPassword,
+        authProvider: profile.authProvider,
       }),
     );
     // Notification preference lives on the User model, so it applies even before goal/level are set.

@@ -17,6 +17,8 @@ const limiter = (max: number) =>
     max,
     standardHeaders: true,
     legacyHeaders: false,
+    // Object → JSON 429 body; the plain-text default is unreadable by clients expecting {error}
+    message: { error: "Too many attempts. Please try again later." },
   });
 
 // Registration is limited more strictly in production to slow enumeration attacks

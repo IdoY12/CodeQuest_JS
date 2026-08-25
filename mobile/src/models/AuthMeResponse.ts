@@ -4,4 +4,6 @@ export default interface AuthMeResponse {
     email: string
     username: string
     avatarUrl: string | null
+    hasPassword: boolean
+    authProvider: "google" | "apple" | null
 }

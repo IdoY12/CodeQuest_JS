@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto";
 import type { User } from "@prisma/client";
 import { resolveExperienceLevel } from "@project/db";
+import { authAccountFields } from "../../utils/authAccountFields.js";
 import { signAccessToken, signRefreshToken } from "../../utils/sessionJwtTokens.js";
 import { storeRefreshToken } from "../../utils/storeRefreshToken.js";
 import { ensureUserProgressForLogin, touchUserLastActive } from "./loginSideEffects.js";
@@ -23,6 +24,7 @@ export async function issueSessionForUser(user: User, includeBlockProgress = fal
       experienceLevel: resolveExperienceLevel(progress.experienceLevel),
       dailyCommitmentMinutes: progress.dailyCommitmentMinutes ?? 15,
       notificationsEnabled: user.notificationsEnabled,
+      ...authAccountFields(user),
       ...(includeBlockProgress ? { blockProgress: (progress.blockProgress ?? {}) as Record<string, number> } : {}),
     },
     accessToken,

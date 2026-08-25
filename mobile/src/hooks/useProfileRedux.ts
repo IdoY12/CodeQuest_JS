@@ -14,6 +14,7 @@ export function useProfileRedux() {
   const experienceLevel = useAppSelector((s) => s.profile.experienceLevel);
   const commitment = useAppSelector((s) => s.profile.commitment);
   const notificationsEnabled = useAppSelector((s) => s.profile.notificationsEnabled);
+  const hasPassword = useAppSelector((s) => s.profile.hasPassword);
   const accessToken = useAppSelector((s) => s.session.accessToken);
   const refreshToken = useAppSelector((s) => s.session.refreshToken);
   const studyMinutesToday = useAppSelector((s) => Math.floor(s.session.studySecondsToday / 60));
@@ -34,6 +35,7 @@ export function useProfileRedux() {
     experienceLevel,
     commitment,
     notificationsEnabled,
+    hasPassword,
     accessToken,
     refreshToken,
     duelWinRate,

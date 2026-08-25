@@ -6,6 +6,7 @@ import {
   isDatabaseUnavailableError,
   isUniqueConstraintError,
 } from "../../utils/dbErrors.js";
+import { authAccountFields } from "../../utils/authAccountFields.js";
 import type { RegisterBody } from "../../validators/authValidators.js";
 import { createRegisteredUserWithDefaults } from "../../services/auth/registerUser.js";
 import { createVerificationCode } from "../../services/auth/emailVerificationCodes.js";
@@ -37,6 +38,7 @@ export async function authRegisterHandler(request: Request, response: Response):
         experienceLevel: experienceLevel ?? null,
         dailyCommitmentMinutes: dailyCommitmentMinutes ?? 15,
         notificationsEnabled: user.notificationsEnabled,
+        ...authAccountFields(user),
         blockProgress: blockProgress?.[activeLevel] ?? {},
       },
       requiresEmailVerification: true,

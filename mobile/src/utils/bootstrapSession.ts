@@ -46,7 +46,7 @@ async function _run(dispatch: AppDispatch): Promise<void> {
   try {
     dispatch(setBootstrapError(null));
     const me = await userService.getMe();
-    dispatch(setUserIdentity({ email: me.email, username: me.username, avatarUrl: me.avatarUrl ?? null }));
+    dispatch(setUserIdentity({ email: me.email, username: me.username, avatarUrl: me.avatarUrl ?? null, hasPassword: me.hasPassword, authProvider: me.authProvider }));
     const userPreferences = await userService.getPreferencesGet();
     // Notification preference lives on the User model, so it applies even before goal/level are set.
     dispatch(setNotificationsEnabled(userPreferences.notificationsEnabled));

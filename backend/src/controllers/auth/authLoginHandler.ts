@@ -3,6 +3,7 @@ import { randomUUID } from "crypto";
 import { prisma } from "@project/db";
 import { logError, logInfo, logWarn } from "../../utils/logger.js";
 import { DATABASE_UNAVAILABLE_MESSAGE, isDatabaseUnavailableError } from "../../utils/dbErrors.js";
+import { authAccountFields } from "../../utils/authAccountFields.js";
 import { comparePassword } from "../../utils/passwordHashing.js";
 import { signAccessToken, signRefreshToken } from "../../utils/sessionJwtTokens.js";
 import { resolveExperienceLevel } from "@project/db";
@@ -56,6 +57,7 @@ export async function authLoginHandler(request: Request, response: Response): Pr
         experienceLevel: resolveExperienceLevel(progress.experienceLevel),
         dailyCommitmentMinutes: progress.dailyCommitmentMinutes ?? 15,
         notificationsEnabled: user.notificationsEnabled,
+        ...authAccountFields(user),
       },
       accessToken,
       refreshToken,

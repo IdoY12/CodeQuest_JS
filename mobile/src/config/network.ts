@@ -1,24 +1,37 @@
 import Constants from "expo-constants";
+import { NativeModules } from "react-native";
 
 const DEV_BACKEND_PORT = "4000";
 const DEV_IO_PORT = "4001";
 const PROD_API_BASE_URL = "https://api.platyko.com/api";
 const PROD_DUEL_SOCKET_URL = "https://io.platyko.com/duel";
 
+/**
+ * Host the running JS bundle was fetched from (Metro), e.g. "192.168.1.221:8081".
+ * Most reliable dev host: if this code is executing, that address was reachable moments ago.
+ * Null when the bundle is embedded (file:// — release builds, Metro-less device builds).
+ */
+function getBundleSourceHost(): string | null {
+  const sourceCode = (NativeModules as { SourceCode?: { getConstants?: () => { scriptURL?: string } } }).SourceCode;
+  const scriptURL = sourceCode?.getConstants?.()?.scriptURL;
+  if (!scriptURL?.startsWith("http")) return null;
+  return scriptURL.split("://")[1]?.split("/")[0] ?? null;
+}
+
 function getExpoHost(): string | null {
   const hostUri =
-    // Primary: new Expo API — populated only when running via Expo Go (QR scan) or Dev Client
-    // Returns e.g. "192.168.1.88:8081" (host:metroPort), undefined in native builds
+    // Live Metro host ("192.168.1.221:8081") — self-heals when the Mac's LAN IP changes
+    getBundleSourceHost() ??
+
+    // Expo Go / dev-client manifest host; undefined in bare native builds
     Constants.expoConfig?.hostUri ??
 
-    // Fallback: legacy Expo Go API (removed from official types but still present at runtime on older versions)
-    // Cast needed because TypeScript no longer includes expoGoConfig in the Constants type definitions
+    // Legacy Expo Go API (removed from official types but still present at runtime on older versions)
     (Constants as unknown as { expoGoConfig?: { debuggerHost?: string } }).expoGoConfig?.debuggerHost ??
 
-    // Fallback: LAN IP written to mobile/.env by ios-device.sh before native build.
-    // React Native types process.env values as `any`, so pin the real type here.
+    // LAN IP written to mobile/.env by ios-device.sh before a native device build.
+    // Inlined at bundle time — goes stale if the Mac's IP changes after the build.
     (process.env.EXPO_PUBLIC_DEV_HOST as string | undefined) ??
-    // No host available — native build without ios-device.sh, caller handles this
     null;
   if (!hostUri) return null;
   return hostUri.split(":")[0] ?? null;

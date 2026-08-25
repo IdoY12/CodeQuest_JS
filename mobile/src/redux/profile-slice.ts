@@ -12,6 +12,8 @@ type ProfileState = {
   experienceLevel?: Experience;
   commitment: Commitment;
   notificationsEnabled: boolean;
+  hasPassword: boolean;
+  authProvider: "google" | "apple" | null;
 };
 
 const initialState: ProfileState = {
@@ -21,6 +23,9 @@ const initialState: ProfileState = {
   commitment: "15",
   experienceLevel: "JUNIOR",
   notificationsEnabled: true,
+  // Assume a password account until a server payload says otherwise (pre-update snapshots lack the flag).
+  hasPassword: true,
+  authProvider: null,
 };
 
 const profileSlice = createSlice({
@@ -31,10 +36,9 @@ const profileSlice = createSlice({
       Object.assign(state, a.payload);
     },
     resetProfile: () => initialState,
-    setUserIdentity: (state, a: PayloadAction<Partial<Pick<ProfileState, "username" | "email" | "avatarUrl">>>) => {
-      if (a.payload.username !== undefined) state.username = a.payload.username;
-      if (a.payload.email !== undefined) state.email = a.payload.email;
-      if (a.payload.avatarUrl !== undefined) state.avatarUrl = a.payload.avatarUrl;
+    setUserIdentity: (state, a: PayloadAction<Partial<Pick<ProfileState, "username" | "email" | "avatarUrl" | "hasPassword" | "authProvider">>>) => {
+      for (const [key, value] of Object.entries(a.payload))
+        if (value !== undefined) (state as unknown as Record<string, unknown>)[key] = value;
     },
     setOnboarding: (state, a: PayloadAction<{ goal: Goal; experienceLevel: Experience; commitment: Commitment }>) => {
       const { goal, experienceLevel, commitment } = a.payload;

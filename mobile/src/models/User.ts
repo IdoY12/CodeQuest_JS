@@ -7,5 +7,7 @@ export default interface User {
     experienceLevel: "JUNIOR" | "MID" | "SENIOR" | null
     dailyCommitmentMinutes: number | null
     notificationsEnabled: boolean
+    hasPassword: boolean
+    authProvider: "google" | "apple" | null
     blockProgress?: Record<string, number>
 }

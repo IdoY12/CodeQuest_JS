@@ -23,7 +23,7 @@ export function dispatchSignInSuccess(
       refreshToken,
     }),
   );
-  dispatch(setUserIdentity({ username: user.username, email: user.email, avatarUrl: user.avatarUrl }));
+  dispatch(setUserIdentity({ username: user.username, email: user.email, avatarUrl: user.avatarUrl, hasPassword: user.hasPassword, authProvider: user.authProvider }));
 
   const c: Commitment =
     user.dailyCommitmentMinutes === 10 || user.dailyCommitmentMinutes === 15 || user.dailyCommitmentMinutes === 25

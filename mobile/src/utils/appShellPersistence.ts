@@ -66,7 +66,7 @@ export async function ensureAppShellNotificationSetup(): Promise<void> {
 export async function refreshSessionOrLogoutOnForeground(accessToken: string, dispatch: AppDispatch): Promise<void> {
   try {
     const me = await new UserService().getMe();
-    dispatch(setUserIdentity({ email: me.email, username: me.username, avatarUrl: me.avatarUrl ?? null }));
+    dispatch(setUserIdentity({ email: me.email, username: me.username, avatarUrl: me.avatarUrl ?? null, hasPassword: me.hasPassword, authProvider: me.authProvider }));
   } catch (error) {
     if (isAuthFailure(error)) {
       await AsyncStorage.removeItem(REDUX_PERSIST_KEY);
